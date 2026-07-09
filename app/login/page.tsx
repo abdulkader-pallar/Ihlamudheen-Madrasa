@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { supabaseConfigured } from "@/lib/supabase/config";
@@ -13,6 +13,17 @@ export default function LoginPage() {
   const router = useRouter();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // If already signed in, skip the login screen.
+  useEffect(() => {
+    if (!configured) return;
+    createClient()
+      .auth.getUser()
+      .then(({ data }) => {
+        if (data?.user) router.replace("/admin");
+      })
+      .catch(() => {});
+  }, [router]);
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
