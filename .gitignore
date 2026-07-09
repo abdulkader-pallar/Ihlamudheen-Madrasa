@@ -1,11 +1,20 @@
-# Local editor / tooling
+# Dependencies
+/node_modules
+
+# Next.js
+/.next/
+/out/
+next-env.d.ts
+
+# Env — local secrets never committed (.env.example is the template)
+.env
+.env.local
+.env*.local
+
+# Tooling / editor
 .claude/
 .vercel/
-node_modules/
 
 # OS cruft
 Thumbs.db
 .DS_Store
-
-# NOTE: admin/config.js is committed on purpose — it holds only the PUBLIC
-# Supabase URL + anon key. The service_role secret must never enter this repo.

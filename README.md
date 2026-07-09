@@ -1,89 +1,76 @@
 # Ihlamudheen Madrasa
 
-Two things live in this repo:
+A modern **Next.js 15** app for **Ihlamudheen Madrasa** (مدرسة إعلام الدين), an
+Islamic education institute. It contains two things:
 
-1. **Public website** (`index.html`) — the marketing site for **Ihlamudheen
-   Madrasa** (مدرسة إعلام الدين): About, Programs, Admissions, Contact.
-2. **Private accounting portal** (`admin/`) — a secure, login-only app for
-   recording the institution's **income & expenditure**, backed by Supabase.
+1. **Public website** (`/`) — the marketing site: hero, about, programs,
+   admissions, contact.
+2. **Private accounting portal** (`/admin`) — a secure, login-only app for the
+   institution's **income & expenditure**, backed by Supabase.
 
-The primary purpose of the project is the accounting portal; the public site is
-the front-facing brochure. Brand colours: navy · teal · gold.
+The accounting portal is the primary purpose; the public site is the front-facing
+brochure. Brand colours: navy · teal · gold.
 
-> ⚠️ **Financial data is sensitive.** The accounting portal is protected by
-> Supabase Auth + Postgres Row Level Security. See [`SETUP.md`](SETUP.md) before
-> going live, and never commit the Supabase `service_role` secret key.
+## Tech stack
 
----
+| Layer      | Choice |
+|------------|--------|
+| Framework  | Next.js 15 (App Router) + TypeScript + React 18 |
+| Styling    | Tailwind CSS (theme via CSS variables, light/dark) |
+| Auth       | Supabase Auth via `@supabase/ssr` — **httpOnly cookies, validated server-side** |
+| Data       | Supabase Postgres with **Row Level Security** |
+| Charts     | Recharts · Icons: lucide-react |
+| Hosting    | Vercel |
 
-## 🔗 Working spaces
-
-| Service   | Purpose                     | Link |
-|-----------|-----------------------------|------|
-| GitHub    | Source code repository      | https://github.com/abdulkader-pallar/Ihlamudheen-Madrasa |
-| Vercel    | Hosting / deployment (admin)| https://vercel.com/ihlamudheen-madrasa/ihlamudheen-madrasa |
-| Supabase  | Database / backend (admin)  | https://supabase.com/dashboard/project/tvmhycdyfflnxrnpvhjf |
-
-> ⚠️ The Vercel and Supabase links are **private admin dashboards** and must not
-> be published on the public website.
-
----
+> ⚠️ **Financial data is sensitive.** Access is protected by middleware
+> (server-side route guard), Supabase Auth, and Postgres Row Level Security.
+> See [`SETUP.md`](SETUP.md) before going live. Never commit the Supabase
+> `service_role` secret — only the public `anon` key ships to the browser.
 
 ## Project structure
 
 ```
-.
-├── index.html                 # Public marketing website (HTML + inline CSS/JS)
-├── admin/                     # Private accounting portal
-│   ├── index.html             #   app shell + styles
-│   ├── app.js                 #   logic (auth, dashboard, CRUD, reports)
-│   └── config.js              #   PUBLIC Supabase url + anon key (paste yours)
-├── supabase/
-│   └── schema.sql             # Database tables, RLS, roles, seed data
-├── public/                    # Brand assets (logos)
-├── SETUP.md                   # Step-by-step accounting-portal setup
-└── README.md
+app/
+  layout.tsx              # fonts, metadata, theme bootstrap
+  page.tsx                # public marketing site
+  login/page.tsx          # staff sign-in
+  admin/
+    layout.tsx            # server-side auth + role check (protected)
+    page.tsx              # dashboard (stats + charts)
+    transactions/page.tsx # income/expense CRUD + filters + CSV
+    reports/page.tsx      # statements + print/PDF + CSV
+    manage/page.tsx       # categories & funds
+components/
+  ui/                     # theme toggle, toast
+  admin/                  # shell, data provider, charts, dialogs
+lib/
+  supabase/               # browser + server clients, session middleware
+  types.ts, format.ts, csv.ts, ui.ts
+middleware.ts             # refreshes session + guards /admin
+supabase/schema.sql       # tables, RLS, roles, audit, seed data
+public/                   # logos
+legacy-static/            # the previous plain-HTML version (kept for reference)
 ```
-
-## Accounting portal
-
-- Lives at `/admin/` — login required, not linked from the public site.
-- **Roles:** `admin` / `accountant` (full edit) and `viewer` (read-only reports).
-- **Features:** income & expense entries, live dashboard with charts, categories
-  & funds, and reports with CSV / print-to-PDF export.
-- **Setup:** follow [`SETUP.md`](SETUP.md) — run `supabase/schema.sql`, disable
-  public sign-ups, create users, assign roles, paste the anon key into
-  `admin/config.js`.
 
 ## Local development
 
-Open `index.html` directly in a browser, or serve the folder:
-
 ```bash
-python -m http.server 4173
-# then visit http://localhost:4173
+npm install
+cp .env.example .env.local     # then paste your Supabase anon key
+npm run dev                    # http://localhost:3000
 ```
 
-## Fonts
+The public site works immediately. The `/admin` portal needs Supabase configured
+(see below) — until then the login page shows a "not configured" notice.
 
-- **Fraunces** & **Hanken Grotesk** — loaded from Google Fonts (English UI/display).
-- **Andalus** — Arabic text (a system font on Windows); falls back to **Amiri**
-  (Google Fonts) on devices without it.
+## Accounting portal
 
-## Deployment (Vercel)
+- Lives at `/admin` — login required, `noindex`, not linked from the public site.
+- **Roles:** `admin` / `accountant` (full edit) and `viewer` (read-only reports).
+- **Features:** income & expense entries, live dashboard with charts, categories
+  & funds, and reports with CSV / print-to-PDF export.
 
-The site is static, so Vercel serves `index.html` as-is. Pushing to the `main`
-branch of the GitHub repo triggers an automatic deployment.
+## Setup & deploy
 
-## Backend (Supabase) — planned
-
-The admission enquiry form currently opens the visitor's email client. It can be
-wired to store submissions in Supabase instead. See the "Next steps" below.
-
-## Next steps
-
-- [ ] Run `supabase/schema.sql` and complete [`SETUP.md`](SETUP.md).
-- [ ] Paste the Supabase **anon** key into `admin/config.js`.
-- [ ] `git init` locally and push to the GitHub repo.
-- [ ] Connect the GitHub repo to Vercel for automatic deploys.
-- [ ] Replace placeholder contact details on the public site (phone, email, address).
+Follow [`SETUP.md`](SETUP.md): run `supabase/schema.sql`, disable public
+sign-ups, create users, assign roles, set the env vars, deploy to Vercel.

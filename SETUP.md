@@ -51,35 +51,40 @@ where id = (select id from auth.users where email = 'accountant@example.com');
 | `accountant` | ✅       | ✅                  | ✅                        |
 | `viewer`     | ✅       | ❌                  | ❌                        |
 
-## 5. Connect the website to Supabase
+## 5. Connect the app to Supabase (env vars)
 
 1. **Dashboard → Project Settings → API**.
 2. Copy the **Project URL** and the **`anon` `public`** key.
-3. Open [`admin/config.js`](admin/config.js) and paste them in:
+3. Create `.env.local` (copy from [`.env.example`](.env.example)) and fill it in:
 
-   ```js
-   window.SUPABASE_CONFIG = {
-     url: "https://tvmhycdyfflnxrnpvhjf.supabase.co",   // already filled in
-     anonKey: "eyJhbGciOi...your anon public key..."     // paste here
-   };
+   ```bash
+   NEXT_PUBLIC_SUPABASE_URL=https://tvmhycdyfflnxrnpvhjf.supabase.co   # already set
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOi...your anon public key...   # paste here
    ```
+
+   Only these PUBLIC values live in the app. The `service_role` secret is never used here.
 
 ## 6. Test locally
 
 ```bash
-python -m http.server 4173
-# visit http://localhost:4173/admin/  and sign in
+npm install
+npm run dev
+# visit http://localhost:3000/admin  and sign in
 ```
 
 You should see the dashboard, be able to add an entry, and see it appear in the
 Supabase **Table Editor → transactions**.
 
-## 7. Deploy
+## 7. Deploy to Vercel
 
-Push to GitHub → Vercel auto-deploys. The portal will live at
-`https://your-domain/admin/`. It is marked `noindex` and is not linked from the
-public site, so visitors won't find it — but access is ultimately protected by
-the login + database rules, not by hiding the URL.
+1. Push to GitHub → import the repo in Vercel (Next.js is auto-detected).
+2. In **Vercel → Project → Settings → Environment Variables**, add the same two
+   `NEXT_PUBLIC_SUPABASE_*` values (Production + Preview).
+3. Deploy. The portal lives at `https://your-domain/admin`.
+
+Access is protected by **server-side middleware + Supabase Auth + Row Level
+Security** — not by hiding the URL. The `/admin` routes are also marked
+`noindex`.
 
 ---
 
