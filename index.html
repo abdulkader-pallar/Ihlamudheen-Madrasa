@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ihlamudheen Madrasa — مدرسة إعلام الدين</title>
+  <meta name="description" content="Ihlamudheen Madrasa (مدرسة إعلام الدين) — nurturing faith, character, and knowledge through Qur'an, Islamic studies, and Arabic education for every generation." />
+  <link rel="icon" type="image/png" href="./public/Logo of Ihlamudheen Madrasa dark-bg removed.png" />
+
+  <!-- Fonts (Google Fonts — permitted for locally served files) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Hanken+Grotesk:wght@400;500;600;700;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* Arabic text uses "Andalus" (a traditional Arabic font bundled with Windows).
+       Web fallback: Amiri (Google Fonts) for viewers without Andalus installed. */
+
+    /* ============ TOKENS ============ */
+    :root {
+      --navy: #0E2E52;
+      --navy-700: #143a68;
+      --teal: #16807F;
+      --teal-600: #1a9694;
+      --gold: #F0A82C;
+      --gold-soft: #f7c766;
+
+      --bg: #F7F9FB;
+      --surface: #FFFFFF;
+      --surface-2: #F0F4F8;
+      --ink: #10233b;
+      --muted: #55677A;
+      --line: #E2E9F0;
+      --shadow: 20px 40px 80px -40px rgba(14, 46, 82, .28);
+      --shadow-sm: 0 2px 8px -2px rgba(14, 46, 82, .12);
+
+      --brand: var(--teal);
+      --accent: var(--gold);
+
+      --maxw: 1180px;
+      --radius: 18px;
+      --radius-sm: 12px;
+
+      --font-display: "Fraunces", Georgia, serif;
+      --font-body: "Hanken Grotesk", system-ui, -apple-system, sans-serif;
+      --font-ar: "Andalus", "Amiri", "Traditional Arabic", serif;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0A1524;
+        --surface: #101F33;
+        --surface-2: #16273e;
+        --ink: #EAF1F8;
+        --muted: #9FB2C6;
+        --line: #22344c;
+        --shadow: 24px 44px 90px -46px rgba(0, 0, 0, .7);
+        --shadow-sm: 0 2px 10px -2px rgba(0, 0, 0, .5);
+        --navy: #cfe0f2;
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg: #0A1524;
+      --surface: #101F33;
+      --surface-2: #16273e;
+      --ink: #EAF1F8;
+      --muted: #9FB2C6;
+      --line: #22344c;
+      --shadow: 24px 44px 90px -46px rgba(0, 0, 0, .7);
+      --shadow-sm: 0 2px 10px -2px rgba(0, 0, 0, .5);
+      --navy: #cfe0f2;
+    }
+    :root[data-theme="light"] {
+      --bg: #F7F9FB;
+      --surface: #FFFFFF;
+      --surface-2: #F0F4F8;
+      --ink: #10233b;
+      --muted: #55677A;
+      --line: #E2E9F0;
+      --shadow: 20px 40px 80px -40px rgba(14, 46, 82, .28);
+      --shadow-sm: 0 2px 8px -2px rgba(14, 46, 82, .12);
+      --navy: #0E2E52;
+    }
+
+    /* ============ RESET / BASE ============ */
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 90px; }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      * { animation: none !important; transition: none !important; }
+    }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--font-body);
+      font-size: 17px;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    img { max-width: 100%; display: block; }
+    a { color: inherit; text-decoration: none; }
+    h1, h2, h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.1; text-wrap: balance; margin: 0; letter-spacing: -.01em; }
+    p { margin: 0; }
+    .wrap { max-width: var(--maxw); margin-inline: auto; padding-inline: clamp(20px, 5vw, 40px); }
+
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: var(--font-body); font-weight: 700;
+      font-size: 12.5px; letter-spacing: .16em; text-transform: uppercase;
+      color: var(--teal);
+    }
+    .eyebrow::before { content: ""; width: 26px; height: 2px; background: var(--gold); border-radius: 2px; }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 9px;
+      font-family: var(--font-body); font-weight: 700; font-size: 15.5px;
+      padding: 13px 24px; border-radius: 100px; cursor: pointer;
+      border: 1.5px solid transparent; transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+      white-space: nowrap;
+    }
+    .btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+    .btn-primary { background: var(--teal); color: #fff; box-shadow: 0 10px 24px -10px rgba(22,128,127,.7); }
+    .btn-primary:hover { background: var(--teal-600); transform: translateY(-2px); }
+    .btn-ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+    .btn-ghost:hover { border-color: var(--teal); color: var(--teal); transform: translateY(-2px); }
+    .btn-gold { background: var(--gold); color: #3a2a05; }
+    .btn-gold:hover { background: var(--gold-soft); transform: translateY(-2px); }
+
+    /* ============ HEADER ============ */
+    header {
+      position: sticky; top: 0; z-index: 50;
+      backdrop-filter: blur(14px);
+      background: color-mix(in srgb, var(--bg) 82%, transparent);
+      border-bottom: 1px solid transparent;
+      transition: border-color .3s ease, box-shadow .3s ease;
+    }
+    header.scrolled { border-color: var(--line); box-shadow: var(--shadow-sm); }
+    .nav { display: flex; align-items: center; justify-content: space-between; height: 74px; gap: 20px; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand img { height: 44px; width: auto; }
+    .brand .b-text { display: inline-flex; flex-direction: column; align-items: stretch; line-height: 1.12; }
+    .brand .b-en { font-family: var(--font-display); font-weight: 600; font-size: 18px; color: var(--ink); letter-spacing: -.01em; white-space: nowrap; }
+    .brand .b-ar { font-family: var(--font-ar); font-size: 20px; font-weight: 700; color: var(--teal); direction: rtl; width: 100%; text-align: center; }
+    .nav-links { display: flex; align-items: center; gap: 6px; }
+    .nav-links a {
+      font-weight: 600; font-size: 15px; color: var(--muted);
+      padding: 9px 15px; border-radius: 10px; transition: color .15s, background .15s;
+    }
+    .nav-links a:hover { color: var(--teal); background: color-mix(in srgb, var(--teal) 9%, transparent); }
+    .nav-actions { display: flex; align-items: center; gap: 10px; }
+    .theme-toggle {
+      width: 42px; height: 42px; border-radius: 12px; border: 1px solid var(--line);
+      background: var(--surface); color: var(--ink); cursor: pointer;
+      display: grid; place-items: center; transition: border-color .15s, transform .15s;
+    }
+    .theme-toggle:hover { border-color: var(--teal); transform: rotate(-8deg); }
+    .theme-toggle:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+    .theme-toggle svg { width: 20px; height: 20px; }
+    .theme-toggle .moon { display: none; }
+    :root[data-theme="dark"] .theme-toggle .moon { display: block; }
+    :root[data-theme="dark"] .theme-toggle .sun { display: none; }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) .theme-toggle .moon { display: block; }
+      :root:not([data-theme="light"]) .theme-toggle .sun { display: none; }
+    }
+    .hamburger { display: none; width: 42px; height: 42px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); cursor: pointer; color: var(--ink); }
+
+    /* ============ HERO ============ */
+    .hero { position: relative; overflow: hidden; padding: clamp(48px, 8vw, 96px) 0 clamp(56px, 8vw, 104px); }
+    .hero-grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: clamp(32px, 5vw, 72px); align-items: center; }
+    .hero-copy .h-title { font-size: clamp(14px, 2vw, 30px); font-weight: 600; margin: 20px 0 0; white-space: nowrap; }
+    .hero-copy .h-title .accentword { color: var(--teal); font-style: italic; }
+    .hero-ar { font-family: var(--font-ar); direction: rtl; font-size: clamp(22px, 3vw, 30px); color: var(--gold); margin-top: 14px; font-weight: 700; }
+    .hero-lead { color: var(--muted); font-size: clamp(17px, 2vw, 19px); max-width: 46ch; margin-top: 22px; }
+    .hero-cta { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 34px; }
+    .hero-meta { display: flex; gap: 26px; margin-top: 40px; flex-wrap: wrap; }
+    .hero-meta .hm { display: flex; flex-direction: column; }
+    .hero-meta .hm b { font-family: var(--font-display); font-size: 30px; color: var(--teal); font-weight: 600; }
+    .hero-meta .hm span { font-size: 13px; color: var(--muted); font-weight: 600; letter-spacing: .02em; }
+
+    .hero-art { position: relative; display: grid; place-items: center; }
+    .hero-glow {
+      position: absolute; inset: 0; margin: auto;
+      width: min(115%, 520px); aspect-ratio: 1;
+      background: radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--teal) 30%, transparent), transparent 62%);
+      filter: blur(8px); z-index: 0;
+    }
+    .hero-logo-card {
+      position: relative; z-index: 2;
+      width: min(100%, 440px); aspect-ratio: 1;
+      display: grid; place-items: center; padding: 0;
+      border-radius: 32px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .hero-logo-card .pattern { position: absolute; inset: 0; opacity: .5; z-index: 0; color: var(--teal); }
+    :root[data-theme="dark"] .hero-logo-card .pattern { opacity: .28; }
+    @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .hero-logo-card .pattern { opacity: .28; } }
+    .hero-logo-card img.logo { position: relative; z-index: 1; width: 100%; height: 100%; object-fit: cover; }
+    .logo-light { display: block; }
+    .logo-dark { display: none; }
+    :root[data-theme="dark"] .logo-light { display: none; }
+    :root[data-theme="dark"] .logo-dark { display: block; }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) .logo-light { display: none; }
+      :root:not([data-theme="light"]) .logo-dark { display: block; }
+    }
+    .hero-badge {
+      position: absolute; z-index: 3; bottom: -14px; right: -8px;
+      background: var(--gold); color: #3a2a05; font-weight: 800;
+      font-size: 13.5px; padding: 12px 18px; border-radius: 14px;
+      box-shadow: 0 16px 30px -14px rgba(240,168,44,.7);
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    /* ============ SECTIONS ============ */
+    section { padding: clamp(56px, 8vw, 104px) 0; }
+    .sec-head { max-width: 640px; margin-bottom: 48px; }
+    .sec-head h2 { font-size: clamp(30px, 4.4vw, 46px); margin-top: 14px; }
+    .sec-head p { color: var(--muted); margin-top: 16px; font-size: 18px; }
+    .sec-head.center { margin-inline: auto; text-align: center; }
+    .sec-head.center .eyebrow { justify-content: center; }
+
+    /* stats strip */
+    .stats { background: var(--navy); color: #fff; }
+    :root[data-theme="light"] .stats { background: var(--navy); }
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; text-align: center; }
+    .stat b { display: block; font-family: var(--font-display); font-size: clamp(34px, 5vw, 52px); font-weight: 600; color: var(--gold); }
+    .stat span { color: rgba(255,255,255,.72); font-weight: 600; font-size: 14.5px; letter-spacing: .02em; }
+    :root[data-theme="dark"] .stats { background: #071020; border-block: 1px solid var(--line); }
+    @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .stats { background:#071020; border-block:1px solid var(--line);} }
+
+    /* about */
+    .about-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: clamp(32px, 5vw, 64px); align-items: start; }
+    .about-body p + p { margin-top: 18px; }
+    .about-body p { color: var(--muted); font-size: 17.5px; }
+    .about-body .lead-line { color: var(--ink); font-size: 20px; font-family: var(--font-display); font-weight: 500; line-height: 1.4; }
+    .vv-cards { display: grid; gap: 18px; }
+    .vv {
+      background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+      padding: 26px 26px 24px; box-shadow: var(--shadow-sm);
+    }
+    .vv .vv-ic { width: 48px; height: 48px; border-radius: 13px; display: grid; place-items: center; margin-bottom: 16px; }
+    .vv.mission .vv-ic { background: color-mix(in srgb, var(--teal) 14%, transparent); color: var(--teal); }
+    .vv.vision .vv-ic { background: color-mix(in srgb, var(--gold) 20%, transparent); color: #b6810f; }
+    :root[data-theme="dark"] .vv.vision .vv-ic { color: var(--gold); }
+    .vv h3 { font-size: 21px; margin-bottom: 8px; }
+    .vv p { color: var(--muted); font-size: 16px; }
+
+    /* principal message */
+    .principal {
+      margin-top: 40px; display: grid; grid-template-columns: auto 1fr; gap: 22px; align-items: center;
+      background: linear-gradient(135deg, color-mix(in srgb, var(--teal) 10%, var(--surface)), var(--surface));
+      border: 1px solid var(--line); border-radius: var(--radius); padding: 26px; box-shadow: var(--shadow-sm);
+    }
+    .principal .avatar {
+      width: 66px; height: 66px; border-radius: 50%; background: var(--teal); color: #fff;
+      display: grid; place-items: center; font-family: var(--font-display); font-size: 26px; font-weight: 600; flex: none;
+    }
+    .principal blockquote { margin: 0; font-family: var(--font-display); font-style: italic; font-size: 17.5px; color: var(--ink); line-height: 1.5; }
+    .principal .who { margin-top: 10px; font-family: var(--font-body); font-style: normal; font-size: 14px; font-weight: 700; color: var(--teal); }
+
+    /* programs */
+    .prog-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+    .prog {
+      background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+      padding: 28px; box-shadow: var(--shadow-sm); position: relative; overflow: hidden;
+      transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    }
+    .prog::after { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: var(--gold); transform: scaleX(0); transform-origin: left; transition: transform .25s ease; }
+    .prog:hover { transform: translateY(-5px); box-shadow: var(--shadow); border-color: color-mix(in srgb, var(--teal) 40%, var(--line)); }
+    .prog:hover::after { transform: scaleX(1); }
+    .prog .p-ic { width: 52px; height: 52px; border-radius: 14px; background: color-mix(in srgb, var(--teal) 12%, transparent); color: var(--teal); display: grid; place-items: center; margin-bottom: 18px; }
+    .prog h3 { font-size: 20px; margin-bottom: 8px; }
+    .prog p { color: var(--muted); font-size: 15.5px; }
+    .prog .p-tags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 16px; }
+    .prog .p-tags span { font-size: 12px; font-weight: 700; color: var(--teal); background: color-mix(in srgb, var(--teal) 10%, transparent); padding: 4px 10px; border-radius: 100px; letter-spacing: .02em; }
+
+    /* admissions + contact */
+    #admissions { background: var(--surface-2); }
+    .adm-grid { display: grid; grid-template-columns: 1fr 1.05fr; gap: clamp(32px, 5vw, 56px); align-items: start; }
+    .adm-info .steps { display: grid; gap: 14px; margin-top: 28px; }
+    .step { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: start; }
+    .step .num { width: 38px; height: 38px; border-radius: 11px; background: var(--teal); color: #fff; font-family: var(--font-display); font-weight: 600; display: grid; place-items: center; flex: none; }
+    .step h4 { margin: 0 0 3px; font-size: 16.5px; font-family: var(--font-body); font-weight: 700; }
+    .step p { color: var(--muted); font-size: 15px; }
+    .contact-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 30px; }
+    .cc { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 18px; display: flex; gap: 13px; align-items: flex-start; }
+    .cc .cc-ic { color: var(--teal); flex: none; margin-top: 2px; }
+    .cc b { display: block; font-size: 14px; }
+    .cc span { color: var(--muted); font-size: 14px; }
+
+    /* form */
+    .form-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: clamp(24px, 3vw, 36px); box-shadow: var(--shadow); }
+    .form-card h3 { font-size: 24px; margin-bottom: 6px; }
+    .form-card .fc-sub { color: var(--muted); font-size: 15px; margin-bottom: 24px; }
+    .field { margin-bottom: 18px; }
+    .field label { display: block; font-weight: 700; font-size: 13.5px; margin-bottom: 7px; color: var(--ink); }
+    .field input, .field select, .field textarea {
+      width: 100%; padding: 13px 15px; border-radius: 11px; border: 1.5px solid var(--line);
+      background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15.5px; transition: border-color .15s, box-shadow .15s;
+    }
+    .field textarea { resize: vertical; min-height: 96px; }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      outline: none; border-color: var(--teal); box-shadow: 0 0 0 4px color-mix(in srgb, var(--teal) 16%, transparent);
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-note { font-size: 12.5px; color: var(--muted); margin-top: 6px; text-align: center; }
+    .toast {
+      margin-top: 16px; padding: 14px 16px; border-radius: 12px; font-weight: 600; font-size: 14.5px;
+      background: color-mix(in srgb, var(--teal) 14%, transparent); color: var(--teal);
+      border: 1px solid color-mix(in srgb, var(--teal) 35%, transparent);
+      display: none; align-items: center; gap: 10px;
+    }
+    .toast.show { display: flex; }
+
+    /* footer */
+    footer { background: var(--navy); color: rgba(255,255,255,.75); padding: 64px 0 30px; }
+    :root[data-theme="dark"] footer { background: #071020; border-top: 1px solid var(--line); }
+    @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) footer { background:#071020; border-top:1px solid var(--line);} }
+    .f-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 36px; }
+    .f-brand img { height: 52px; margin-bottom: 16px; }
+    .f-brand p { font-size: 14.5px; max-width: 34ch; }
+    footer h5 { color: #fff; font-family: var(--font-body); font-size: 13px; letter-spacing: .12em; text-transform: uppercase; margin: 0 0 16px; }
+    footer ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+    footer ul a { font-size: 14.5px; color: rgba(255,255,255,.75); transition: color .15s; }
+    footer ul a:hover { color: var(--gold); }
+    .f-bottom { border-top: 1px solid rgba(255,255,255,.14); margin-top: 44px; padding-top: 22px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: 13.5px; }
+    .f-ar { font-family: var(--font-ar); direction: rtl; color: var(--gold); }
+
+    /* reveal anim */
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity .7s cubic-bezier(.2,.7,.2,1), transform .7s cubic-bezier(.2,.7,.2,1); }
+    .reveal.in { opacity: 1; transform: none; }
+
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 960px) {
+      .hero-grid { grid-template-columns: 1fr; }
+      .hero-art { order: -1; }
+      .hero-logo-card { width: min(80%, 360px); }
+      .about-grid, .adm-grid { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .prog-grid { grid-template-columns: 1fr 1fr; }
+      .f-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 900px) {
+      .nav-links { display: none; }
+      .hamburger { display: grid; place-items: center; }
+      .nav-links.open {
+        display: flex; position: absolute; top: 74px; left: 0; right: 0;
+        flex-direction: column; align-items: stretch; gap: 4px;
+        background: var(--surface); border-bottom: 1px solid var(--line); padding: 14px 20px 20px;
+        box-shadow: var(--shadow);
+      }
+      .nav-links.open a { padding: 12px 14px; }
+      .nav-actions .btn-primary { display: none; }
+    }
+    @media (max-width: 720px) {
+      .nav-links { display: none; }
+      .hamburger { display: grid; place-items: center; }
+      .nav-links.open {
+        display: flex; position: absolute; top: 74px; left: 0; right: 0;
+        flex-direction: column; align-items: stretch; gap: 4px;
+        background: var(--surface); border-bottom: 1px solid var(--line); padding: 14px 20px 20px;
+        box-shadow: var(--shadow);
+      }
+      .nav-links.open a { padding: 12px 14px; }
+      .brand .b-text { display: none; }
+      .prog-grid { grid-template-columns: 1fr; }
+      .contact-cards { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .f-grid { grid-template-columns: 1fr; gap: 28px; }
+      .principal { grid-template-columns: 1fr; text-align: center; }
+      .principal .avatar { margin-inline: auto; }
+      body { font-size: 16px; }
+    }
+    @media (max-width: 420px) { .stats-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+  <!-- ============ HEADER ============ -->
+  <header id="header">
+    <div class="wrap nav">
+      <a class="brand" href="#home" aria-label="Ihlamudheen Madrasa home">
+        <img class="logo-light" src="./public/Logo of Ihlamudheen Madrasa light.png" alt="Ihlamudheen Madrasa logo" />
+        <img class="logo-dark" src="./public/Logo of Ihlamudheen Madrasa dark.png" alt="Ihlamudheen Madrasa logo" />
+        <span class="b-text">
+          <span class="b-en">Ihlamudheen Madrasa</span>
+          <span class="b-ar">مدرسة إعلام الدين</span>
+        </span>
+      </a>
+
+      <nav class="nav-links" id="navLinks">
+        <a href="#home">Home</a>
+        <a href="#about">About</a>
+        <a href="#programs">Programs</a>
+        <a href="#admissions">Admissions</a>
+        <a href="#contact">Contact</a>
+      </nav>
+
+      <div class="nav-actions">
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle theme">
+          <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+          <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        </button>
+        <a href="#admissions" class="btn btn-primary" style="padding:11px 20px">Enroll Now</a>
+        <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ============ HERO ============ -->
+    <section class="hero" id="home">
+      <div class="wrap hero-grid">
+        <div class="hero-copy reveal">
+          <span class="eyebrow">Serving the Community Since 1954</span>
+          <h1 class="h-title">Nurturing <span class="accentword">faith</span>, character &amp; knowledge.</h1>
+          <p class="hero-ar">مدرسة إعلام الدين</p>
+          <p class="hero-lead">Ihlamudheen Madrasa is a place where the Qur'an, sound belief, and noble character are taught with love — grounding every student in the light of the Deen while preparing them for a purposeful life.</p>
+          <div class="hero-cta">
+            <a href="#admissions" class="btn btn-primary">Begin Admission
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </a>
+            <a href="#programs" class="btn btn-ghost">Explore Programs</a>
+          </div>
+          <div class="hero-meta">
+            <div class="hm"><b>70+</b><span>Years of Service</span></div>
+            <div class="hm"><b>800+</b><span>Students Taught</span></div>
+            <div class="hm"><b>25+</b><span>Qualified Teachers</span></div>
+          </div>
+        </div>
+
+        <div class="hero-art reveal">
+          <div class="hero-glow" aria-hidden="true"></div>
+          <div class="hero-logo-card">
+            <svg class="pattern" viewBox="0 0 200 200" aria-hidden="true" preserveAspectRatio="xMidYMid slice">
+              <defs>
+                <pattern id="stars" width="40" height="40" patternUnits="userSpaceOnUse" patternTransform="rotate(0)">
+                  <path d="M20 4 L24 16 L36 20 L24 24 L20 36 L16 24 L4 20 L16 16 Z" fill="none" stroke="currentColor" stroke-width="1"/>
+                  <circle cx="20" cy="20" r="1.4" fill="currentColor"/>
+                </pattern>
+              </defs>
+              <rect width="200" height="200" fill="url(#stars)"/>
+            </svg>
+            <img class="logo logo-light" src="./public/Logo of Ihlamudheen Madrasa light.png" alt="Ihlamudheen Madrasa calligraphic logo" />
+            <img class="logo logo-dark" src="./public/Logo of Ihlamudheen Madrasa dark.png" alt="Ihlamudheen Madrasa calligraphic logo" />
+          </div>
+          <div class="hero-badge">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            Admissions Open 2026
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ STATS ============ -->
+    <section class="stats" style="padding-block: clamp(40px,6vw,60px)">
+      <div class="wrap stats-grid reveal">
+        <div class="stat"><b>800+</b><span>Students Enrolled</span></div>
+        <div class="stat"><b>25+</b><span>Qualified Teachers</span></div>
+        <div class="stat"><b>70+</b><span>Years of Service</span></div>
+        <div class="stat"><b>100%</b><span>Value-Based Learning</span></div>
+      </div>
+    </section>
+
+    <!-- ============ ABOUT ============ -->
+    <section id="about">
+      <div class="wrap">
+        <div class="about-grid">
+          <div class="reveal">
+            <div class="sec-head" style="margin-bottom:24px">
+              <span class="eyebrow">About the Madrasa</span>
+              <h2>A foundation built on the Book and the Sunnah.</h2>
+            </div>
+            <div class="about-body">
+              <p class="lead-line">Ihlamudheen Madrasa — <span style="font-family:var(--font-ar); direction:rtl;">مدرسة إعلام الدين</span> — carries a simple mission: to make the guidance of Islam clear, beloved, and lived.</p>
+              <p>Founded in 1954 by a group of dedicated scholars and community elders, the madrasa began with a handful of children learning the Qur'an under a single roof. Over seventy years later it serves hundreds of students across structured levels — from first letters and recitation to memorization, Islamic sciences, and the Arabic language.</p>
+              <p>Our teaching blends time-honoured tradition with a caring, child-centred approach. Every student is known by name, guided with patience, and encouraged to grow in both knowledge (‘ilm) and character (akhlaq).</p>
+            </div>
+
+            <div class="principal reveal">
+              <div class="avatar" aria-hidden="true">ع</div>
+              <div>
+                <blockquote>“We do not merely teach lessons — we plant a love for Allah and His Messenger ﷺ in the heart of every child, so that knowledge becomes a lifelong companion.”</blockquote>
+                <div class="who">— Abdul Rahim Wafy · Sadar Muallim</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="vv-cards reveal">
+            <div class="vv mission">
+              <div class="vv-ic" aria-hidden="true">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg>
+              </div>
+              <h3>Our Mission</h3>
+              <p>To provide authentic, accessible Islamic education that strengthens faith, nurtures excellent character, and empowers students to serve their families and community with wisdom.</p>
+            </div>
+            <div class="vv vision">
+              <div class="vv-ic" aria-hidden="true">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+              </div>
+              <h3>Our Vision</h3>
+              <p>A generation firmly rooted in the Qur'an and Sunnah — confident in their identity, upright in conduct, and a source of goodness and light wherever they go.</p>
+            </div>
+            <div class="vv mission">
+              <div class="vv-ic" aria-hidden="true">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 3 8l9 5 9-5-9-5z"/><path d="M3 8v6l9 5 9-5V8"/></svg>
+              </div>
+              <h3>Our Values</h3>
+              <p>Sincerity (ikhlas), knowledge with action, respect for teachers and parents, kindness, discipline, and a lasting love of learning.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PROGRAMS ============ -->
+    <section id="programs">
+      <div class="wrap">
+        <div class="sec-head center reveal">
+          <span class="eyebrow">What We Teach</span>
+          <h2>Programs &amp; Courses</h2>
+          <p>A complete curriculum that grows with your child — from their first words of the Qur'an to advanced Islamic studies.</p>
+        </div>
+
+        <div class="prog-grid">
+          <article class="prog reveal">
+            <div class="p-ic" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h9a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4z"/><path d="M20 4h-4a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h5z"/></svg></div>
+            <h3>Qur'an &amp; Tajweed</h3>
+            <p>Correct recitation from Qaida to fluent reading, with the rules of tajweed taught step by step for beautiful, accurate recitation.</p>
+            <div class="p-tags"><span>Qaida</span><span>Nazira</span><span>Tajweed</span></div>
+          </article>
+
+          <article class="prog reveal">
+            <div class="p-ic" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M5 7a4 4 0 0 1 7 0 4 4 0 0 1 7 0"/><circle cx="12" cy="19" r="2"/></svg></div>
+            <h3>Hifz al-Qur'an</h3>
+            <p>A dedicated memorization program with revision cycles and one-to-one supervision, guiding students to become confident huffaz.</p>
+            <div class="p-tags"><span>Memorization</span><span>Revision</span></div>
+          </article>
+
+          <article class="prog reveal">
+            <div class="p-ic" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v5"/></svg></div>
+            <h3>Islamic Studies</h3>
+            <p>Aqeedah, Fiqh, Seerah and Islamic history taught in an age-appropriate way, building a clear understanding of the Deen.</p>
+            <div class="p-tags"><span>Aqeedah</span><span>Fiqh</span><span>Seerah</span></div>
+          </article>
+
+          <article class="prog reveal">
+            <div class="p-ic" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 12h10M4 19h16"/><path d="M18 9l3 3-3 3"/></svg></div>
+            <h3>Arabic Language</h3>
+            <p>Reading, writing, and understanding classical Arabic — the key that unlocks the Qur'an, Hadith, and the Islamic sciences.</p>
+            <div class="p-tags"><span>Grammar</span><span>Vocabulary</span></div>
+          </article>
+
+          <article class="prog reveal">
+            <div class="p-ic" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.5-7 10-7 10z"/></svg></div>
+            <h3>Akhlaq &amp; Adab</h3>
+            <p>Manners, morals, and the prophetic character — daily du'as, etiquette, and the values that shape a righteous Muslim.</p>
+            <div class="p-tags"><span>Manners</span><span>Du'as</span><span>Hadith</span></div>
+          </article>
+
+          <article class="prog reveal">
+            <div class="p-ic" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.2"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></div>
+            <h3>Kindergarten Deen</h3>
+            <p>A warm, playful first step for our youngest learners — letters, short surahs, and love for Allah through songs and stories.</p>
+            <div class="p-tags"><span>Ages 4–6</span><span>Foundation</span></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ ADMISSIONS + CONTACT ============ -->
+    <section id="admissions">
+      <div class="wrap">
+        <div class="adm-grid">
+          <div class="adm-info reveal" id="contact">
+            <div class="sec-head" style="margin-bottom:8px">
+              <span class="eyebrow">Admissions &amp; Enquiry</span>
+              <h2>Join the Ihlamudheen family.</h2>
+              <p>Admissions for the new academic year are open. Enrolling your child takes just a few simple steps.</p>
+            </div>
+
+            <div class="steps">
+              <div class="step"><div class="num">1</div><div><h4>Send an enquiry</h4><p>Fill in the form or call us — tell us your child's age and the program you're interested in.</p></div></div>
+              <div class="step"><div class="num">2</div><div><h4>Visit &amp; assessment</h4><p>Meet our teachers, see the classrooms, and let us gauge your child's current level.</p></div></div>
+              <div class="step"><div class="num">3</div><div><h4>Confirm &amp; begin</h4><p>Complete the simple registration and welcome your child to their new learning journey.</p></div></div>
+            </div>
+
+            <div class="contact-cards">
+              <div class="cc">
+                <span class="cc-ic" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.6a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.5-1.2a2 2 0 0 1 2.1-.5c.8.3 1.7.6 2.6.7a2 2 0 0 1 1.6 2z"/></svg></span>
+                <div><b>Call / WhatsApp</b><span>+91 00000 00000</span></div>
+              </div>
+              <div class="cc">
+                <span class="cc-ic" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></svg></span>
+                <div><b>Email</b><span>info@ihlamudheen.edu</span></div>
+              </div>
+              <div class="cc">
+                <span class="cc-ic" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
+                <div><b>Location</b><span>Your address here, City, State</span></div>
+              </div>
+              <div class="cc">
+                <span class="cc-ic" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+                <div><b>Class Hours</b><span>Daily · 6:00 – 9:00 AM</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Enquiry Form -->
+          <div class="form-card reveal">
+            <h3>Admission Enquiry</h3>
+            <p class="fc-sub">Fill in the details and we'll get back to you within 1–2 days, in shā’ Allah.</p>
+            <form id="enquiryForm" novalidate>
+              <div class="form-row">
+                <div class="field">
+                  <label for="pname">Parent / Guardian name</label>
+                  <input id="pname" name="pname" type="text" placeholder="e.g. Ahmed Ali" required />
+                </div>
+                <div class="field">
+                  <label for="phone">Phone number</label>
+                  <input id="phone" name="phone" type="tel" placeholder="+91 00000 00000" required />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="field">
+                  <label for="cname">Student's name</label>
+                  <input id="cname" name="cname" type="text" placeholder="Child's full name" required />
+                </div>
+                <div class="field">
+                  <label for="age">Student's age</label>
+                  <input id="age" name="age" type="number" min="3" max="25" placeholder="e.g. 7" required />
+                </div>
+              </div>
+              <div class="field">
+                <label for="program">Program of interest</label>
+                <select id="program" name="program" required>
+                  <option value="" disabled selected>Select a program</option>
+                  <option>Qur'an &amp; Tajweed</option>
+                  <option>Hifz al-Qur'an</option>
+                  <option>Islamic Studies</option>
+                  <option>Arabic Language</option>
+                  <option>Akhlaq &amp; Adab</option>
+                  <option>Kindergarten Deen</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="msg">Message (optional)</label>
+                <textarea id="msg" name="msg" placeholder="Any questions or preferred timings?"></textarea>
+              </div>
+              <button type="submit" class="btn btn-gold" style="width:100%; justify-content:center;">
+                Submit Enquiry
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </button>
+              <div class="toast" id="toast" role="status">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                <span>Jazak Allahu khayran! Your enquiry has been recorded. We'll contact you soon.</span>
+              </div>
+              <p class="form-note">Your email client will open so you can send us the details securely.</p>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ FOOTER ============ -->
+  <footer>
+    <div class="wrap">
+      <div class="f-grid">
+        <div class="f-brand">
+          <img class="logo-light" src="./public/Logo of Ihlamudheen Madrasa dark.png" alt="Ihlamudheen Madrasa logo" />
+          <img class="logo-dark" src="./public/Logo of Ihlamudheen Madrasa dark.png" alt="Ihlamudheen Madrasa logo" />
+          <p>Nurturing faith, character, and knowledge — grounding every student in the light of the Deen since 1954.</p>
+        </div>
+        <div>
+          <h5>Explore</h5>
+          <ul>
+            <li><a href="#home">Home</a></li>
+            <li><a href="#about">About Us</a></li>
+            <li><a href="#programs">Programs</a></li>
+            <li><a href="#admissions">Admissions</a></li>
+          </ul>
+        </div>
+        <div>
+          <h5>Programs</h5>
+          <ul>
+            <li><a href="#programs">Qur'an &amp; Tajweed</a></li>
+            <li><a href="#programs">Hifz al-Qur'an</a></li>
+            <li><a href="#programs">Islamic Studies</a></li>
+            <li><a href="#programs">Arabic Language</a></li>
+          </ul>
+        </div>
+        <div>
+          <h5>Contact</h5>
+          <ul>
+            <li><a href="tel:+910000000000">+91 00000 00000</a></li>
+            <li><a href="mailto:info@ihlamudheen.edu">info@ihlamudheen.edu</a></li>
+            <li><a href="#contact">Your address, City</a></li>
+            <li><span>Daily · 6:00 – 9:00 AM</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="f-bottom">
+        <span>© <span id="year"></span> Ihlamudheen Madrasa. All rights reserved.</span>
+        <span class="f-ar">مدرسة إعلام الدين · وَقُل رَّبِّ زِدْنِي عِلْمًا</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ---- Theme toggle (respects OS default, remembers choice for the session) ----
+    (function () {
+      const root = document.documentElement;
+      const btn = document.getElementById('themeToggle');
+      const stored = sessionStorage.getItem('theme');
+      if (stored) root.setAttribute('data-theme', stored);
+
+      function currentIsDark() {
+        const t = root.getAttribute('data-theme');
+        if (t) return t === 'dark';
+        return window.matchMedia('(prefers-color-scheme: dark)').matches;
+      }
+      btn.addEventListener('click', function () {
+        const next = currentIsDark() ? 'light' : 'dark';
+        root.setAttribute('data-theme', next);
+        sessionStorage.setItem('theme', next);
+      });
+    })();
+
+    // ---- Header shadow on scroll ----
+    const header = document.getElementById('header');
+    const onScroll = () => header.classList.toggle('scrolled', window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    // ---- Mobile menu ----
+    const hb = document.getElementById('hamburger');
+    const links = document.getElementById('navLinks');
+    hb.addEventListener('click', () => {
+      const open = links.classList.toggle('open');
+      hb.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    links.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+      links.classList.remove('open');
+      hb.setAttribute('aria-expanded', 'false');
+    }));
+
+    // ---- Scroll reveal ----
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+    // ---- Year ----
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // ---- Fit hero headline to its column on one line (largest size that fits, capped) ----
+    (function () {
+      const title = document.querySelector('.h-title');
+      const col = document.querySelector('.hero-copy');
+      const MAX = 30; // px cap so it isn't oversized on wide screens
+      function fit() {
+        if (!title || !col) return;
+        title.style.fontSize = '100px';           // measure natural width at a known size
+        const natural = title.scrollWidth || 1;
+        const avail = col.clientWidth;
+        let size = (avail / natural) * 100 * 0.99; // 1% breathing room
+        size = Math.min(size, MAX);
+        title.style.fontSize = size + 'px';
+      }
+      fit();
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+      let raf;
+      window.addEventListener('resize', () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(fit); }, { passive: true });
+    })();
+
+    // ---- Enquiry form -> opens email with details, shows confirmation ----
+    const form = document.getElementById('enquiryForm');
+    const toast = document.getElementById('toast');
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (!form.checkValidity()) { form.reportValidity(); return; }
+      const d = new FormData(form);
+      const body = [
+        'Admission Enquiry — Ihlamudheen Madrasa', '',
+        'Parent/Guardian: ' + d.get('pname'),
+        'Phone: ' + d.get('phone'),
+        'Student: ' + d.get('cname') + ' (Age ' + d.get('age') + ')',
+        'Program: ' + d.get('program'),
+        'Message: ' + (d.get('msg') || '—')
+      ].join('\n');
+      const mailto = 'mailto:info@ihlamudheen.edu'
+        + '?subject=' + encodeURIComponent('Admission Enquiry — ' + d.get('cname'))
+        + '&body=' + encodeURIComponent(body);
+      window.location.href = mailto;
+      toast.classList.add('show');
+      form.reset();
+      setTimeout(() => toast.classList.remove('show'), 9000);
+    });
+  </script>
+</body>
+</html>
