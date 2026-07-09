@@ -19,6 +19,12 @@ import {
   Mail,
   MapPin,
   Clock,
+  GraduationCap,
+  Sparkles,
+  Users,
+  ShieldCheck,
+  Quote,
+  Star,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Toaster, toast } from "@/components/ui/toast";
@@ -53,6 +59,21 @@ const CONTACTS: [typeof Phone, string, string][] = [
   [MapPin, "Location", "Your address, City, State"],
   [Clock, "Class Hours", "Daily · 6:00 – 9:00 AM"],
 ];
+
+const WHY = [
+  { icon: GraduationCap, t: "Qualified Scholars", d: "Learn from Ustadhs trained in the classical Islamic sciences, devoted to teaching with ihsan." },
+  { icon: Sparkles, t: "Holistic Growth", d: "Qur'an, sound belief and noble character developed together — not just lessons, but a way of life." },
+  { icon: Users, t: "Caring, Small Classes", d: "Every child is known by name, guided with patience and encouraged to reach their potential." },
+  { icon: ShieldCheck, t: "Rooted in Tradition", d: "Seventy years of trusted teaching, faithful to the Book and the Sunnah, in a safe environment." },
+];
+
+const TESTIMONIALS = [
+  { quote: "My son memorised his first juz here — and, more importantly, learned to love his prayers. The teachers care for the heart, not just the syllabus.", name: "Umm Yusuf", role: "Parent of a Hifz student" },
+  { quote: "The change in my daughter's manners and confidence has been beautiful. They treat every child as their own.", name: "Abdul Basith", role: "Parent · Class 4" },
+  { quote: "A rare place where deen and discipline are taught with so much love. Three generations of our family have studied here.", name: "Hajji Ismail", role: "Community elder" },
+];
+
+const EYEBROW = "inline-flex items-center gap-2 text-[12.5px] font-bold uppercase tracking-[0.16em] text-brand before:h-0.5 before:w-6 before:rounded before:bg-accent";
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -195,6 +216,26 @@ export default function Home() {
         </div>
       </section>
 
+      {/* WHY CHOOSE US */}
+      <section className="py-16 sm:py-24" style={{ background: "var(--surface-2)" }}>
+        <div className="mx-auto max-w-[1180px] px-5 sm:px-10">
+          <div className="reveal mx-auto max-w-2xl text-center">
+            <span className={cx(EYEBROW, "justify-center")}>Why Ihlamudheen</span>
+            <h2 className="mt-3.5 text-balance font-display text-3xl font-semibold sm:text-[42px]">An education that shapes the heart, not just the mind.</h2>
+            <p className="mt-4 text-lg text-muted">For over seventy years, families have trusted us to raise a generation grounded in faith, character and knowledge.</p>
+          </div>
+          <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {WHY.map(({ icon: Icon, t, d }) => (
+              <div key={t} className="reveal rounded-2xl border border-line bg-surface p-6 shadow-soft transition hover:-translate-y-1 hover:shadow-card">
+                <div className="mb-4 grid h-12 w-12 place-items-center rounded-xl" style={{ background: "color-mix(in srgb, var(--accent) 16%, transparent)", color: "var(--accent)" }}><Icon size={22} /></div>
+                <h3 className="text-lg font-bold">{t}</h3>
+                <p className="mt-2 text-[14.5px] text-muted">{d}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ABOUT */}
       <section id="about" className="py-16 sm:py-24">
         <div className="mx-auto grid max-w-[1180px] gap-10 px-5 sm:px-10 lg:grid-cols-[1.1fr_1fr] lg:gap-16">
@@ -250,6 +291,44 @@ export default function Home() {
                 </div>
               </article>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* TESTIMONIALS */}
+      <section className="py-16 sm:py-24" style={{ background: "var(--surface-2)" }}>
+        <div className="mx-auto max-w-[1180px] px-5 sm:px-10">
+          <div className="reveal mx-auto max-w-2xl text-center">
+            <span className={cx(EYEBROW, "justify-center")}>Words From Our Families</span>
+            <h2 className="mt-3.5 text-balance font-display text-3xl font-semibold sm:text-[42px]">Trusted by the community for generations.</h2>
+          </div>
+          <div className="mt-12 grid gap-5 md:grid-cols-3">
+            {TESTIMONIALS.map((x, i) => (
+              <figure key={i} className="reveal flex flex-col rounded-2xl border border-line bg-surface p-7 shadow-soft">
+                <div className="flex items-center justify-between">
+                  <Quote size={30} style={{ color: "var(--accent)" }} />
+                  <div className="flex gap-0.5">{[0, 1, 2, 3, 4].map((s) => (<Star key={s} size={14} style={{ color: "var(--accent)", fill: "var(--accent)" }} />))}</div>
+                </div>
+                <blockquote className="mt-4 flex-1 text-[16px] leading-relaxed text-ink">“{x.quote}”</blockquote>
+                <figcaption className="mt-5 border-t border-line pt-4">
+                  <div className="font-bold text-brand">{x.name}</div>
+                  <div className="text-[13px] text-muted">{x.role}</div>
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA BANNER */}
+      <section className="py-16 sm:py-20" style={{ background: "linear-gradient(135deg, var(--navy), var(--brand))" }}>
+        <div className="reveal mx-auto max-w-[900px] px-5 text-center sm:px-10">
+          <p className="font-ar text-2xl text-accent sm:text-3xl" dir="rtl">وَقُل رَّبِّ زِدْنِي عِلْمًا</p>
+          <h2 className="mt-4 text-balance font-display text-3xl font-semibold text-white sm:text-[40px]">Give your child a foundation that lasts a lifetime.</h2>
+          <p className="mx-auto mt-4 max-w-[48ch] text-white/75">Admissions for the new academic year are open. Reserve your child's place at Ihlamudheen Madrasa today.</p>
+          <div className="mt-8 flex flex-wrap justify-center gap-3.5">
+            <a href="#admissions" className={btn({ variant: "gold", size: "lg" })}>Enroll Now <ArrowRight size={16} /></a>
+            <a href="tel:+910000000000" className="inline-flex items-center gap-2 rounded-full border border-white/30 px-6 py-3 text-[15px] font-bold text-white transition hover:bg-white/10"><Phone size={16} /> Call the Office</a>
           </div>
         </div>
       </section>
