@@ -58,7 +58,7 @@ where id = (select id from auth.users where email = 'accountant@example.com');
 3. Create `.env.local` (copy from [`.env.example`](.env.example)) and fill it in:
 
    ```bash
-   NEXT_PUBLIC_SUPABASE_URL=https://tvmhycdyfflnxrnpvhjf.supabase.co   # already set
+   NEXT_PUBLIC_SUPABASE_URL=https://iiathuvpstbqrtsskppq.supabase.co   # already set
    NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOi...your anon public key...   # paste here
    ```
 
