@@ -1,0 +1,25 @@
+{
+  "name": "v0-project",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "serve -l 3000 .",
+    "start": "serve -l 3000 ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abdulkader-pallar/Ihlamudheen-Madrasa.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/abdulkader-pallar/Ihlamudheen-Madrasa/issues"
+  },
+  "homepage": "https://github.com/abdulkader-pallar/Ihlamudheen-Madrasa#readme",
+  "dependencies": {
+    "serve": "^14.2.6"
+  }
+}
