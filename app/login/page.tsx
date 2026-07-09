@@ -3,10 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { supabaseConfigured } from "@/lib/supabase/config";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { btn, cx } from "@/lib/ui";
 
-const configured = !/PASTE_YOUR/.test(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "PASTE_YOUR");
+const configured = supabaseConfigured;
 
 export default function LoginPage() {
   const router = useRouter();

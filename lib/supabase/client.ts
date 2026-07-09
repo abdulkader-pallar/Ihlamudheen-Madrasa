@@ -1,10 +1,8 @@
 import { createBrowserClient } from "@supabase/ssr";
+import { SUPABASE_ANON_KEY, SUPABASE_URL } from "./config";
 
 // Browser-side Supabase client (used inside "use client" components).
-// Only the PUBLIC url + anon key are exposed. RLS enforces all access.
+// Only the PUBLIC url + anon/publishable key are exposed. RLS enforces all access.
 export function createClient() {
-  return createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  return createBrowserClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 }
