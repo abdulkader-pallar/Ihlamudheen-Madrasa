@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { supabaseConfigured } from "@/lib/supabase/config";
 import { AdminShell } from "@/components/admin/admin-shell";
 import type { Profile } from "@/lib/types";
 
@@ -7,6 +8,10 @@ import type { Profile } from "@/lib/types";
 export const dynamic = "force-dynamic";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  // If Supabase isn't configured yet, send to the login screen (which explains it)
+  // instead of throwing a server error.
+  if (!supabaseConfigured) redirect("/login");
+
   const supabase = await createClient();
 
   const {
