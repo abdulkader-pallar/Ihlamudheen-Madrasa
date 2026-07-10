@@ -29,19 +29,12 @@ function GoogleIcon() {
   );
 }
 
-function AppleIcon() {
-  return (
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M16.365 1.43c0 1.14-.417 2.2-1.253 3.02-1.006.99-2.22 1.56-3.29 1.47-.13-1.1.42-2.28 1.19-3.03C13.86 2.03 15.19 1.47 16.365 1.43zM20.5 17.05c-.61 1.4-.9 2.02-1.68 3.26-1.1 1.73-2.65 3.88-4.57 3.9-1.71.02-2.15-1.11-4.47-1.1-2.32.01-2.8 1.12-4.51 1.1-1.92-.02-3.39-1.96-4.49-3.69C-.32 16.9-.55 11.36 1.6 8.4c1.11-1.53 2.86-2.5 4.68-2.53 1.75-.02 2.8 1.13 4.46 1.13 1.65 0 2.66-1.13 4.68-1.13 1.63.01 3.35.9 4.44 2.44-3.9 2.13-3.26 7.7 1.14 8.74z" />
-    </svg>
-  );
-}
 
 export default function LoginPage() {
   const router = useRouter();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [oauthBusy, setOauthBusy] = useState<"google" | "apple" | null>(null);
+  const [oauthBusy, setOauthBusy] = useState<"google" | null>(null);
 
   // Show any error passed back from the OAuth callback / server guard.
   useEffect(() => {
@@ -149,11 +142,7 @@ export default function LoginPage() {
         <div className="grid gap-2.5">
           <button type="button" onClick={() => oauth("google")} disabled={!configured || !!oauthBusy}
             className="inline-flex w-full items-center justify-center gap-2.5 rounded-[11px] border-[1.5px] border-line bg-surface px-4 py-3 text-[14.5px] font-bold text-ink transition hover:bg-surface-2 disabled:opacity-60">
-            <GoogleIcon /> {oauthBusy === "google" ? "Redirecting…" : "Continue with Google"}
-          </button>
-          <button type="button" onClick={() => oauth("apple")} disabled={!configured || !!oauthBusy}
-            className="inline-flex w-full items-center justify-center gap-2.5 rounded-[11px] border-[1.5px] border-line bg-surface px-4 py-3 text-[14.5px] font-bold text-ink transition hover:bg-surface-2 disabled:opacity-60">
-            <AppleIcon /> {oauthBusy === "apple" ? "Redirecting…" : "Continue with Apple"}
+            <GoogleIcon /> {oauthBusy === "google" ? "Redirecting…" : "Sign in with Google"}
           </button>
         </div>
 
