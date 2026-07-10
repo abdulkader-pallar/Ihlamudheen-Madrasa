@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { supabaseConfigured } from "@/lib/supabase/config";
 import { AdminShell } from "@/components/admin/admin-shell";
-import type { Profile } from "@/lib/types";
+import { hasAccess, type Profile } from "@/lib/types";
 
 // Always run per-request so auth is checked on the server every time.
 export const dynamic = "force-dynamic";
@@ -25,10 +25,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     .eq("id", user.id)
     .single();
 
-  // Signed in but no access profile → sign out and bounce.
-  if (!profile) {
+  // Signed in but not a registered/approved user (no profile, or role still
+  // "pending") → sign out and bounce. This blocks unregistered Google/Apple
+  // sign-ins from ever reaching the portal.
+  if (!profile || !hasAccess(profile.role)) {
     await supabase.auth.signOut();
-    redirect("/login?error=no-access");
+    redirect(profile ? "/login?error=unauthorized" : "/login?error=no-access");
   }
 
   return <AdminShell profile={profile as Profile}>{children}</AdminShell>;

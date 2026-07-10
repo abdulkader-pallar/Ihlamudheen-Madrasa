@@ -1,4 +1,6 @@
-export type Role = "admin" | "accountant" | "viewer";
+// "pending" = a signed-up account (e.g. via Google) that an admin has NOT yet
+// approved. Pending users have NO access until an admin assigns a real role.
+export type Role = "admin" | "accountant" | "viewer" | "pending";
 export type TxType = "income" | "expense";
 
 export interface Profile {
@@ -33,3 +35,8 @@ export interface Transaction {
 }
 
 export const isEditor = (role?: Role | null) => role === "admin" || role === "accountant";
+
+// Only these roles may enter the portal at all. "pending" (and anyone with no
+// profile) is denied — this is what keeps unregistered Google/Apple sign-ins out.
+export const hasAccess = (role?: Role | null) =>
+  role === "admin" || role === "accountant" || role === "viewer";

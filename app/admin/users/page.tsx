@@ -14,6 +14,7 @@ const ROLE_INFO: Record<Role, { label: string; desc: string; color: string }> = 
   admin: { label: "Admin", desc: "Full access, including user roles", color: "var(--accent)" },
   accountant: { label: "Accountant", desc: "Add and edit all records", color: "var(--brand)" },
   viewer: { label: "Viewer", desc: "Read-only reports", color: "#8b5cf6" },
+  pending: { label: "Pending", desc: "No access — awaiting approval", color: "var(--muted)" },
 };
 
 export default function UsersPage() {

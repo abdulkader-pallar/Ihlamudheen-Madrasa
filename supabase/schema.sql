@@ -17,7 +17,7 @@
 do $$
 begin
   if not exists (select 1 from pg_type where typname = 'user_role') then
-    create type public.user_role as enum ('admin', 'accountant', 'viewer');
+    create type public.user_role as enum ('admin', 'accountant', 'viewer', 'pending');
   end if;
 end $$;
 
@@ -25,7 +25,7 @@ end $$;
 create table if not exists public.profiles (
   id         uuid primary key references auth.users(id) on delete cascade,
   full_name  text,
-  role       public.user_role not null default 'viewer',
+  role       public.user_role not null default 'pending',
   created_at timestamptz not null default now()
 );
 
@@ -53,7 +53,7 @@ returns trigger language plpgsql security definer set search_path = public
 as $$
 begin
   insert into public.profiles (id, full_name, role)
-  values (new.id, coalesce(new.raw_user_meta_data->>'full_name', new.email), 'viewer')
+  values (new.id, coalesce(new.raw_user_meta_data->>'full_name', new.email), 'pending')
   on conflict (id) do nothing;
   return new;
 end $$;

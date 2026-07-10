@@ -25,7 +25,9 @@ import {
   ShieldCheck,
   Quote,
   Star,
+  LogIn,
 } from "lucide-react";
+import Link from "next/link";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Toaster, toast } from "@/components/ui/toast";
 import { btn, cx } from "@/lib/ui";
@@ -161,6 +163,7 @@ export default function Home() {
           </nav>
 
           <div className="flex items-center gap-2.5">
+            <Link href="/login" className={cx(btn({ variant: "ghost", size: "lg" }), "hidden py-2.5 min-[900px]:inline-flex")}><LogIn size={16} /> Staff Login</Link>
             <a href="#admissions" className={cx(btn({ variant: "primary", size: "lg" }), "hidden py-2.5 min-[900px]:inline-flex")}>Enroll Now</a>
             <ThemeToggle />
             <button className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-surface text-ink min-[900px]:hidden" aria-label="Menu" aria-expanded={menuOpen} onClick={() => setMenuOpen((v) => !v)}>
@@ -173,6 +176,7 @@ export default function Home() {
             {NAV.map(([label, href]) => (
               <a key={href} href={href} onClick={() => setMenuOpen(false)} className="rounded-lg px-3.5 py-3 font-semibold text-muted hover:text-brand">{label}</a>
             ))}
+            <Link href="/login" onClick={() => setMenuOpen(false)} className="mt-1 inline-flex items-center gap-2 rounded-lg px-3.5 py-3 font-semibold text-brand"><LogIn size={16} /> Staff Login</Link>
           </nav>
         )}
       </header>
