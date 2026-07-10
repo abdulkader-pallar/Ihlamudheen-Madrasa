@@ -58,7 +58,7 @@ const STEPS = [
 const CONTACTS: [typeof Phone, string, string][] = [
   [Phone, "Call / WhatsApp", "+91 00000 00000"],
   [Mail, "Email", "info@ihlamudheen.edu"],
-  [MapPin, "Location", "Your address, City, State"],
+  [MapPin, "Location", "Pallar, Vairamkode, Malappuram, Kerala — 676301"],
   [Clock, "Class Hours", "Daily · 6:00 – 9:00 AM"],
 ];
 
@@ -400,7 +400,7 @@ export default function Home() {
             </div>
             <FooterCol title="Explore" links={[["Home", "#home"], ["About Us", "#about"], ["Programs", "#programs"], ["Admissions", "#admissions"]]} />
             <FooterCol title="Programs" links={[["Qur'an & Tajweed", "#programs"], ["Hifz al-Qur'an", "#programs"], ["Islamic Studies", "#programs"], ["Arabic Language", "#programs"]]} />
-            <FooterCol title="Contact" links={[["+91 00000 00000", "tel:+910000000000"], ["info@ihlamudheen.edu", "mailto:info@ihlamudheen.edu"], ["Your address, City", "#contact"], ["Daily · 6:00–9:00 AM", "#contact"]]} />
+            <FooterCol title="Contact" links={[["+91 00000 00000", "tel:+910000000000"], ["info@ihlamudheen.edu", "mailto:info@ihlamudheen.edu"], ["Pallar, Vairamkode, Malappuram, Kerala 676301", "#contact"], ["Daily · 6:00–9:00 AM", "#contact"]]} />
           </div>
           <div className="mt-11 flex flex-wrap items-center justify-between gap-3 border-t border-white/15 pt-6 text-[13.5px]">
             <span>© {new Date().getFullYear()} Ihlamudheen Madrasa. All rights reserved.</span>
