@@ -78,7 +78,7 @@ export default function LoginPage() {
     router.refresh();
   };
 
-  const oauth = async (provider: "google" | "apple") => {
+  const oauth = async (provider: "google") => {
     setError("");
     setOauthBusy(provider);
     const next = new URLSearchParams(window.location.search).get("next") || "/admin";
