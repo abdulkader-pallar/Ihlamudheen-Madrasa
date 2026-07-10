@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import type { LucideIcon } from "lucide-react";
 import { cx } from "@/lib/ui";
 import type { TxType } from "@/lib/types";
 
@@ -38,16 +39,47 @@ export function Panel({ title, action, children, className }: { title?: string; 
   );
 }
 
-export function StatCard({ label, value, tone, dot }: { label: string; value: string; tone?: "income" | "expense" | "brand"; dot?: "i" | "e" | "b" }) {
-  const color = tone === "income" ? "text-good" : tone === "expense" ? "text-bad" : "text-ink";
-  const dotColor = dot === "i" ? "bg-good" : dot === "e" ? "bg-bad" : "bg-brand";
+type Accent = "green" | "red" | "blue" | "gold" | "teal";
+const ACCENT_COLOR: Record<Accent, string> = {
+  green: "var(--good)",
+  red: "var(--bad)",
+  blue: "#3b82f6",
+  gold: "var(--accent)",
+  teal: "var(--brand)",
+};
+
+export function StatCard({
+  icon: Icon,
+  label,
+  value,
+  sub,
+  accent = "teal",
+  valueTone,
+}: {
+  icon: LucideIcon;
+  label: string;
+  value: string;
+  sub?: string;
+  accent?: Accent;
+  valueTone?: "good" | "bad";
+}) {
+  const c = ACCENT_COLOR[accent];
+  const valueColor = valueTone === "good" ? "var(--good)" : valueTone === "bad" ? "var(--bad)" : "var(--ink)";
   return (
-    <div className="rounded-2xl border border-line bg-surface p-5 shadow-soft">
-      <div className="flex items-center gap-2 text-[12.5px] font-bold uppercase tracking-[0.06em] text-muted">
-        {dot && <span className={cx("h-2.5 w-2.5 rounded-full", dotColor)} />}
-        {label}
+    <div className="flex items-center gap-4 rounded-2xl border border-line bg-surface p-5 shadow-soft transition hover:shadow-card">
+      <div
+        className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl"
+        style={{ background: `color-mix(in srgb, ${c} 15%, transparent)`, color: c }}
+      >
+        <Icon size={26} />
       </div>
-      <div className={cx("tnum mt-2 font-display text-3xl font-semibold", color)}>{value}</div>
+      <div className="min-w-0">
+        <div className="tnum font-display text-[26px] font-semibold leading-tight" style={{ color: valueColor }}>
+          {value}
+        </div>
+        <div className="text-[13px] font-semibold text-muted">{label}</div>
+        {sub && <div className="truncate text-[12px] text-muted">{sub}</div>}
+      </div>
     </div>
   );
 }

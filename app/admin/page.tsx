@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Plus } from "lucide-react";
+import { CalendarDays, GraduationCap, Plus, TrendingDown, TrendingUp, Wallet } from "lucide-react";
 import { useData } from "@/components/admin/data-context";
 import { EmptyState, Panel, Pill, Spinner, StatCard } from "@/components/admin/ui";
 import { CategoryDonut, MonthlyChart } from "@/components/admin/charts";
@@ -52,21 +52,45 @@ export default function DashboardPage() {
 
   if (loading) return <Spinner />;
 
+  const rawName = profile.full_name || "";
+  const firstName = (rawName.includes("@") ? rawName.split("@")[0] : rawName.split(" ")[0]) || "there";
+  const today = new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+
   return (
     <div className="animate-fade">
-      {isEditor(profile.role) && (
-        <div className="mb-5 flex justify-end">
+      {/* Welcome header */}
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className="grid h-12 w-12 place-items-center rounded-2xl bg-brand text-white">
+            <GraduationCap size={24} />
+          </div>
+          <div>
+            <div className="flex flex-wrap items-center gap-2.5">
+              <h2 className="font-display text-2xl font-semibold capitalize">Welcome back, {firstName}!</h2>
+              <span className="rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide" style={{ background: "color-mix(in srgb, var(--accent) 20%, transparent)", color: "var(--accent)" }}>
+                {profile.role}
+              </span>
+            </div>
+            <div className="mt-0.5 flex items-center gap-2 text-[13px] text-muted">
+              {today}
+              <span className="inline-flex items-center gap-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-good" /> Active
+              </span>
+            </div>
+          </div>
+        </div>
+        {isEditor(profile.role) && (
           <button onClick={() => setAdding(true)} className={btn({ variant: "primary" })}>
             <Plus size={16} /> New entry
           </button>
-        </div>
-      )}
+        )}
+      </div>
 
       <div className="mb-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Total Income" value={fmt(stats.income)} tone="income" dot="i" />
-        <StatCard label="Total Expense" value={fmt(stats.expense)} tone="expense" dot="e" />
-        <StatCard label="Balance" value={fmt(stats.balance)} dot="b" />
-        <StatCard label="This Month (Net)" value={fmt(stats.mNet)} tone={stats.mNet >= 0 ? "income" : "expense"} />
+        <StatCard icon={TrendingUp} accent="green" valueTone="good" label="Total Income" value={fmt(stats.income)} sub="All time" />
+        <StatCard icon={TrendingDown} accent="red" valueTone="bad" label="Total Expense" value={fmt(stats.expense)} sub="All time" />
+        <StatCard icon={Wallet} accent="blue" label="Balance" value={fmt(stats.balance)} sub="Income − Expense" />
+        <StatCard icon={CalendarDays} accent="gold" valueTone={stats.mNet >= 0 ? "good" : "bad"} label="This Month" value={fmt(stats.mNet)} sub="Net this month" />
       </div>
 
       <div className="mb-5 grid gap-4 lg:grid-cols-[1.5fr_1fr]">

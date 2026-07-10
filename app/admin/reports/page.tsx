@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Download, Printer } from "lucide-react";
+import { Download, Printer, TrendingDown, TrendingUp, Wallet } from "lucide-react";
 import { useData } from "@/components/admin/data-context";
 import { EmptyState, Spinner, StatCard } from "@/components/admin/ui";
 import { toast } from "@/components/ui/toast";
@@ -77,9 +77,9 @@ export default function ReportsPage() {
       </div>
 
       <div className="mb-4 grid gap-4 sm:grid-cols-3">
-        <StatCard label="Total Income" value={fmt(totals.income)} tone="income" dot="i" />
-        <StatCard label="Total Expense" value={fmt(totals.expense)} tone="expense" dot="e" />
-        <StatCard label="Net Balance" value={fmt(totals.balance)} dot="b" />
+        <StatCard icon={TrendingUp} accent="green" valueTone="good" label="Total Income" value={fmt(totals.income)} />
+        <StatCard icon={TrendingDown} accent="red" valueTone="bad" label="Total Expense" value={fmt(totals.expense)} />
+        <StatCard icon={Wallet} accent="blue" label="Net Balance" value={fmt(totals.balance)} />
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-line bg-surface">

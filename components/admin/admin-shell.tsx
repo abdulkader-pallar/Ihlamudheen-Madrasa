@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { BarChart3, LayoutDashboard, ListOrdered, LogOut, Menu, SlidersHorizontal } from "lucide-react";
+import { BarChart3, Globe, LayoutDashboard, LayoutGrid, ListOrdered, LogOut, Menu, SlidersHorizontal } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Toaster } from "@/components/ui/toast";
 import { DataProvider } from "./data-context";
-import { isEditor, type Profile } from "@/lib/types";
+import { isEditor, type Profile, type Role } from "@/lib/types";
 import { cx } from "@/lib/ui";
 
 const NAV = [
@@ -29,6 +30,7 @@ export function AdminShell({ profile, children }: { profile: Profile; children: 
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [appsOpen, setAppsOpen] = useState(false);
   const editor = isEditor(profile.role);
   const name = profile.full_name || "Staff";
 
@@ -110,7 +112,22 @@ export function AdminShell({ profile, children }: { profile: Profile; children: 
               </button>
               <h1 className="font-display text-xl font-semibold sm:text-[22px]">{TITLES[pathname] || "Accounts"}</h1>
             </div>
-            <ThemeToggle />
+            <div className="flex items-center gap-2.5">
+              <div className="relative">
+                <button
+                  onClick={() => setAppsOpen((v) => !v)}
+                  aria-label="Apps"
+                  className={cx(
+                    "grid h-10 w-10 place-items-center rounded-xl border bg-surface text-ink transition hover:border-brand",
+                    appsOpen ? "border-brand text-brand" : "border-line"
+                  )}
+                >
+                  <LayoutGrid size={19} />
+                </button>
+                {appsOpen && <AppsMenu role={profile.role} onClose={() => setAppsOpen(false)} onSignOut={signOut} />}
+              </div>
+              <ThemeToggle />
+            </div>
           </header>
 
           <main className="p-4 sm:p-7">{children}</main>
@@ -118,5 +135,50 @@ export function AdminShell({ profile, children }: { profile: Profile; children: 
       </div>
       <Toaster />
     </DataProvider>
+  );
+}
+
+function AppsMenu({ role, onClose, onSignOut }: { role: Role; onClose: () => void; onSignOut: () => void }) {
+  const editor = isEditor(role);
+  const apps: { label: string; href: string; icon: LucideIcon; color: string }[] = [
+    { label: "Dashboard", href: "/admin", icon: LayoutDashboard, color: "var(--brand)" },
+    { label: "Transactions", href: "/admin/transactions", icon: ListOrdered, color: "#3b82f6" },
+    { label: "Reports", href: "/admin/reports", icon: BarChart3, color: "var(--accent)" },
+    ...(editor ? [{ label: "Categories", href: "/admin/manage", icon: SlidersHorizontal, color: "var(--good)" }] : []),
+  ];
+
+  const tileCls = "flex flex-col items-center gap-2 rounded-xl p-3 text-center transition hover:bg-surface-2";
+  const Icon = ({ icon: I, color }: { icon: LucideIcon; color: string }) => (
+    <span className="grid h-11 w-11 place-items-center rounded-2xl text-white" style={{ background: color }}>
+      <I size={20} />
+    </span>
+  );
+
+  return (
+    <>
+      <div className="fixed inset-0 z-40" onClick={onClose} />
+      <div className="absolute right-0 top-12 z-50 w-[288px] rounded-2xl border border-line bg-surface p-4 shadow-card">
+        <div className="mb-2 px-1 text-[11px] font-bold uppercase tracking-wider text-muted">Accounts</div>
+        <div className="grid grid-cols-3 gap-1">
+          {apps.map((a) => (
+            <Link key={a.href} href={a.href} onClick={onClose} className={tileCls}>
+              <Icon icon={a.icon} color={a.color} />
+              <span className="text-[11.5px] font-semibold leading-tight">{a.label}</span>
+            </Link>
+          ))}
+        </div>
+        <div className="my-3 border-t border-line" />
+        <div className="grid grid-cols-3 gap-1">
+          <Link href="/" onClick={onClose} className={tileCls}>
+            <Icon icon={Globe} color="#8b5cf6" />
+            <span className="text-[11.5px] font-semibold leading-tight">Website</span>
+          </Link>
+          <button onClick={onSignOut} className={tileCls}>
+            <Icon icon={LogOut} color="var(--bad)" />
+            <span className="text-[11.5px] font-semibold leading-tight">Sign out</span>
+          </button>
+        </div>
+      </div>
+    </>
   );
 }
