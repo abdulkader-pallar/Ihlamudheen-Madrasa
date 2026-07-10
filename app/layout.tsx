@@ -60,7 +60,13 @@ export const metadata: Metadata = {
     "Quran school Pallar", "hifz Pallar", "madrasa Pallar 676301",
     "مدرسة إعلام الدين", "pallar", "vairamkode", "malappuram",
   ],
-  icons: { icon: "/Logo of Ihlamudheen Madrasa dark-bg removed.png" },
+  icons: {
+    icon: [
+      { url: "/favicon/favicon.ico", sizes: "any" },
+      { url: "/favicon/favicon-96x96.png", sizes: "96x96", type: "image/png" },
+    ],
+    apple: "/favicon/apple-touch-icon.png",
+  },
   openGraph: {
     title: "Ihlamudheen Madrasa — Pallar, Malappuram, Kerala",
     description: SITE_DESC,
