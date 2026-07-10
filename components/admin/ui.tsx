@@ -1,14 +1,18 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useId, useRef } from "react";
 import type { LucideIcon } from "lucide-react";
 import { cx } from "@/lib/ui";
 import type { TxType } from "@/lib/types";
 
 export function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const titleId = useId();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
+    // Move focus into the dialog for keyboard/screen-reader users.
+    ref.current?.querySelector<HTMLElement>("input,select,textarea,button,[tabindex]")?.focus();
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
@@ -17,8 +21,14 @@ export function Modal({ title, onClose, children }: { title: string; onClose: ()
       className="fixed inset-0 z-[60] grid place-items-center bg-black/55 p-5 backdrop-blur-sm"
       onMouseDown={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="max-h-[92vh] w-full max-w-[460px] overflow-y-auto rounded-2xl border border-line bg-surface p-6 shadow-card">
-        <h3 className="mb-4 font-display text-xl font-semibold">{title}</h3>
+      <div
+        ref={ref}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        className="max-h-[92vh] w-full max-w-[460px] overflow-y-auto rounded-2xl border border-line bg-surface p-6 shadow-card"
+      >
+        <h3 id={titleId} className="mb-4 font-display text-xl font-semibold">{title}</h3>
         {children}
       </div>
     </div>
