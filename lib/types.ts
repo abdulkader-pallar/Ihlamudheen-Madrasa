@@ -7,6 +7,7 @@ export interface Profile {
   id: string;
   full_name: string | null;
   role: Role;
+  email?: string | null;
 }
 
 export interface Category {

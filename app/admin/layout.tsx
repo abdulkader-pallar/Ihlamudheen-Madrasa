@@ -24,6 +24,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     .select("id, full_name, role")
     .eq("id", user.id)
     .single();
+  const profileWithEmail = profile ? { ...profile, email: user.email } : profile;
 
   // Signed in but not a registered/approved user (no profile, or role still
   // "pending") → sign out and bounce. This blocks unregistered Google/Apple
@@ -33,5 +34,5 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     redirect(profile ? "/login?error=unauthorized" : "/login?error=no-access");
   }
 
-  return <AdminShell profile={profile as Profile}>{children}</AdminShell>;
+  return <AdminShell profile={profileWithEmail as Profile}>{children}</AdminShell>;
 }

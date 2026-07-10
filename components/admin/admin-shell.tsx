@@ -12,12 +12,14 @@ import { DataProvider } from "./data-context";
 import { isEditor, type Profile, type Role } from "@/lib/types";
 import { cx } from "@/lib/ui";
 
-const NAV: { href: string; label: string; icon: LucideIcon; exact?: boolean; editor?: boolean; admin?: boolean }[] = [
+const SUPERADMIN_EMAIL = "cryptolife676@gmail.com";
+
+const NAV: { href: string; label: string; icon: LucideIcon; exact?: boolean; editor?: boolean; admin?: boolean; superadmin?: boolean }[] = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { href: "/admin/transactions", label: "Transactions", icon: ListOrdered },
   { href: "/admin/reports", label: "Reports", icon: BarChart3 },
   { href: "/admin/manage", label: "Categories & Funds", icon: SlidersHorizontal, editor: true },
-  { href: "/admin/users", label: "Users & Roles", icon: Users, admin: true },
+  { href: "/admin/users", label: "Users & Roles", icon: Users, superadmin: true },
 ];
 
 const TITLES: Record<string, string> = {
@@ -35,6 +37,7 @@ export function AdminShell({ profile, children }: { profile: Profile; children: 
   const [appsOpen, setAppsOpen] = useState(false);
   const editor = isEditor(profile.role);
   const admin = profile.role === "admin";
+  const superadmin = profile.email === SUPERADMIN_EMAIL;
   const name = profile.full_name || "Staff";
 
   const signOut = async () => {
@@ -63,7 +66,7 @@ export function AdminShell({ profile, children }: { profile: Profile; children: 
             </div>
           </div>
 
-          {NAV.filter((n) => (n.admin ? admin : !n.editor || editor)).map((n) => {
+          {NAV.filter((n) => (n.superadmin ? superadmin : n.admin ? admin : !n.editor || editor)).map((n) => {
             const active = n.exact ? pathname === n.href : pathname.startsWith(n.href);
             const Icon = n.icon;
             return (
@@ -127,7 +130,7 @@ export function AdminShell({ profile, children }: { profile: Profile; children: 
                 >
                   <LayoutGrid size={19} />
                 </button>
-                {appsOpen && <AppsMenu role={profile.role} onClose={() => setAppsOpen(false)} onSignOut={signOut} />}
+                {appsOpen && <AppsMenu role={profile.role} email={profile.email} onClose={() => setAppsOpen(false)} onSignOut={signOut} />}
               </div>
               <ThemeToggle />
             </div>
@@ -141,15 +144,15 @@ export function AdminShell({ profile, children }: { profile: Profile; children: 
   );
 }
 
-function AppsMenu({ role, onClose, onSignOut }: { role: Role; onClose: () => void; onSignOut: () => void }) {
+function AppsMenu({ role, email, onClose, onSignOut }: { role: Role; email?: string | null; onClose: () => void; onSignOut: () => void }) {
   const editor = isEditor(role);
-  const admin = role === "admin";
+  const superadmin = email === SUPERADMIN_EMAIL;
   const apps: { label: string; href: string; icon: LucideIcon; color: string }[] = [
     { label: "Dashboard", href: "/admin", icon: LayoutDashboard, color: "var(--brand)" },
     { label: "Transactions", href: "/admin/transactions", icon: ListOrdered, color: "#3b82f6" },
     { label: "Reports", href: "/admin/reports", icon: BarChart3, color: "var(--accent)" },
     ...(editor ? [{ label: "Categories", href: "/admin/manage", icon: SlidersHorizontal, color: "var(--good)" }] : []),
-    ...(admin ? [{ label: "Users", href: "/admin/users", icon: Users, color: "#8b5cf6" }] : []),
+    ...(superadmin ? [{ label: "Users", href: "/admin/users", icon: Users, color: "#8b5cf6" }] : []),
   ];
 
   const tileCls = "flex flex-col items-center gap-2 rounded-xl p-3 text-center transition hover:bg-surface-2";
