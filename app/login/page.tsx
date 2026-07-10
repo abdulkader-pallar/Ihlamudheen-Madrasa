@@ -127,22 +127,6 @@ export default function LoginPage() {
           </p>
         )}
 
-        {/* Social sign-in */}
-        <div className="grid gap-2.5">
-          <button type="button" onClick={() => oauth("google")} disabled={!configured || !!oauthBusy}
-            className="inline-flex w-full items-center justify-center gap-2.5 rounded-[11px] border-[1.5px] border-line bg-surface px-4 py-3 text-[14.5px] font-bold text-ink transition hover:bg-surface-2 disabled:opacity-60">
-            <GoogleIcon /> {oauthBusy === "google" ? "Redirecting…" : "Continue with Google"}
-          </button>
-          <button type="button" onClick={() => oauth("apple")} disabled={!configured || !!oauthBusy}
-            className="inline-flex w-full items-center justify-center gap-2.5 rounded-[11px] border-[1.5px] border-line bg-surface px-4 py-3 text-[14.5px] font-bold text-ink transition hover:bg-surface-2 disabled:opacity-60">
-            <AppleIcon /> {oauthBusy === "apple" ? "Redirecting…" : "Continue with Apple"}
-          </button>
-        </div>
-
-        <div className="my-5 flex items-center gap-3 text-[12px] font-semibold uppercase tracking-wide text-muted">
-          <span className="h-px flex-1 bg-line" /> or <span className="h-px flex-1 bg-line" />
-        </div>
-
         <form onSubmit={onSubmit}>
           <label className="mb-1.5 block text-[13px] font-bold">Email</label>
           <input name="email" type="email" autoComplete="username" required placeholder="you@example.com"
@@ -156,6 +140,22 @@ export default function LoginPage() {
             {loading ? "Signing in…" : "Sign in"}
           </button>
         </form>
+
+        <div className="my-5 flex items-center gap-3 text-[12px] font-semibold uppercase tracking-wide text-muted">
+          <span className="h-px flex-1 bg-line" /> or <span className="h-px flex-1 bg-line" />
+        </div>
+
+        {/* Social sign-in */}
+        <div className="grid gap-2.5">
+          <button type="button" onClick={() => oauth("google")} disabled={!configured || !!oauthBusy}
+            className="inline-flex w-full items-center justify-center gap-2.5 rounded-[11px] border-[1.5px] border-line bg-surface px-4 py-3 text-[14.5px] font-bold text-ink transition hover:bg-surface-2 disabled:opacity-60">
+            <GoogleIcon /> {oauthBusy === "google" ? "Redirecting…" : "Continue with Google"}
+          </button>
+          <button type="button" onClick={() => oauth("apple")} disabled={!configured || !!oauthBusy}
+            className="inline-flex w-full items-center justify-center gap-2.5 rounded-[11px] border-[1.5px] border-line bg-surface px-4 py-3 text-[14.5px] font-bold text-ink transition hover:bg-surface-2 disabled:opacity-60">
+            <AppleIcon /> {oauthBusy === "apple" ? "Redirecting…" : "Continue with Apple"}
+          </button>
+        </div>
 
         {error && <p className="mt-4 rounded-lg border border-bad/30 bg-bad/10 px-3 py-2.5 text-[13px] font-semibold text-bad">{error}</p>}
 
