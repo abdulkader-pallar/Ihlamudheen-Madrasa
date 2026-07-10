@@ -14,7 +14,13 @@ const nextConfig = {
         ],
       },
       {
+        // Keep the private portal out of search engines.
         source: "/admin/:path*",
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+      },
+      {
+        // Keep the login screen out of search engines too.
+        source: "/login",
         headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
       },
     ];

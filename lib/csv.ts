@@ -7,7 +7,13 @@ export function downloadCSV(filename: string, rows: Cell[][]) {
     .map((r) =>
       r
         .map((cell) => {
-          const s = String(cell ?? "");
+          // Numbers are safe to emit as-is (keeps amounts numeric in Excel).
+          if (typeof cell === "number") return String(cell);
+          let s = String(cell ?? "");
+          // Neutralise spreadsheet formula injection: a text cell that starts
+          // with = + - @ (or tab/CR) can execute as a formula when opened in
+          // Excel/Sheets. Prefix it with a quote so it's treated as text.
+          if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
           return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
         })
         .join(",")
