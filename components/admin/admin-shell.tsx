@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { BarChart3, Globe, LayoutDashboard, LayoutGrid, ListOrdered, LogOut, Menu, SlidersHorizontal } from "lucide-react";
+import { BarChart3, Globe, LayoutDashboard, LayoutGrid, ListOrdered, LogOut, Menu, SlidersHorizontal, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -12,11 +12,12 @@ import { DataProvider } from "./data-context";
 import { isEditor, type Profile, type Role } from "@/lib/types";
 import { cx } from "@/lib/ui";
 
-const NAV = [
+const NAV: { href: string; label: string; icon: LucideIcon; exact?: boolean; editor?: boolean; admin?: boolean }[] = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { href: "/admin/transactions", label: "Transactions", icon: ListOrdered },
   { href: "/admin/reports", label: "Reports", icon: BarChart3 },
   { href: "/admin/manage", label: "Categories & Funds", icon: SlidersHorizontal, editor: true },
+  { href: "/admin/users", label: "Users & Roles", icon: Users, admin: true },
 ];
 
 const TITLES: Record<string, string> = {
@@ -24,6 +25,7 @@ const TITLES: Record<string, string> = {
   "/admin/transactions": "Transactions",
   "/admin/reports": "Reports",
   "/admin/manage": "Categories & Funds",
+  "/admin/users": "Users & Roles",
 };
 
 export function AdminShell({ profile, children }: { profile: Profile; children: React.ReactNode }) {
@@ -32,6 +34,7 @@ export function AdminShell({ profile, children }: { profile: Profile; children: 
   const [open, setOpen] = useState(false);
   const [appsOpen, setAppsOpen] = useState(false);
   const editor = isEditor(profile.role);
+  const admin = profile.role === "admin";
   const name = profile.full_name || "Staff";
 
   const signOut = async () => {
@@ -60,7 +63,7 @@ export function AdminShell({ profile, children }: { profile: Profile; children: 
             </div>
           </div>
 
-          {NAV.filter((n) => !n.editor || editor).map((n) => {
+          {NAV.filter((n) => (n.admin ? admin : !n.editor || editor)).map((n) => {
             const active = n.exact ? pathname === n.href : pathname.startsWith(n.href);
             const Icon = n.icon;
             return (
@@ -140,11 +143,13 @@ export function AdminShell({ profile, children }: { profile: Profile; children: 
 
 function AppsMenu({ role, onClose, onSignOut }: { role: Role; onClose: () => void; onSignOut: () => void }) {
   const editor = isEditor(role);
+  const admin = role === "admin";
   const apps: { label: string; href: string; icon: LucideIcon; color: string }[] = [
     { label: "Dashboard", href: "/admin", icon: LayoutDashboard, color: "var(--brand)" },
     { label: "Transactions", href: "/admin/transactions", icon: ListOrdered, color: "#3b82f6" },
     { label: "Reports", href: "/admin/reports", icon: BarChart3, color: "var(--accent)" },
     ...(editor ? [{ label: "Categories", href: "/admin/manage", icon: SlidersHorizontal, color: "var(--good)" }] : []),
+    ...(admin ? [{ label: "Users", href: "/admin/users", icon: Users, color: "#8b5cf6" }] : []),
   ];
 
   const tileCls = "flex flex-col items-center gap-2 rounded-xl p-3 text-center transition hover:bg-surface-2";
