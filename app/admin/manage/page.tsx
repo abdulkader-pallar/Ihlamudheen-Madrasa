@@ -30,14 +30,29 @@ export default function ManagePage() {
 
   return (
     <div className="animate-fade grid gap-4 lg:grid-cols-2">
-      <Panel title="Categories" action={editor && <button onClick={() => setAddCat(true)} className={btn({ variant: "gold", size: "sm" })}><Plus size={14} /> Add</button>}>
+      <Panel title="Income Categories" action={editor && <button onClick={() => setAddCat(true)} className={btn({ variant: "gold", size: "sm" })}><Plus size={14} /> Add</button>}>
         <div className="grid max-h-[380px] gap-2 overflow-y-auto">
-          {categories.length === 0 ? <EmptyState>No categories.</EmptyState> : categories.map((c) => (
-            <div key={c.id} className="flex items-center justify-between gap-2.5 rounded-[10px] border border-line bg-surface-2 px-3 py-2.5 text-sm">
-              <span>{c.name} <span className={cx("ml-1 rounded-full px-2 py-0.5 text-[11px] font-bold capitalize", c.kind === "income" ? "bg-good-bg text-good" : "bg-bad-bg text-bad")}>{c.kind}</span></span>
-              {editor && <button onClick={() => setDel({ table: "categories", id: c.id, label: c.name })} className="text-bad hover:opacity-70" aria-label="Remove"><X size={16} /></button>}
-            </div>
-          ))}
+          {categories.filter((c) => c.kind === "income").length === 0
+            ? <EmptyState>No income categories.</EmptyState>
+            : categories.filter((c) => c.kind === "income").map((c) => (
+              <div key={c.id} className="flex items-center justify-between gap-2.5 rounded-[10px] border border-line bg-surface-2 px-3 py-2.5 text-sm">
+                <span>{c.name}</span>
+                {editor && <button onClick={() => setDel({ table: "categories", id: c.id, label: c.name })} className="text-bad hover:opacity-70" aria-label="Remove"><X size={16} /></button>}
+              </div>
+            ))}
+        </div>
+      </Panel>
+
+      <Panel title="Expense Categories" action={editor && <button onClick={() => setAddCat(true)} className={btn({ variant: "gold", size: "sm" })}><Plus size={14} /> Add</button>}>
+        <div className="grid max-h-[380px] gap-2 overflow-y-auto">
+          {categories.filter((c) => c.kind === "expense").length === 0
+            ? <EmptyState>No expense categories.</EmptyState>
+            : categories.filter((c) => c.kind === "expense").map((c) => (
+              <div key={c.id} className="flex items-center justify-between gap-2.5 rounded-[10px] border border-line bg-surface-2 px-3 py-2.5 text-sm">
+                <span>{c.name}</span>
+                {editor && <button onClick={() => setDel({ table: "categories", id: c.id, label: c.name })} className="text-bad hover:opacity-70" aria-label="Remove"><X size={16} /></button>}
+              </div>
+            ))}
         </div>
       </Panel>
 
