@@ -5,7 +5,7 @@ import { Download, Printer, TrendingDown, TrendingUp, Wallet } from "lucide-reac
 import { useData } from "@/components/admin/data-context";
 import { EmptyState, Spinner, StatCard } from "@/components/admin/ui";
 import { toast } from "@/components/ui/toast";
-import { fmt, fmtDate, monthKey, monthLabel } from "@/lib/format";
+import { fmt, fmtDate, monthKey, monthLabel, round2 } from "@/lib/format";
 import { downloadCSV } from "@/lib/csv";
 import { btn, cx, inputClass } from "@/lib/ui";
 
@@ -32,7 +32,7 @@ export default function ReportsPage() {
     let income = 0, expense = 0;
     list.forEach((t) => (t.type === "income" ? (income += +t.amount) : (expense += +t.amount)));
     const rows = Object.entries(groups).sort((a, b) => b[1].income + b[1].expense - (a[1].income + a[1].expense));
-    return { rows, totals: { income, expense, balance: income - expense } };
+    return { rows, totals: { income: round2(income), expense: round2(expense), balance: round2(income - expense) } };
   }, [transactions, from, to, group, catName, fundName]);
 
   const rangeText = from || to ? `${from ? fmtDate(from) : "start"} → ${to ? fmtDate(to) : "today"}` : "All time";

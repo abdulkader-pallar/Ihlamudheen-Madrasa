@@ -6,7 +6,7 @@ import { useData } from "@/components/admin/data-context";
 import { EmptyState, Modal, Pill, Spinner } from "@/components/admin/ui";
 import { TxDialog } from "@/components/admin/tx-dialog";
 import { toast } from "@/components/ui/toast";
-import { fmt, fmtDate } from "@/lib/format";
+import { fmt, fmtDate, round2 } from "@/lib/format";
 import { downloadCSV } from "@/lib/csv";
 import { isEditor, type Transaction } from "@/lib/types";
 import { btn, cx, inputClass } from "@/lib/ui";
@@ -39,7 +39,7 @@ export default function TransactionsPage() {
   const totals = useMemo(() => {
     let income = 0, expense = 0;
     list.forEach((t) => (t.type === "income" ? (income += +t.amount) : (expense += +t.amount)));
-    return { income, expense, balance: income - expense };
+    return { income: round2(income), expense: round2(expense), balance: round2(income - expense) };
   }, [list]);
 
   const set = (k: keyof typeof empty, v: string) => setF((p) => ({ ...p, [k]: v }));

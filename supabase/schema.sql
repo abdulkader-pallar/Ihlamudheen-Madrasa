@@ -110,6 +110,16 @@ create trigger trg_touch_tx
   before update on public.transactions
   for each row execute function public.touch_updated();
 
+-- Audit: force created_by to the signed-in user on insert (no spoofing).
+create or replace function public.force_created_by()
+returns trigger language plpgsql
+as $$ begin new.created_by = auth.uid(); return new; end $$;
+
+drop trigger if exists trg_force_created_by on public.transactions;
+create trigger trg_force_created_by
+  before insert on public.transactions
+  for each row execute function public.force_created_by();
+
 -- ============================================================================
 --  Row Level Security
 -- ============================================================================

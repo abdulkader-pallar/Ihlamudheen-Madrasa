@@ -6,7 +6,7 @@ import { useData } from "@/components/admin/data-context";
 import { EmptyState, Panel, Pill, Spinner, StatCard } from "@/components/admin/ui";
 import { CategoryDonut, MonthlyChart } from "@/components/admin/charts";
 import { TxDialog } from "@/components/admin/tx-dialog";
-import { fmt, fmtDate, monthKey, monthLabel } from "@/lib/format";
+import { fmt, fmtDate, monthKey, monthLabel, round2 } from "@/lib/format";
 import { isEditor } from "@/lib/types";
 import { btn } from "@/lib/ui";
 
@@ -25,7 +25,7 @@ export default function DashboardPage() {
       else expense += +t.amount;
       if (monthKey(t.occurred_on) === thisMonth) mNet += t.type === "income" ? +t.amount : -+t.amount;
     }
-    return { income, expense, balance: income - expense, mNet };
+    return { income: round2(income), expense: round2(expense), balance: round2(income - expense), mNet: round2(mNet) };
   }, [transactions]);
 
   const monthly = useMemo(() => {

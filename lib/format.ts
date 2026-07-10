@@ -6,6 +6,9 @@ const money = new Intl.NumberFormat("en-IN", {
 
 export const fmt = (n: number) => money.format(Number(n) || 0);
 
+// Round to 2 decimals, absorbing binary-float drift (e.g. 0.1 + 0.2).
+export const round2 = (n: number) => Math.round((n + Number.EPSILON) * 100) / 100;
+
 export const fmtDate = (d: string) =>
   new Date(d + "T00:00:00").toLocaleDateString("en-GB", {
     day: "2-digit",
