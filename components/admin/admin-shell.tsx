@@ -9,6 +9,8 @@ import { createClient } from "@/lib/supabase/client";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Toaster } from "@/components/ui/toast";
 import { DataProvider } from "./data-context";
+import { getMenuForRole } from "@/components/app-launcher";
+import type { UserRole } from "@/lib/roles";
 import { isEditor, SUPERADMIN_EMAIL, type Profile, type Role } from "@/lib/types";
 import { cx } from "@/lib/ui";
 
@@ -163,10 +165,16 @@ function AppsMenu({ role, email, onClose, onSignOut }: { role: Role; email?: str
     </span>
   );
 
+  // Full school-ERP module menu (Academics, Teachers, Grade Book, Fest, HRMS,
+  // Finance, Tools, Reports…) shown alongside the accounting apps. Accounting
+  // roles viewer/pending fall back to the student menu.
+  const erpRole: UserRole = role === "admin" ? "admin" : role === "accountant" ? "accountant" : "student";
+  const erpCategories = getMenuForRole(erpRole);
+
   return (
     <>
       <div className="fixed inset-0 z-40" onClick={onClose} />
-      <div className="absolute right-0 top-12 z-50 w-[288px] rounded-2xl border border-line bg-surface p-4 shadow-card">
+      <div className="absolute right-0 top-12 z-50 max-h-[80vh] w-[320px] overflow-y-auto rounded-2xl border border-line bg-surface p-4 shadow-card">
         <div className="mb-2 px-1 text-[11px] font-bold uppercase tracking-wider text-muted">Accounts</div>
         <div className="grid grid-cols-3 gap-1">
           {apps.map((a) => (
@@ -176,6 +184,28 @@ function AppsMenu({ role, email, onClose, onSignOut }: { role: Role; email?: str
             </Link>
           ))}
         </div>
+
+        {/* School ERP modules */}
+        {erpCategories.map((cat) => (
+          <div key={cat.title}>
+            <div className="my-3 border-t border-line" />
+            <div className="mb-2 px-1 text-[11px] font-bold uppercase tracking-wider text-muted">{cat.title}</div>
+            <div className="grid grid-cols-3 gap-1">
+              {cat.items.map((it) => {
+                const ItIcon = it.icon;
+                return (
+                  <Link key={it.href} href={it.href} onClick={onClose} className={tileCls}>
+                    <span className={cx("grid h-11 w-11 place-items-center rounded-2xl text-white", it.color)}>
+                      <ItIcon className="size-5" />
+                    </span>
+                    <span className="text-[11.5px] font-semibold leading-tight">{it.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+
         <div className="my-3 border-t border-line" />
         <div className="grid grid-cols-3 gap-1">
           <Link href="/" onClick={onClose} className={tileCls}>
