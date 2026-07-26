@@ -35,10 +35,29 @@ RLS to grant access, users must have `app_metadata.role` set (the
 your own staff). Your accounting RLS (`is_editor`, `current_user_role`,
 `is_member`) is untouched and keeps working.
 
-## Suggested apply order
-1. Root `migration-*.sql` files first (they build base ERP tables/policies).
-2. Then `migrations/*.sql` in **timestamp order** (filenames sort correctly).
-3. Storage buckets (`*_bucket.sql`, `migration-storage-photos.sql`) as needed.
+## Suggested apply order (CORRECTED)
+1. **`00-base-app-tables.sql` FIRST** — creates classes, students, attendance,
+   exams, exam_subjects, exam_scores (the core tables the app queries). This DDL
+   was extracted from the reference project's data file; the real roster seed was
+   dropped.
+2. The remaining root `migration-*.sql` files (staff-payments, monthly-salaries,
+   marked-by, attendance-requests, lms-notes, storage-photos, profile-fields…).
+3. Then `migrations/*.sql` in **timestamp order** (filenames sort correctly).
+
+## ⛔ Quarantined — `_review-do-not-run-as-is/`
+`migration-security-hardening.sql`, `-part-a`, `-part-b` were moved out of the run
+set. They **recreate `profiles` + `handle_new_user` + `on_auth_user_created`** with
+the reference project's model and would **overwrite your accounting auth** (which
+already creates a `profiles` row with role `pending`). The ERP tables don't need
+them — their RLS policies check the role inline. Do NOT run these as-is; port only
+anything you specifically need, by hand.
+
+## ⚠️ Role source — verify on staging
+The ERP table policies grant WRITE via `auth.jwt() -> 'user_metadata' ->> 'role'`
+(`admin`/`teacher`), but your sign-in flow (`/api/auth/verify-user`) stamps the role
+into **`app_metadata.role`**. So a user may be able to READ ERP data but not WRITE
+it until their role is also in `user_metadata`, OR the policies are changed to read
+`app_metadata`. Decide one approach and apply it consistently while testing on staging.
 
 ## Procedure
 1. In the Supabase dashboard, create a **branch / staging project** (or a DB copy).
