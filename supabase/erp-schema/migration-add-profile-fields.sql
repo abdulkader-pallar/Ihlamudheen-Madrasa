@@ -2,18 +2,18 @@
 -- Run this in Supabase SQL Editor (https://supabase.com/dashboard > SQL Editor)
 
 -- 1. Add missing columns
-ALTER TABLE public.users ADD COLUMN IF NOT EXISTS phone text;
-ALTER TABLE public.users ADD COLUMN IF NOT EXISTS bio text;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS phone text;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS bio text;
 
 -- 2. Add INSERT policy so upsert works for users saving their own profile
 DO $$
 BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM pg_policies
-    WHERE tablename = 'users' AND policyname = 'Users: insert own row'
+    WHERE tablename = 'profiles' AND policyname = 'Users: insert own row'
   ) THEN
     CREATE POLICY "Users: insert own row"
-      ON public.users FOR INSERT
+      ON public.profiles FOR INSERT
       WITH CHECK (auth.uid() = id);
   END IF;
 END
