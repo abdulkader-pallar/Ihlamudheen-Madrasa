@@ -13,10 +13,10 @@ CREATE POLICY "exam_scores: staff write"
   ON public.exam_scores
   FOR ALL TO authenticated
   USING (
-    (auth.jwt() -> 'user_metadata' ->> 'role') IN ('admin', 'teacher')
+    (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher')
   )
   WITH CHECK (
-    (auth.jwt() -> 'user_metadata' ->> 'role') IN ('admin', 'teacher')
+    (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher')
   );
 
 -- Same fix for exam_subjects (same pattern, same potential issue)
@@ -28,10 +28,10 @@ CREATE POLICY "exam_subjects: staff write"
   ON public.exam_subjects
   FOR ALL TO authenticated
   USING (
-    (auth.jwt() -> 'user_metadata' ->> 'role') IN ('admin', 'teacher')
+    (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher')
   )
   WITH CHECK (
-    (auth.jwt() -> 'user_metadata' ->> 'role') IN ('admin', 'teacher')
+    (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher')
   );
 
 -- Same fix for exams table
@@ -43,8 +43,8 @@ CREATE POLICY "exams: staff write"
   ON public.exams
   FOR ALL TO authenticated
   USING (
-    (auth.jwt() -> 'user_metadata' ->> 'role') IN ('admin', 'teacher')
+    (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher')
   )
   WITH CHECK (
-    (auth.jwt() -> 'user_metadata' ->> 'role') IN ('admin', 'teacher')
+    (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher')
   );

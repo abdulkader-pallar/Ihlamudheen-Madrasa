@@ -13,12 +13,12 @@
 -- ══════════════════════════════════════════════════════════
 
 -- Arrival time stored as "HH:MM" (24-hour), nullable — only set when recorded.
-ALTER TABLE public.attendance ADD COLUMN IF NOT EXISTS arrival_time TEXT;
+ALTER TABLE public.student_attendance ADD COLUMN IF NOT EXISTS arrival_time TEXT;
 
 -- Absence/late note column is referenced by the app; ensure it exists.
-ALTER TABLE public.attendance ADD COLUMN IF NOT EXISTS remarks TEXT;
+ALTER TABLE public.student_attendance ADD COLUMN IF NOT EXISTS remarks TEXT;
 
 -- Fast lookup of late records for the daily/monthly late-comer reports.
 CREATE INDEX IF NOT EXISTS idx_attendance_late
-  ON public.attendance(date)
+  ON public.student_attendance(date)
   WHERE status = 'late';

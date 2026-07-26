@@ -2,7 +2,7 @@
 -- SECURITY: move all role-based RLS off user-writable `user_metadata`.
 --
 -- PROBLEM (audit C3): every financial/grade policy keyed on
---   (auth.jwt() -> 'user_metadata' ->> 'role')
+--   (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role'))
 -- but `user_metadata` is writable by the user via
 --   supabase.auth.updateUser({ data: { role: 'admin' } })
 -- so any authenticated user could self-escalate and read/write payroll, fees,

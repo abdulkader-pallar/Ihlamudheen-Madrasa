@@ -301,7 +301,7 @@ export default function AttendancePage() {
 
   useEffect(() => {
     if (!useSupabase) return
-    const sub = db.subscribeToTable("attendance", () => { reloadAndReseed() })
+    const sub = db.subscribeToTable("student_attendance", () => { reloadAndReseed() })
     return () => { sub.unsubscribe() }
   }, [useSupabase, reloadAndReseed])
 

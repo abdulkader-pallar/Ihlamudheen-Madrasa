@@ -20,7 +20,7 @@ ALTER TABLE public.classes ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Anyone authenticated can read classes" ON public.classes FOR SELECT TO authenticated USING (true);
 CREATE POLICY "Admins and teachers can manage classes" ON public.classes FOR ALL TO authenticated
   USING (
-    (auth.jwt() -> 'user_metadata' ->> 'role') IN ('admin', 'teacher')
+    (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher')
   );
 
 -- 2. STUDENTS table
@@ -39,11 +39,11 @@ ALTER TABLE public.students ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Anyone authenticated can read students" ON public.students FOR SELECT TO authenticated USING (true);
 CREATE POLICY "Admins and teachers can manage students" ON public.students FOR ALL TO authenticated
   USING (
-    (auth.jwt() -> 'user_metadata' ->> 'role') IN ('admin', 'teacher')
+    (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher')
   );
 
 -- 3. ATTENDANCE table (one row per student per date)
-CREATE TABLE IF NOT EXISTS public.attendance (
+CREATE TABLE IF NOT EXISTS public.student_attendance (
   id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   class_id TEXT NOT NULL REFERENCES public.classes(id) ON DELETE CASCADE,
   student_id TEXT NOT NULL REFERENCES public.students(id) ON DELETE CASCADE,
@@ -53,14 +53,14 @@ CREATE TABLE IF NOT EXISTS public.attendance (
   UNIQUE(class_id, student_id, date)
 );
 
-CREATE INDEX idx_attendance_class_date ON public.attendance(class_id, date);
-CREATE INDEX idx_attendance_student ON public.attendance(student_id);
+CREATE INDEX idx_attendance_class_date ON public.student_attendance(class_id, date);
+CREATE INDEX idx_attendance_student ON public.student_attendance(student_id);
 
-ALTER TABLE public.attendance ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Anyone authenticated can read attendance" ON public.attendance FOR SELECT TO authenticated USING (true);
-CREATE POLICY "Admins and teachers can manage attendance" ON public.attendance FOR ALL TO authenticated
+ALTER TABLE public.student_attendance ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Anyone authenticated can read attendance" ON public.student_attendance FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Admins and teachers can manage attendance" ON public.student_attendance FOR ALL TO authenticated
   USING (
-    (auth.jwt() -> 'user_metadata' ->> 'role') IN ('admin', 'teacher')
+    (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher')
   );
 
 -- 4. EXAMS table (one row per exam)
@@ -79,7 +79,7 @@ ALTER TABLE public.exams ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Anyone authenticated can read exams" ON public.exams FOR SELECT TO authenticated USING (true);
 CREATE POLICY "Admins and teachers can manage exams" ON public.exams FOR ALL TO authenticated
   USING (
-    (auth.jwt() -> 'user_metadata' ->> 'role') IN ('admin', 'teacher')
+    (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher')
   );
 
 -- 5. EXAM_SUBJECTS table (subjects per exam)
@@ -96,7 +96,7 @@ ALTER TABLE public.exam_subjects ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Anyone authenticated can read exam subjects" ON public.exam_subjects FOR SELECT TO authenticated USING (true);
 CREATE POLICY "Admins and teachers can manage exam subjects" ON public.exam_subjects FOR ALL TO authenticated
   USING (
-    (auth.jwt() -> 'user_metadata' ->> 'role') IN ('admin', 'teacher')
+    (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher')
   );
 
 -- 6. EXAM_SCORES table (one row per student per subject per exam)
@@ -116,6 +116,6 @@ ALTER TABLE public.exam_scores ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Anyone authenticated can read exam scores" ON public.exam_scores FOR SELECT TO authenticated USING (true);
 CREATE POLICY "Admins and teachers can manage exam scores" ON public.exam_scores FOR ALL TO authenticated
   USING (
-    (auth.jwt() -> 'user_metadata' ->> 'role') IN ('admin', 'teacher')
+    (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher')
   );
 

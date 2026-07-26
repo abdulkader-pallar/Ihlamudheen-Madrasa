@@ -83,12 +83,12 @@ DROP POLICY IF EXISTS "Admin/accountant write salaries" ON public.monthly_salari
 
 CREATE POLICY "Admin/accountant read salaries"
   ON public.monthly_salaries FOR SELECT TO authenticated
-  USING ((auth.jwt() -> 'user_metadata' ->> 'role') IN ('admin', 'accountant'));
+  USING ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'accountant'));
 
 CREATE POLICY "Admin/accountant write salaries"
   ON public.monthly_salaries FOR ALL TO authenticated
-  USING ((auth.jwt() -> 'user_metadata' ->> 'role') IN ('admin', 'accountant'))
-  WITH CHECK ((auth.jwt() -> 'user_metadata' ->> 'role') IN ('admin', 'accountant'));
+  USING ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'accountant'))
+  WITH CHECK ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'accountant'));
 
 -- ── Enable realtime ──────────────────────────────────────
 ALTER PUBLICATION supabase_realtime ADD TABLE public.monthly_salaries;

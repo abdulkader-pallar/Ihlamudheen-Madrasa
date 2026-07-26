@@ -15,7 +15,7 @@ export async function checkSupabase(): Promise<boolean> {
     // Probe the attendance table (the primary table we actually use for student data).
     // Previous code probed `classes` which may not exist if only partial migrations ran.
     // If the attendance table doesn't exist yet, try a generic health check.
-    const { error } = await supabase.from("attendance").select("class_id").limit(1)
+    const { error } = await supabase.from("student_attendance").select("class_id").limit(1)
     if (error && error.code === "42P01") {
       // Table doesn't exist — Supabase is reachable but not migrated yet
       // Still mark as ready so saves can create the table via upsert
@@ -81,7 +81,7 @@ export async function renameClass(classId: string, name: string, schedule?: stri
 export async function removeClass(classId: string) {
   // Best-effort cascade: delete attendance + grades + students first in case FK cascade isn't set.
   // If FK ON DELETE CASCADE is configured, these are no-ops but still safe.
-  await supabase.from("attendance").delete().eq("class_id", classId)
+  await supabase.from("student_attendance").delete().eq("class_id", classId)
   await supabase.from("grades").delete().eq("class_id", classId)
   await supabase.from("students").delete().eq("class_id", classId)
   return supabase.from("classes").delete().eq("id", classId)
@@ -147,7 +147,7 @@ export async function addStudent(classId: string, id: string, name: string, roll
  *  have attendance rows for the old class_id but a different class_id now. */
 export async function fetchStudentsFromAttendance(classId: string): Promise<Student[]> {
   const { data: attRows } = await supabase
-    .from("attendance")
+    .from("student_attendance")
     .select("student_id")
     .eq("class_id", classId)
   if (!attRows?.length) return []
@@ -189,7 +189,7 @@ function mapStudent(s: Record<string, string>): Student {
 
 export async function removeStudent(studentId: string) {
   // Clean up child rows first (attendance + grade entries per student).
-  await supabase.from("attendance").delete().eq("student_id", studentId)
+  await supabase.from("student_attendance").delete().eq("student_id", studentId)
   await supabase.from("grades").delete().eq("student_id", studentId)
   // Select the deleted rows so we can tell whether anything was actually
   // removed. A delete blocked by row-level security removes 0 rows but
@@ -488,7 +488,7 @@ export async function reconcileRoster(
  *  step after reconcileRoster. Cascades to attendance + grade rows. */
 export async function bulkRemoveStudents(ids: string[]): Promise<{ removed: number; error?: unknown }> {
   if (ids.length === 0) return { removed: 0 }
-  await supabase.from("attendance").delete().in("student_id", ids)
+  await supabase.from("student_attendance").delete().in("student_id", ids)
   await supabase.from("grades").delete().in("student_id", ids)
   const { error } = await supabase.from("students").delete().in("id", ids)
   if (error) return { removed: 0, error }
@@ -823,7 +823,7 @@ export async function fetchAttendance(classId: string, month: string): Promise<A
   const endDate = `${y}-${String(m).padStart(2, "0")}-${new Date(y, m, 0).getDate()}`
 
   const { data, error } = await supabase
-    .from("attendance")
+    .from("student_attendance")
     .select("*")
     .eq("class_id", classId)
     .gte("date", startDate)
@@ -853,7 +853,7 @@ export async function fetchAttendance(classId: string, month: string): Promise<A
 
 export async function fetchAllAttendance(classId: string): Promise<AttendanceRecord[]> {
   const { data, error } = await supabase
-    .from("attendance")
+    .from("student_attendance")
     .select("*")
     .eq("class_id", classId)
     .order("date")
@@ -892,7 +892,7 @@ export async function fetchAllAttendanceBatch(
   // arrival_time is a newer column; if the DB hasn't been migrated yet the
   // select errors, so retry without it rather than dropping all attendance.
   const runBatch = (cols: string) =>
-    supabase.from("attendance").select(cols).in("class_id", classIds).order("date")
+    supabase.from("student_attendance").select(cols).in("class_id", classIds).order("date")
   let resp = await runBatch("class_id, student_id, date, status, remarks, arrival_time")
   if (resp.error) resp = await runBatch("class_id, student_id, date, status, remarks")
   const { data, error } = resp
@@ -984,7 +984,7 @@ export async function fetchAllGradesBatch(
  * absent, late and arrival times) for that class+date.
  */
 export async function deleteAttendanceForDate(classId: string, date: string) {
-  return supabase.from("attendance").delete().eq("class_id", classId).eq("date", date)
+  return supabase.from("student_attendance").delete().eq("class_id", classId).eq("date", date)
 }
 
 export async function saveAttendance(
@@ -1022,7 +1022,7 @@ export async function saveAttendance(
   if (rows.length === 0) return { error: null }
 
   const upsert = (rs: Array<Record<string, unknown>>) =>
-    supabase.from("attendance").upsert(rs, { onConflict: "class_id,student_id,date" })
+    supabase.from("student_attendance").upsert(rs, { onConflict: "class_id,student_id,date" })
 
   // Try with the full payload first.
   let result = await upsert(rows)
@@ -1050,7 +1050,7 @@ export async function saveAttendance(
  */
 export async function fetchTodayMarkers(dateStr: string): Promise<Record<string, string>> {
   const { data, error } = await supabase
-    .from("attendance")
+    .from("student_attendance")
     .select("class_id, marked_by")
     .eq("date", dateStr)
     .not("marked_by", "is", null)
@@ -1068,7 +1068,7 @@ export async function fetchTodayMarkers(dateStr: string): Promise<Record<string,
  */
 export async function fetchAttendanceMarkers(classId: string): Promise<Record<string, string>> {
   const { data, error } = await supabase
-    .from("attendance")
+    .from("student_attendance")
     .select("date, marked_by")
     .eq("class_id", classId)
     .not("marked_by", "is", null)
@@ -1094,7 +1094,7 @@ export async function fetchAllClassLastMarkers(
 ): Promise<Record<string, { date: string; by: string }>> {
   if (classIds.length === 0) return {}
   const { data, error } = await supabase
-    .from("attendance")
+    .from("student_attendance")
     .select("class_id, date, marked_by")
     .in("class_id", classIds)
     .not("marked_by", "is", null)
@@ -2068,7 +2068,7 @@ export async function fetchAllClassesAttendanceForMonth(
   // arrival_time is a newer column; if the DB hasn't been migrated yet the
   // select errors, so retry without it rather than dropping all attendance.
   const runMonth = (cols: string) =>
-    supabase.from("attendance").select(cols)
+    supabase.from("student_attendance").select(cols)
       .in("class_id", classIds).gte("date", startDate).lte("date", endDate)
   let resp = await runMonth("class_id, student_id, date, status, remarks, arrival_time")
   if (resp.error) resp = await runMonth("class_id, student_id, date, status, remarks")

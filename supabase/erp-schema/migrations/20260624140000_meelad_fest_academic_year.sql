@@ -31,8 +31,8 @@ DO $$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'app_settings' AND policyname = 'settings_admin_write') THEN
     CREATE POLICY "settings_admin_write" ON public.app_settings
       FOR ALL TO authenticated
-      USING   ((auth.jwt() -> 'user_metadata' ->> 'role') = 'admin')
-      WITH CHECK ((auth.jwt() -> 'user_metadata' ->> 'role') = 'admin');
+      USING   ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) = 'admin')
+      WITH CHECK ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) = 'admin');
   END IF;
 END $$;
 

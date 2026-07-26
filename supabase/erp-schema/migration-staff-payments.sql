@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS public.teachers (
 ALTER TABLE public.teachers ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Anyone authenticated can read teachers" ON public.teachers FOR SELECT TO authenticated USING (true);
 CREATE POLICY "Admins can manage teachers" ON public.teachers FOR ALL TO authenticated
-  USING ((auth.jwt() -> 'user_metadata' ->> 'role') IN ('admin'));
+  USING ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin'));
 
 -- 2. TEACHER_ASSIGNMENTS (which teacher teaches which class)
 CREATE TABLE IF NOT EXISTS public.teacher_assignments (
@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS public.teacher_assignments (
 ALTER TABLE public.teacher_assignments ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Anyone authenticated can read assignments" ON public.teacher_assignments FOR SELECT TO authenticated USING (true);
 CREATE POLICY "Admins can manage assignments" ON public.teacher_assignments FOR ALL TO authenticated
-  USING ((auth.jwt() -> 'user_metadata' ->> 'role') IN ('admin'));
+  USING ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin'));
 
 -- 3. STAFF_ATTENDANCE (one row per teacher per date per session)
 CREATE TABLE IF NOT EXISTS public.staff_attendance (
@@ -50,7 +50,7 @@ CREATE INDEX idx_staff_attendance_teacher ON public.staff_attendance(teacher_id)
 ALTER TABLE public.staff_attendance ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Anyone authenticated can read staff attendance" ON public.staff_attendance FOR SELECT TO authenticated USING (true);
 CREATE POLICY "Admin and accountant can manage staff attendance" ON public.staff_attendance FOR ALL TO authenticated
-  USING ((auth.jwt() -> 'user_metadata' ->> 'role') IN ('admin', 'accountant'));
+  USING ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'accountant'));
 
 -- 4. PAYMENTS table
 CREATE TABLE IF NOT EXISTS public.payments (
@@ -76,9 +76,9 @@ ALTER TABLE public.payments ADD COLUMN IF NOT EXISTS ta_paid_date DATE;
 
 ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Admin and accountant can read payments" ON public.payments FOR SELECT TO authenticated
-  USING ((auth.jwt() -> 'user_metadata' ->> 'role') IN ('admin', 'accountant'));
+  USING ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'accountant'));
 CREATE POLICY "Admin and accountant can manage payments" ON public.payments FOR ALL TO authenticated
-  USING ((auth.jwt() -> 'user_metadata' ->> 'role') IN ('admin', 'accountant'));
+  USING ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'accountant'));
 
 
 -- ══════════════════════════════════════════════════════════

@@ -79,7 +79,7 @@ CREATE POLICY "auth read fee_payment_audit"
 
 CREATE POLICY "admin insert fee_payment_audit"
   ON public.fee_payment_audit FOR INSERT TO authenticated
-  WITH CHECK ((auth.jwt() -> 'user_metadata' ->> 'role') IN ('admin', 'accountant'));
+  WITH CHECK ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'accountant'));
 
 -- 9. Tighten fee_payments policy: writes restricted to admin/accountant,
 --    and rows can never be UPDATE'd or DELETE'd from the client. Corrections
@@ -94,7 +94,7 @@ CREATE POLICY "auth read fee_payments"
 
 CREATE POLICY "admin insert fee_payments"
   ON public.fee_payments FOR INSERT TO authenticated
-  WITH CHECK ((auth.jwt() -> 'user_metadata' ->> 'role') IN ('admin', 'accountant'));
+  WITH CHECK ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'accountant'));
 
 -- Note: deliberately NO update/delete policy — ledger entries are immutable.
 

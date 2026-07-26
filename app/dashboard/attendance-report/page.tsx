@@ -97,7 +97,7 @@ export default function AttendanceReportPage() {
 
   // Realtime — refresh when attendance changes from any device
   useEffect(() => {
-    const sub = db.subscribeToTable("attendance", () => load())
+    const sub = db.subscribeToTable("student_attendance", () => load())
     return () => sub.unsubscribe()
   }, [load])
 

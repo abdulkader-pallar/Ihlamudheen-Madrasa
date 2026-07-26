@@ -91,7 +91,7 @@ export default function LateComersPage() {
   useEffect(() => { load() }, [load])
 
   useEffect(() => {
-    const sub = db.subscribeToTable("attendance", () => load())
+    const sub = db.subscribeToTable("student_attendance", () => load())
     return () => sub.unsubscribe()
   }, [load])
 

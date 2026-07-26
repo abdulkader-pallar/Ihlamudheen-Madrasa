@@ -5,10 +5,10 @@
 
 -- 1. Add marked_by column to attendance table
 --    Tracks which teacher/admin last marked each attendance record.
-ALTER TABLE public.attendance ADD COLUMN IF NOT EXISTS marked_by TEXT;
+ALTER TABLE public.student_attendance ADD COLUMN IF NOT EXISTS marked_by TEXT;
 
 -- Index for fast lookups when displaying "last marked by" on class cards
-CREATE INDEX IF NOT EXISTS idx_attendance_marked_by ON public.attendance(class_id, date);
+CREATE INDEX IF NOT EXISTS idx_attendance_marked_by ON public.student_attendance(class_id, date);
 
 -- 2. Add missing transport_allowance and ta_remarks columns to staff_attendance
 --    (These were used in code but missing from the original migration SQL)

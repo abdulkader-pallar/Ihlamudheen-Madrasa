@@ -323,7 +323,7 @@ export default function MadrasaTeacherPage() {
 
   useEffect(() => {
     if (!useSupabase) return
-    const subAttendance = db.subscribeToTable("attendance", () => { reloadFromSupabase() })
+    const subAttendance = db.subscribeToTable("student_attendance", () => { reloadFromSupabase() })
     const subStudents = db.subscribeToTable("students", () => { reloadFromSupabase() })
     return () => {
       subAttendance.unsubscribe()

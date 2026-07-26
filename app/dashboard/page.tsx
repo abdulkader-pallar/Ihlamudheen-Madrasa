@@ -965,7 +965,7 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!supabaseReady) return
     const subs = [
-      db.subscribeToTable("attendance", refreshAttendance),
+      db.subscribeToTable("student_attendance", refreshAttendance),
       db.subscribeToTable("students", refreshAttendance),
       db.subscribeToTable("classes", refreshAttendance),
     ]

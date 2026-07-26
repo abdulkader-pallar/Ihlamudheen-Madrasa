@@ -12,7 +12,7 @@ CREATE POLICY "exam_scores_select"
   ON public.exam_scores
   FOR SELECT TO authenticated
   USING (
-    (auth.jwt() -> 'user_metadata' ->> 'role') IN ('admin', 'teacher')
+    (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher')
     OR student_id = (auth.jwt() -> 'user_metadata' ->> 'student_id')
     OR student_id = auth.uid()::text
   );
@@ -44,8 +44,8 @@ CREATE POLICY "settings_select"
 CREATE POLICY "settings_admin_write"
   ON public.app_settings
   FOR ALL TO authenticated
-  USING   ((auth.jwt() -> 'user_metadata' ->> 'role') = 'admin')
-  WITH CHECK ((auth.jwt() -> 'user_metadata' ->> 'role') = 'admin');
+  USING   ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) = 'admin')
+  WITH CHECK ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) = 'admin');
 
 -- Seed defaults (idempotent)
 INSERT INTO public.app_settings (key, value)
