@@ -97,10 +97,10 @@ export default function ProfilePage() {
 
       if (error) throw error
 
-      // Also try to update the users table name (best-effort, won't break if it fails)
+      // Also try to update the profile name (best-effort, won't break if it fails)
       await supabase
-        .from("users")
-        .update({ name: fullName })
+        .from("profiles")
+        .update({ full_name: fullName })
         .eq("id", user.id)
         .then(() => {}) // ignore result
 

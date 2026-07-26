@@ -157,12 +157,12 @@ export async function POST(req: NextRequest) {
         if (error) {
           results.push({ name: account.name, role: account.role, status: "error", message: error.message })
         } else if (data.user) {
-          // Also insert into users table
-          await adminClient.from("users").upsert({
+          // Ensure a profile row exists (the handle_new_user trigger normally
+          // creates it; upsert full_name here as a backstop). Role is assigned
+          // via auth metadata above, not the profiles enum.
+          await adminClient.from("profiles").upsert({
             id: data.user.id,
-            name: account.name,
-            email: account.email,
-            role: account.role,
+            full_name: account.name,
           }, { onConflict: "id" })
 
           results.push({ name: account.name, role: account.role, status: "created", tempPassword: newPw })

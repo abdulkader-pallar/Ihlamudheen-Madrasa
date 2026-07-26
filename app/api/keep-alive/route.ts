@@ -29,7 +29,7 @@ export async function GET(request: Request) {
   try {
     // Simple query to keep the database active
     const { count, error } = await supabase
-      .from("users")
+      .from("profiles")
       .select("*", { count: "exact", head: true })
 
     if (error) throw error
