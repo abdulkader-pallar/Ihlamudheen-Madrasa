@@ -3,21 +3,20 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { BarChart3, Globe, LayoutDashboard, LayoutGrid, ListOrdered, LogOut, Menu, SlidersHorizontal, Users } from "lucide-react";
+import { BarChart3, Fingerprint, Globe, LayoutDashboard, LayoutGrid, ListOrdered, LogOut, Menu, SlidersHorizontal, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Toaster } from "@/components/ui/toast";
 import { DataProvider } from "./data-context";
-import { isEditor, type Profile, type Role } from "@/lib/types";
+import { isEditor, SUPERADMIN_EMAIL, type Profile, type Role } from "@/lib/types";
 import { cx } from "@/lib/ui";
-
-const SUPERADMIN_EMAIL = "cryptolife676@gmail.com";
 
 const NAV: { href: string; label: string; icon: LucideIcon; exact?: boolean; editor?: boolean; admin?: boolean; superadmin?: boolean }[] = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { href: "/admin/transactions", label: "Transactions", icon: ListOrdered },
   { href: "/admin/reports", label: "Reports", icon: BarChart3 },
+  { href: "/admin/attendance", label: "Staff Attendance", icon: Fingerprint },
   { href: "/admin/manage", label: "Categories & Funds", icon: SlidersHorizontal, editor: true },
   { href: "/admin/users", label: "Users & Roles", icon: Users, superadmin: true },
 ];
@@ -26,6 +25,7 @@ const TITLES: Record<string, string> = {
   "/admin": "Dashboard",
   "/admin/transactions": "Transactions",
   "/admin/reports": "Reports",
+  "/admin/attendance": "Staff Attendance",
   "/admin/manage": "Categories & Funds",
   "/admin/users": "Users & Roles",
 };
@@ -151,6 +151,7 @@ function AppsMenu({ role, email, onClose, onSignOut }: { role: Role; email?: str
     { label: "Dashboard", href: "/admin", icon: LayoutDashboard, color: "var(--brand)" },
     { label: "Transactions", href: "/admin/transactions", icon: ListOrdered, color: "#3b82f6" },
     { label: "Reports", href: "/admin/reports", icon: BarChart3, color: "var(--accent)" },
+    { label: "Attendance", href: "/admin/attendance", icon: Fingerprint, color: "#0ea5e9" },
     ...(editor ? [{ label: "Categories", href: "/admin/manage", icon: SlidersHorizontal, color: "var(--good)" }] : []),
     ...(superadmin ? [{ label: "Users", href: "/admin/users", icon: Users, color: "#8b5cf6" }] : []),
   ];

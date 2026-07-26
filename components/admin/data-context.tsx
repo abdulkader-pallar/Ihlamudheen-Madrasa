@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import type { Category, Fund, Profile, Transaction } from "@/lib/types";
+import type { Category, Fund, Profile, Staff, Transaction } from "@/lib/types";
 
 type SupabaseClient = ReturnType<typeof createClient>;
 
@@ -11,8 +11,10 @@ type DataCtx = {
   categories: Category[];
   funds: Fund[];
   transactions: Transaction[];
+  staff: Staff[];
   loading: boolean;
   reload: () => Promise<void>;
+  reloadStaff: () => Promise<void>;
   supabase: SupabaseClient;
 };
 
@@ -29,7 +31,13 @@ export function DataProvider({ profile, children }: { profile: Profile; children
   const [categories, setCategories] = useState<Category[]>([]);
   const [funds, setFunds] = useState<Fund[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [staff, setStaff] = useState<Staff[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const reloadStaff = useCallback(async () => {
+    const { data } = await supabase.from("staff").select("*").order("name");
+    setStaff((data as Staff[]) || []);
+  }, [supabase]);
 
   const reload = useCallback(async () => {
     const [c, f, t] = await Promise.all([
@@ -40,19 +48,20 @@ export function DataProvider({ profile, children }: { profile: Profile; children
         .select("*")
         .order("occurred_on", { ascending: false })
         .order("created_at", { ascending: false }),
+      reloadStaff(),
     ]);
     setCategories((c.data as Category[]) || []);
     setFunds((f.data as Fund[]) || []);
     setTransactions((t.data as Transaction[]) || []);
     setLoading(false);
-  }, [supabase]);
+  }, [supabase, reloadStaff]);
 
   useEffect(() => {
     reload();
   }, [reload]);
 
   return (
-    <Ctx.Provider value={{ profile, categories, funds, transactions, loading, reload, supabase }}>
+    <Ctx.Provider value={{ profile, categories, funds, transactions, staff, loading, reload, reloadStaff, supabase }}>
       {children}
     </Ctx.Provider>
   );

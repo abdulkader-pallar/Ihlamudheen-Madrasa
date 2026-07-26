@@ -1,0 +1,20 @@
+CREATE TABLE IF NOT EXISTS staff_members (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  email TEXT,
+  phone TEXT,
+  fingerprint_device_id INTEGER,
+  pay_type TEXT NOT NULL,
+  dual_pay_type TEXT,
+  fixed_monthly_rate INTEGER,
+  daily_rate INTEGER,
+  transport_allowance BOOLEAN DEFAULT false,
+  class_ids TEXT[] DEFAULT '{}',
+  teaches_cibis BOOLEAN DEFAULT false,
+  teaches_hadia BOOLEAN DEFAULT false,
+  is_non_teaching BOOLEAN DEFAULT false,
+  role_label TEXT,
+  auth_user_id UUID,
+  status TEXT DEFAULT 'active',
+  created_at TIMESTAMPTZ DEFAULT now()
+);

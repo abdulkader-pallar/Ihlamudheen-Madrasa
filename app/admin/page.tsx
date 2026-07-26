@@ -1,9 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { CalendarDays, GraduationCap, Plus, TrendingDown, TrendingUp, Wallet } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { CalendarDays, Fingerprint, GraduationCap, Plus, TrendingDown, TrendingUp, Wallet } from "lucide-react";
 import { useData } from "@/components/admin/data-context";
 import { EmptyState, Panel, Pill, Spinner, StatCard } from "@/components/admin/ui";
+import type { Attendance } from "@/lib/types";
 import { CategoryDonut, MonthlyChart } from "@/components/admin/charts";
 import { TxDialog } from "@/components/admin/tx-dialog";
 import { fmt, fmtDate, monthKey, monthLabel, round2 } from "@/lib/format";
@@ -102,6 +104,10 @@ export default function DashboardPage() {
         </Panel>
       </div>
 
+      <div className="mb-5">
+        <TodayAttendancePanel />
+      </div>
+
       <Panel title="Recent transactions">
         {recent.length === 0 ? (
           <EmptyState>No transactions yet.</EmptyState>
@@ -137,5 +143,65 @@ export default function DashboardPage() {
 
       {adding && <TxDialog onClose={() => setAdding(false)} />}
     </div>
+  );
+}
+
+function TodayAttendancePanel() {
+  const { staff, supabase } = useData();
+  const [rows, setRows] = useState<Attendance[] | null>(null);
+  const today = new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD, local
+
+  useEffect(() => {
+    let cancelled = false;
+    supabase
+      .from("attendance")
+      .select("id, staff_id, work_date, check_in, check_out, source, remarks")
+      .eq("work_date", today)
+      .then(({ data }) => { if (!cancelled) setRows((data as Attendance[]) || []); });
+    return () => { cancelled = true; };
+  }, [supabase, today]);
+
+  const active = useMemo(() => staff.filter((s) => s.active), [staff]);
+  const byStaff = useMemo(() => Object.fromEntries((rows || []).map((r) => [r.staff_id, r])), [rows]);
+  const present = active.filter((s) => byStaff[s.id]?.check_in).length;
+  const hhmm = (t: string | null | undefined) => (t ? t.slice(0, 5) : "—");
+
+  return (
+    <Panel
+      title="Staff attendance — today"
+      action={<Link href="/admin/attendance" className="text-[13px] font-bold text-brand hover:underline">View all</Link>}
+    >
+      {rows === null ? (
+        <div className="py-6"><Spinner /></div>
+      ) : active.length === 0 ? (
+        <EmptyState>No staff added yet. Add staff in the Attendance page to track in/out times.</EmptyState>
+      ) : (
+        <>
+          <div className="mb-3 flex items-center gap-2 text-[13.5px] font-semibold text-muted">
+            <Fingerprint size={17} className="text-brand" />
+            <span className="text-ink">{present}</span> of {active.length} present
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {active.slice(0, 8).map((s) => {
+              const a = byStaff[s.id];
+              return (
+                <div key={s.id} className="flex items-center justify-between gap-3 rounded-xl border border-line bg-surface-2 px-3.5 py-2">
+                  <div className="min-w-0">
+                    <div className="truncate text-[13.5px] font-bold">{s.name}</div>
+                    <div className="text-[11.5px] text-muted">{s.designation || "Staff"}</div>
+                  </div>
+                  <div className="tnum shrink-0 text-right text-[12.5px]">
+                    <span className={a?.check_in ? "text-good" : "text-muted"}>{hhmm(a?.check_in)}</span>
+                    <span className="text-muted"> → </span>
+                    <span className={a?.check_out ? "text-ink" : "text-muted"}>{hhmm(a?.check_out)}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          {active.length > 8 && <p className="mt-2.5 text-[12px] text-muted">+{active.length - 8} more on the Attendance page</p>}
+        </>
+      )}
+    </Panel>
   );
 }

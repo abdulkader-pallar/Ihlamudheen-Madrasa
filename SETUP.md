@@ -3,8 +3,10 @@
 This guide gets the private accounting portal (`/admin/`) running securely on top
 of your existing Supabase + Vercel projects. Follow it once; it takes ~15 minutes.
 
-> **Golden rule:** only ever use the **public "anon" key** in the website.
-> Never paste the **`service_role` / secret key** into any file or into a chat.
+> **Golden rule:** the **public "anon" key** is the only Supabase key that ships to
+> the browser. The **`service_role` / secret key** is used only by server-side API
+> routes (adding users, receiving device punches) — keep it in `.env.local` / Vercel
+> env vars and never paste it into client code or a chat.
 
 ---
 
@@ -25,9 +27,15 @@ of your existing Supabase + Vercel projects. Follow it once; it takes ~15 minute
 
 ## 3. Create the staff accounts
 
-1. **Dashboard → Authentication → Users → Add user** (set an email + a strong password).
-2. Repeat for each staff member (accountants, viewers).
-   - Every new user automatically gets a profile with the **`viewer`** role (read-only).
+Two ways to add a login account:
+
+- **From the website (easiest):** sign in as the super-admin
+  (`cryptolife676@gmail.com`) → **Users & Roles → Add a user**. Set name, email,
+  a temporary password, and the role; they can sign in immediately. This requires
+  the service-role secret to be set (see [§8](#8-adding-users--staff-attendance-zkteco)).
+- **From Supabase:** **Dashboard → Authentication → Users → Add user** (email + a
+  strong password). New users get the **`pending`** role until an admin assigns one
+  in **Users & Roles**.
 
 ## 4. Assign roles
 
@@ -85,6 +93,40 @@ Supabase **Table Editor → transactions**.
 Access is protected by **server-side middleware + Supabase Auth + Row Level
 Security** — not by hiding the URL. The `/admin` routes are also marked
 `noindex`.
+
+## 8. Adding users & staff attendance (ZKTeco)
+
+These two features need **two server-only secrets**. Set them in `.env.local`
+(local dev) **and** in **Vercel → Settings → Environment Variables** (Production +
+Preview). Never expose them to the browser.
+
+| Env var | What it's for | Where to get it |
+|---------|---------------|-----------------|
+| `SUPABASE_SERVICE_ROLE_KEY`* | Create login accounts from the website; write device punches | Supabase → Project Settings → API → `service_role` secret |
+| `ZK_API_KEY` | Shared password between the ZKTeco agent and the website | Any long random string you choose |
+
+\* This project also accepts the existing name `NEXT_SECRET_SUPABASE_SECRET_KEY` —
+either works.
+
+**Set up attendance:**
+
+1. Run [`supabase/staff-attendance.sql`](supabase/staff-attendance.sql) in the
+   **SQL Editor** (creates the `staff` and `attendance` tables + RLS). Safe to re-run.
+2. In the website, go to **Staff Attendance → Manage staff** and add each teacher /
+   employee. Set their **Device user id** to the enrolment number the ZKTeco device
+   shows for that person.
+3. Put [`zk_agent.py`](zk_agent.py) on the **office PC** (same network as the device):
+   ```bash
+   pip install pyzk requests
+   ```
+   Edit the top of the file: set `DEVICE_IP` (the device's IP) and `ZK_API_KEY`
+   (same value as the Vercel env var). Run `python zk_agent.py`. To run it
+   automatically, add it as a Windows **Scheduled Task** at log-on (use `pythonw.exe`
+   to run silently). See the comments inside the file.
+4. Punches now flow: **device → agent → `/api/zk-attendance` → Supabase**, and each
+   staff member's in/out time shows on the **Dashboard** and **Staff Attendance** page.
+   The first punch of the day is the check-in; a later punch becomes the check-out.
+   Editors can also enter or correct times by hand on the Attendance page.
 
 ---
 

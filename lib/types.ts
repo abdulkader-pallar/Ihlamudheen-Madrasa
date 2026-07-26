@@ -35,6 +35,29 @@ export interface Transaction {
   created_at: string;
 }
 
+export interface Staff {
+  id: string;
+  name: string;
+  designation: string | null;
+  device_user_id: number | null;
+  phone: string | null;
+  active: boolean;
+  created_at: string;
+}
+
+export interface Attendance {
+  id: string;
+  staff_id: string;
+  work_date: string;
+  check_in: string | null;
+  check_out: string | null;
+  source: "device" | "manual";
+  remarks: string | null;
+}
+
+// The single super-admin account allowed to create login accounts.
+export const SUPERADMIN_EMAIL = "cryptolife676@gmail.com";
+
 export const isEditor = (role?: Role | null) => role === "admin" || role === "accountant";
 
 // Only these roles may enter the portal at all. "pending" (and anyone with no

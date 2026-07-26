@@ -1,12 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { ShieldCheck, UserRound } from "lucide-react";
+import { ShieldCheck, UserPlus, UserRound } from "lucide-react";
 import { useData } from "@/components/admin/data-context";
 import { EmptyState, Panel, Spinner } from "@/components/admin/ui";
 import { toast } from "@/components/ui/toast";
-import { cx, inputClass } from "@/lib/ui";
-import type { Role } from "@/lib/types";
+import { btn, cx, inputClass, labelClass } from "@/lib/ui";
+import { SUPERADMIN_EMAIL, type Role } from "@/lib/types";
 
 type Row = { id: string; full_name: string | null; role: Role; created_at: string };
 
@@ -21,6 +21,7 @@ export default function UsersPage() {
   const { profile, supabase } = useData();
   const [rows, setRows] = useState<Row[] | null>(null);
   const isAdmin = profile.role === "admin";
+  const isSuperadmin = profile.email === SUPERADMIN_EMAIL;
 
   const load = useCallback(async () => {
     const { data, error } = await supabase
@@ -72,12 +73,15 @@ export default function UsersPage() {
         <div className="flex items-start gap-3">
           <ShieldCheck size={20} className="mt-0.5 shrink-0 text-brand" />
           <p className="text-[14px] text-muted">
-            Roles control what each staff member can do. To add a new person, create their account in{" "}
-            <b className="text-ink">Supabase → Authentication → Users</b> — they appear here as a viewer, then you
-            assign their role.
+            Roles control what each staff member can do.
+            {isSuperadmin
+              ? " Add a new person below — they can sign in immediately with the email and password you set."
+              : " New accounts are created by the super-admin; you can adjust their roles here."}
           </p>
         </div>
       </Panel>
+
+      {isSuperadmin && <AddUserForm onCreated={load} />}
 
       <Panel title={`Staff (${rows.length})`}>
         {rows.length === 0 ? (
@@ -126,5 +130,67 @@ export default function UsersPage() {
         )}
       </Panel>
     </div>
+  );
+}
+
+function AddUserForm({ onCreated }: { onCreated: () => void }) {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState<Role>("accountant");
+  const [busy, setBusy] = useState(false);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      const res = await fetch("/api/admin/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password, role }),
+      });
+      const data = await res.json();
+      if (!res.ok) { toast(data.error || "Could not create user.", true); return; }
+      toast(`${name} added as ${role}.`);
+      setName(""); setEmail(""); setPassword(""); setRole("accountant");
+      onCreated();
+    } catch {
+      toast("Network error — please try again.", true);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Panel title="Add a user">
+      <form onSubmit={submit} className="grid gap-3.5 sm:grid-cols-2">
+        <div>
+          <label className={labelClass}>Full name</label>
+          <input value={name} onChange={(e) => setName(e.target.value)} required className={inputClass} placeholder="e.g. Muhammed Ali" />
+        </div>
+        <div>
+          <label className={labelClass}>Email</label>
+          <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" required autoComplete="off" className={inputClass} placeholder="person@example.com" />
+        </div>
+        <div>
+          <label className={labelClass}>Temporary password</label>
+          <input value={password} onChange={(e) => setPassword(e.target.value)} type="text" required minLength={8} autoComplete="new-password" className={inputClass} placeholder="At least 8 characters" />
+        </div>
+        <div>
+          <label className={labelClass}>Role</label>
+          <select value={role} onChange={(e) => setRole(e.target.value as Role)} className={inputClass}>
+            <option value="admin">Admin — full access, incl. user roles</option>
+            <option value="accountant">Accountant — add &amp; edit records</option>
+            <option value="viewer">Viewer — read-only reports</option>
+          </select>
+        </div>
+        <div className="sm:col-span-2">
+          <button type="submit" disabled={busy} className={btn({ variant: "primary" })}>
+            <UserPlus size={16} /> {busy ? "Creating…" : "Create user"}
+          </button>
+          <p className="mt-2 text-[12px] text-muted">Share the email &amp; password with the person; they can change the password after signing in.</p>
+        </div>
+      </form>
+    </Panel>
   );
 }
