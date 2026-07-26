@@ -37,7 +37,9 @@ CREATE TABLE IF NOT EXISTS public.classes (
 );
 
 ALTER TABLE public.classes ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Anyone authenticated can read classes" ON public.classes;
 CREATE POLICY "Anyone authenticated can read classes" ON public.classes FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Admins and teachers can manage classes" ON public.classes;
 CREATE POLICY "Admins and teachers can manage classes" ON public.classes FOR ALL TO authenticated
   USING (
     (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher')
@@ -53,10 +55,12 @@ CREATE TABLE IF NOT EXISTS public.students (
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
-CREATE INDEX idx_students_class ON public.students(class_id);
+CREATE INDEX IF NOT EXISTS idx_students_class ON public.students(class_id);
 
 ALTER TABLE public.students ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Anyone authenticated can read students" ON public.students;
 CREATE POLICY "Anyone authenticated can read students" ON public.students FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Admins and teachers can manage students" ON public.students;
 CREATE POLICY "Admins and teachers can manage students" ON public.students FOR ALL TO authenticated
   USING (
     (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher')
@@ -73,11 +77,13 @@ CREATE TABLE IF NOT EXISTS public.student_attendance (
   UNIQUE(class_id, student_id, date)
 );
 
-CREATE INDEX idx_attendance_class_date ON public.student_attendance(class_id, date);
-CREATE INDEX idx_attendance_student ON public.student_attendance(student_id);
+CREATE INDEX IF NOT EXISTS idx_attendance_class_date ON public.student_attendance(class_id, date);
+CREATE INDEX IF NOT EXISTS idx_attendance_student ON public.student_attendance(student_id);
 
 ALTER TABLE public.student_attendance ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Anyone authenticated can read attendance" ON public.student_attendance;
 CREATE POLICY "Anyone authenticated can read attendance" ON public.student_attendance FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Admins and teachers can manage attendance" ON public.student_attendance;
 CREATE POLICY "Admins and teachers can manage attendance" ON public.student_attendance FOR ALL TO authenticated
   USING (
     (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher')
@@ -93,10 +99,12 @@ CREATE TABLE IF NOT EXISTS public.exams (
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
-CREATE INDEX idx_exams_class ON public.exams(class_id);
+CREATE INDEX IF NOT EXISTS idx_exams_class ON public.exams(class_id);
 
 ALTER TABLE public.exams ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Anyone authenticated can read exams" ON public.exams;
 CREATE POLICY "Anyone authenticated can read exams" ON public.exams FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Admins and teachers can manage exams" ON public.exams;
 CREATE POLICY "Admins and teachers can manage exams" ON public.exams FOR ALL TO authenticated
   USING (
     (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher')
@@ -110,10 +118,12 @@ CREATE TABLE IF NOT EXISTS public.exam_subjects (
   max_score NUMERIC NOT NULL DEFAULT 50
 );
 
-CREATE INDEX idx_exam_subjects_exam ON public.exam_subjects(exam_id);
+CREATE INDEX IF NOT EXISTS idx_exam_subjects_exam ON public.exam_subjects(exam_id);
 
 ALTER TABLE public.exam_subjects ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Anyone authenticated can read exam subjects" ON public.exam_subjects;
 CREATE POLICY "Anyone authenticated can read exam subjects" ON public.exam_subjects FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Admins and teachers can manage exam subjects" ON public.exam_subjects;
 CREATE POLICY "Admins and teachers can manage exam subjects" ON public.exam_subjects FOR ALL TO authenticated
   USING (
     (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher')
@@ -129,11 +139,13 @@ CREATE TABLE IF NOT EXISTS public.exam_scores (
   UNIQUE(exam_id, student_id, subject_id)
 );
 
-CREATE INDEX idx_exam_scores_exam ON public.exam_scores(exam_id);
-CREATE INDEX idx_exam_scores_student ON public.exam_scores(student_id);
+CREATE INDEX IF NOT EXISTS idx_exam_scores_exam ON public.exam_scores(exam_id);
+CREATE INDEX IF NOT EXISTS idx_exam_scores_student ON public.exam_scores(student_id);
 
 ALTER TABLE public.exam_scores ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Anyone authenticated can read exam scores" ON public.exam_scores;
 CREATE POLICY "Anyone authenticated can read exam scores" ON public.exam_scores FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Admins and teachers can manage exam scores" ON public.exam_scores;
 CREATE POLICY "Admins and teachers can manage exam scores" ON public.exam_scores FOR ALL TO authenticated
   USING (
     (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher')
@@ -155,8 +167,8 @@ BEGIN
     SELECT 1 FROM pg_policies
     WHERE tablename = 'users' AND policyname = 'Users: insert own row'
   ) THEN
-    CREATE POLICY "Users: insert own row"
-      ON public.users FOR INSERT
+    DROP POLICY IF EXISTS "Users: insert own row" ON public.users;
+    CREATE POLICY "Users: insert own row" ON public.users FOR INSERT
       WITH CHECK (auth.uid() = id);
   END IF;
 END
@@ -175,8 +187,8 @@ BEGIN
     SELECT 1 FROM pg_policies
     WHERE tablename = 'objects' AND policyname = 'Avatar upload'
   ) THEN
-    CREATE POLICY "Avatar upload"
-      ON storage.objects FOR INSERT
+    DROP POLICY IF EXISTS "Avatar upload" ON storage.objects;
+    CREATE POLICY "Avatar upload" ON storage.objects FOR INSERT
       WITH CHECK (
         bucket_id = 'avatars'
         AND auth.uid()::text = (storage.foldername(name))[1]
@@ -188,8 +200,8 @@ BEGIN
     SELECT 1 FROM pg_policies
     WHERE tablename = 'objects' AND policyname = 'Avatar update'
   ) THEN
-    CREATE POLICY "Avatar update"
-      ON storage.objects FOR UPDATE
+    DROP POLICY IF EXISTS "Avatar update" ON storage.objects;
+    CREATE POLICY "Avatar update" ON storage.objects FOR UPDATE
       USING (
         bucket_id = 'avatars'
         AND auth.uid()::text = (storage.foldername(name))[1]
@@ -201,8 +213,8 @@ BEGIN
     SELECT 1 FROM pg_policies
     WHERE tablename = 'objects' AND policyname = 'Avatar public read'
   ) THEN
-    CREATE POLICY "Avatar public read"
-      ON storage.objects FOR SELECT
+    DROP POLICY IF EXISTS "Avatar public read" ON storage.objects;
+    CREATE POLICY "Avatar public read" ON storage.objects FOR SELECT
       USING (bucket_id = 'avatars');
   END IF;
 END
@@ -235,25 +247,25 @@ CREATE INDEX IF NOT EXISTS idx_assessments_teacher
 ALTER TABLE public.assessments ENABLE ROW LEVEL SECURITY;
 
 -- Public (anon) + authenticated read so students can see assessments
-CREATE POLICY "Anyone can read assessments"
-  ON public.assessments FOR SELECT
+DROP POLICY IF EXISTS "Anyone can read assessments" ON public.assessments;
+CREATE POLICY "Anyone can read assessments" ON public.assessments FOR SELECT
   TO anon, authenticated
   USING (true);
 
 -- Authenticated (teachers/admins) can create/update/delete.
 -- Ownership enforced in application layer.
-CREATE POLICY "Authenticated users can insert assessments"
-  ON public.assessments FOR INSERT
+DROP POLICY IF EXISTS "Authenticated users can insert assessments" ON public.assessments;
+CREATE POLICY "Authenticated users can insert assessments" ON public.assessments FOR INSERT
   TO authenticated
   WITH CHECK (true);
 
-CREATE POLICY "Authenticated users can update assessments"
-  ON public.assessments FOR UPDATE
+DROP POLICY IF EXISTS "Authenticated users can update assessments" ON public.assessments;
+CREATE POLICY "Authenticated users can update assessments" ON public.assessments FOR UPDATE
   TO authenticated
   USING (true);
 
-CREATE POLICY "Authenticated users can delete assessments"
-  ON public.assessments FOR DELETE
+DROP POLICY IF EXISTS "Authenticated users can delete assessments" ON public.assessments;
+CREATE POLICY "Authenticated users can delete assessments" ON public.assessments FOR DELETE
   TO authenticated
   USING (true);
 
@@ -282,18 +294,18 @@ CREATE TABLE IF NOT EXISTS public.staff_attendance_requests (
 -- Allow authenticated users to insert/read their own requests
 ALTER TABLE public.staff_attendance_requests ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Teachers can submit own requests"
-  ON public.staff_attendance_requests FOR INSERT
+DROP POLICY IF EXISTS "Teachers can submit own requests" ON public.staff_attendance_requests;
+CREATE POLICY "Teachers can submit own requests" ON public.staff_attendance_requests FOR INSERT
   TO authenticated
   WITH CHECK (true);
 
-CREATE POLICY "Teachers can view own requests"
-  ON public.staff_attendance_requests FOR SELECT
+DROP POLICY IF EXISTS "Teachers can view own requests" ON public.staff_attendance_requests;
+CREATE POLICY "Teachers can view own requests" ON public.staff_attendance_requests FOR SELECT
   TO authenticated
   USING (true);
 
-CREATE POLICY "Admins can update requests"
-  ON public.staff_attendance_requests FOR UPDATE
+DROP POLICY IF EXISTS "Admins can update requests" ON public.staff_attendance_requests;
+CREATE POLICY "Admins can update requests" ON public.staff_attendance_requests FOR UPDATE
   TO authenticated
   USING (true);
 
@@ -314,19 +326,19 @@ DROP POLICY IF EXISTS "Admin and accountant can manage staff attendance" ON publ
 DROP POLICY IF EXISTS "Anyone authenticated can read staff attendance" ON public.staff_attendance;
 
 -- Allow all authenticated users to read staff attendance
-CREATE POLICY "Authenticated users can read staff attendance"
-  ON public.staff_attendance FOR SELECT
+DROP POLICY IF EXISTS "Authenticated users can read staff attendance" ON public.staff_attendance;
+CREATE POLICY "Authenticated users can read staff attendance" ON public.staff_attendance FOR SELECT
   TO authenticated
   USING (true);
 
 -- Allow all authenticated users to insert/update (admin check is done in app layer)
-CREATE POLICY "Authenticated users can upsert staff attendance"
-  ON public.staff_attendance FOR INSERT
+DROP POLICY IF EXISTS "Authenticated users can upsert staff attendance" ON public.staff_attendance;
+CREATE POLICY "Authenticated users can upsert staff attendance" ON public.staff_attendance FOR INSERT
   TO authenticated
   WITH CHECK (true);
 
-CREATE POLICY "Authenticated users can update staff attendance"
-  ON public.staff_attendance FOR UPDATE
+DROP POLICY IF EXISTS "Authenticated users can update staff attendance" ON public.staff_attendance;
+CREATE POLICY "Authenticated users can update staff attendance" ON public.staff_attendance FOR UPDATE
   TO authenticated
   USING (true)
   WITH CHECK (true);
@@ -335,16 +347,16 @@ CREATE POLICY "Authenticated users can update staff attendance"
 DROP POLICY IF EXISTS "Admin and accountant can read payments" ON public.payments;
 DROP POLICY IF EXISTS "Admin and accountant can manage payments" ON public.payments;
 
-CREATE POLICY "Authenticated users can read payments"
-  ON public.payments FOR SELECT
+DROP POLICY IF EXISTS "Authenticated users can read payments" ON public.payments;
+CREATE POLICY "Authenticated users can read payments" ON public.payments FOR SELECT
   TO authenticated USING (true);
 
-CREATE POLICY "Authenticated users can insert payments"
-  ON public.payments FOR INSERT
+DROP POLICY IF EXISTS "Authenticated users can insert payments" ON public.payments;
+CREATE POLICY "Authenticated users can insert payments" ON public.payments FOR INSERT
   TO authenticated WITH CHECK (true);
 
-CREATE POLICY "Authenticated users can update payments"
-  ON public.payments FOR UPDATE
+DROP POLICY IF EXISTS "Authenticated users can update payments" ON public.payments;
+CREATE POLICY "Authenticated users can update payments" ON public.payments FOR UPDATE
   TO authenticated USING (true) WITH CHECK (true);
 
 -- 4. Ensure staff_attendance_requests table exists (for teacher self-reporting)
@@ -371,16 +383,16 @@ DROP POLICY IF EXISTS "Teachers can submit own requests" ON public.staff_attenda
 DROP POLICY IF EXISTS "Teachers can view own requests" ON public.staff_attendance_requests;
 DROP POLICY IF EXISTS "Admins can update requests" ON public.staff_attendance_requests;
 
-CREATE POLICY "Authenticated can insert requests"
-  ON public.staff_attendance_requests FOR INSERT
+DROP POLICY IF EXISTS "Authenticated can insert requests" ON public.staff_attendance_requests;
+CREATE POLICY "Authenticated can insert requests" ON public.staff_attendance_requests FOR INSERT
   TO authenticated WITH CHECK (true);
 
-CREATE POLICY "Authenticated can read requests"
-  ON public.staff_attendance_requests FOR SELECT
+DROP POLICY IF EXISTS "Authenticated can read requests" ON public.staff_attendance_requests;
+CREATE POLICY "Authenticated can read requests" ON public.staff_attendance_requests FOR SELECT
   TO authenticated USING (true);
 
-CREATE POLICY "Authenticated can update requests"
-  ON public.staff_attendance_requests FOR UPDATE
+DROP POLICY IF EXISTS "Authenticated can update requests" ON public.staff_attendance_requests;
+CREATE POLICY "Authenticated can update requests" ON public.staff_attendance_requests FOR UPDATE
   TO authenticated USING (true) WITH CHECK (true);
 
 
@@ -409,26 +421,26 @@ CREATE INDEX IF NOT EXISTS idx_lms_notes_teacher
 ALTER TABLE public.lms_notes ENABLE ROW LEVEL SECURITY;
 
 -- Students (anonymous) and teachers can read all notes
-CREATE POLICY "Anyone can read lms notes"
-  ON public.lms_notes FOR SELECT
+DROP POLICY IF EXISTS "Anyone can read lms notes" ON public.lms_notes;
+CREATE POLICY "Anyone can read lms notes" ON public.lms_notes FOR SELECT
   TO anon, authenticated
   USING (true);
 
 -- Authenticated users (teachers, admins) can add notes
-CREATE POLICY "Authenticated users can insert notes"
-  ON public.lms_notes FOR INSERT
+DROP POLICY IF EXISTS "Authenticated users can insert notes" ON public.lms_notes;
+CREATE POLICY "Authenticated users can insert notes" ON public.lms_notes FOR INSERT
   TO authenticated
   WITH CHECK (true);
 
 -- Authenticated users can delete notes (ownership enforced in app layer)
-CREATE POLICY "Authenticated users can delete notes"
-  ON public.lms_notes FOR DELETE
+DROP POLICY IF EXISTS "Authenticated users can delete notes" ON public.lms_notes;
+CREATE POLICY "Authenticated users can delete notes" ON public.lms_notes FOR DELETE
   TO authenticated
   USING (true);
 
 -- Authenticated users can update notes (ownership enforced in app layer)
-CREATE POLICY "Authenticated users can update notes"
-  ON public.lms_notes FOR UPDATE
+DROP POLICY IF EXISTS "Authenticated users can update notes" ON public.lms_notes;
+CREATE POLICY "Authenticated users can update notes" ON public.lms_notes FOR UPDATE
   TO authenticated
   USING (true);
 
@@ -539,12 +551,12 @@ ALTER TABLE public.monthly_salaries ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Admin/accountant read salaries"  ON public.monthly_salaries;
 DROP POLICY IF EXISTS "Admin/accountant write salaries" ON public.monthly_salaries;
 
-CREATE POLICY "Admin/accountant read salaries"
-  ON public.monthly_salaries FOR SELECT TO authenticated
+DROP POLICY IF EXISTS "Admin/accountant read salaries" ON public.monthly_salaries;
+CREATE POLICY "Admin/accountant read salaries" ON public.monthly_salaries FOR SELECT TO authenticated
   USING ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'accountant'));
 
-CREATE POLICY "Admin/accountant write salaries"
-  ON public.monthly_salaries FOR ALL TO authenticated
+DROP POLICY IF EXISTS "Admin/accountant write salaries" ON public.monthly_salaries;
+CREATE POLICY "Admin/accountant write salaries" ON public.monthly_salaries FOR ALL TO authenticated
   USING ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'accountant'))
   WITH CHECK ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'accountant'));
 
@@ -568,7 +580,9 @@ CREATE TABLE IF NOT EXISTS public.teachers (
 );
 
 ALTER TABLE public.teachers ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Anyone authenticated can read teachers" ON public.teachers;
 CREATE POLICY "Anyone authenticated can read teachers" ON public.teachers FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Admins can manage teachers" ON public.teachers;
 CREATE POLICY "Admins can manage teachers" ON public.teachers FOR ALL TO authenticated
   USING ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin'));
 
@@ -581,7 +595,9 @@ CREATE TABLE IF NOT EXISTS public.teacher_assignments (
 );
 
 ALTER TABLE public.teacher_assignments ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Anyone authenticated can read assignments" ON public.teacher_assignments;
 CREATE POLICY "Anyone authenticated can read assignments" ON public.teacher_assignments FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Admins can manage assignments" ON public.teacher_assignments;
 CREATE POLICY "Admins can manage assignments" ON public.teacher_assignments FOR ALL TO authenticated
   USING ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin'));
 
@@ -599,11 +615,13 @@ CREATE TABLE IF NOT EXISTS public.staff_attendance (
   UNIQUE(teacher_id, date, session)
 );
 
-CREATE INDEX idx_staff_attendance_date ON public.staff_attendance(date);
-CREATE INDEX idx_staff_attendance_teacher ON public.staff_attendance(teacher_id);
+CREATE INDEX IF NOT EXISTS idx_staff_attendance_date ON public.staff_attendance(date);
+CREATE INDEX IF NOT EXISTS idx_staff_attendance_teacher ON public.staff_attendance(teacher_id);
 
 ALTER TABLE public.staff_attendance ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Anyone authenticated can read staff attendance" ON public.staff_attendance;
 CREATE POLICY "Anyone authenticated can read staff attendance" ON public.staff_attendance FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Admin and accountant can manage staff attendance" ON public.staff_attendance;
 CREATE POLICY "Admin and accountant can manage staff attendance" ON public.staff_attendance FOR ALL TO authenticated
   USING ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'accountant'));
 
@@ -630,8 +648,10 @@ ALTER TABLE public.payments ADD COLUMN IF NOT EXISTS ta_paid BOOLEAN DEFAULT fal
 ALTER TABLE public.payments ADD COLUMN IF NOT EXISTS ta_paid_date DATE;
 
 ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Admin and accountant can read payments" ON public.payments;
 CREATE POLICY "Admin and accountant can read payments" ON public.payments FOR SELECT TO authenticated
   USING ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'accountant'));
+DROP POLICY IF EXISTS "Admin and accountant can manage payments" ON public.payments;
 CREATE POLICY "Admin and accountant can manage payments" ON public.payments FOR ALL TO authenticated
   USING ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'accountant'));
 
@@ -667,27 +687,27 @@ ON CONFLICT (id) DO UPDATE SET
 -- Only authenticated users can upload/read/delete
 
 -- Allow authenticated users to upload photos
-CREATE POLICY "Authenticated users can upload student photos"
-ON storage.objects FOR INSERT
+DROP POLICY IF EXISTS "Authenticated users can upload student photos" ON storage.objects;
+CREATE POLICY "Authenticated users can upload student photos" ON storage.objects FOR INSERT
 TO authenticated
 WITH CHECK (bucket_id = 'student-photos');
 
 -- Allow authenticated users to read photos (via signed URLs)
-CREATE POLICY "Authenticated users can read student photos"
-ON storage.objects FOR SELECT
+DROP POLICY IF EXISTS "Authenticated users can read student photos" ON storage.objects;
+CREATE POLICY "Authenticated users can read student photos" ON storage.objects FOR SELECT
 TO authenticated
 USING (bucket_id = 'student-photos');
 
 -- Allow authenticated users to update (overwrite) photos
-CREATE POLICY "Authenticated users can update student photos"
-ON storage.objects FOR UPDATE
+DROP POLICY IF EXISTS "Authenticated users can update student photos" ON storage.objects;
+CREATE POLICY "Authenticated users can update student photos" ON storage.objects FOR UPDATE
 TO authenticated
 USING (bucket_id = 'student-photos')
 WITH CHECK (bucket_id = 'student-photos');
 
 -- Only admins and instructors can delete photos
-CREATE POLICY "Admin/instructor can delete student photos"
-ON storage.objects FOR DELETE
+DROP POLICY IF EXISTS "Admin/instructor can delete student photos" ON storage.objects;
+CREATE POLICY "Admin/instructor can delete student photos" ON storage.objects FOR DELETE
 TO authenticated
 USING (
   bucket_id = 'student-photos'
@@ -793,8 +813,8 @@ CREATE INDEX IF NOT EXISTS idx_ssr_roll
 ALTER TABLE public.student_self_reports ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "student_self_reports_public" ON public.student_self_reports;
-CREATE POLICY "student_self_reports_public"
-  ON public.student_self_reports
+DROP POLICY IF EXISTS "student_self_reports_public" ON public.student_self_reports;
+CREATE POLICY "student_self_reports_public" ON public.student_self_reports
   FOR ALL
   USING (true)
   WITH CHECK (true);
@@ -825,33 +845,33 @@ CREATE TRIGGER trg_ssr_updated_at
 DROP POLICY IF EXISTS "student_self_reports_public" ON public.student_self_reports;
 
 -- 1. Anon can read all rows (teacher dashboard fetches via anon key)
-CREATE POLICY "ssr_anon_select"
-  ON public.student_self_reports
+DROP POLICY IF EXISTS "ssr_anon_select" ON public.student_self_reports;
+CREATE POLICY "ssr_anon_select" ON public.student_self_reports
   FOR SELECT TO anon
   USING (true);
 
 -- 2. Anon can insert new rows (student portal upsert)
-CREATE POLICY "ssr_anon_insert"
-  ON public.student_self_reports
+DROP POLICY IF EXISTS "ssr_anon_insert" ON public.student_self_reports;
+CREATE POLICY "ssr_anon_insert" ON public.student_self_reports
   FOR INSERT TO anon
   WITH CHECK (true);
 
 -- 3. Anon can update existing rows (student portal upsert on conflict)
-CREATE POLICY "ssr_anon_update"
-  ON public.student_self_reports
+DROP POLICY IF EXISTS "ssr_anon_update" ON public.student_self_reports;
+CREATE POLICY "ssr_anon_update" ON public.student_self_reports
   FOR UPDATE TO anon
   USING (true)
   WITH CHECK (true);
 
 -- 4. Only service_role can delete (admin cleanup via server-side client)
-CREATE POLICY "ssr_service_delete"
-  ON public.student_self_reports
+DROP POLICY IF EXISTS "ssr_service_delete" ON public.student_self_reports;
+CREATE POLICY "ssr_service_delete" ON public.student_self_reports
   FOR DELETE TO service_role
   USING (true);
 
 -- 5. Service role has full access (for server-side operations)
-CREATE POLICY "ssr_service_all"
-  ON public.student_self_reports
+DROP POLICY IF EXISTS "ssr_service_all" ON public.student_self_reports;
+CREATE POLICY "ssr_service_all" ON public.student_self_reports
   FOR ALL TO service_role
   USING (true)
   WITH CHECK (true);
@@ -893,26 +913,26 @@ CREATE INDEX IF NOT EXISTS idx_tm_class_week
 ALTER TABLE public.teacher_marks ENABLE ROW LEVEL SECURITY;
 
 -- Authenticated users with teacher/admin role can read all marks
-CREATE POLICY "tm_auth_select"
-  ON public.teacher_marks
+DROP POLICY IF EXISTS "tm_auth_select" ON public.teacher_marks;
+CREATE POLICY "tm_auth_select" ON public.teacher_marks
   FOR SELECT TO authenticated
   USING (true);
 
 -- Authenticated users can insert/update (app-level role check via canEdit)
-CREATE POLICY "tm_auth_insert"
-  ON public.teacher_marks
+DROP POLICY IF EXISTS "tm_auth_insert" ON public.teacher_marks;
+CREATE POLICY "tm_auth_insert" ON public.teacher_marks
   FOR INSERT TO authenticated
   WITH CHECK (true);
 
-CREATE POLICY "tm_auth_update"
-  ON public.teacher_marks
+DROP POLICY IF EXISTS "tm_auth_update" ON public.teacher_marks;
+CREATE POLICY "tm_auth_update" ON public.teacher_marks
   FOR UPDATE TO authenticated
   USING (true)
   WITH CHECK (true);
 
 -- Only service_role can delete
-CREATE POLICY "tm_service_delete"
-  ON public.teacher_marks
+DROP POLICY IF EXISTS "tm_service_delete" ON public.teacher_marks;
+CREATE POLICY "tm_service_delete" ON public.teacher_marks
   FOR DELETE TO service_role
   USING (true);
 
@@ -931,18 +951,18 @@ CREATE TABLE IF NOT EXISTS public.teacher_custom_activities (
 
 ALTER TABLE public.teacher_custom_activities ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "tca_auth_select"
-  ON public.teacher_custom_activities
+DROP POLICY IF EXISTS "tca_auth_select" ON public.teacher_custom_activities;
+CREATE POLICY "tca_auth_select" ON public.teacher_custom_activities
   FOR SELECT TO authenticated
   USING (true);
 
-CREATE POLICY "tca_auth_insert"
-  ON public.teacher_custom_activities
+DROP POLICY IF EXISTS "tca_auth_insert" ON public.teacher_custom_activities;
+CREATE POLICY "tca_auth_insert" ON public.teacher_custom_activities
   FOR INSERT TO authenticated
   WITH CHECK (true);
 
-CREATE POLICY "tca_auth_delete"
-  ON public.teacher_custom_activities
+DROP POLICY IF EXISTS "tca_auth_delete" ON public.teacher_custom_activities;
+CREATE POLICY "tca_auth_delete" ON public.teacher_custom_activities
   FOR DELETE TO authenticated
   USING (true);
 
@@ -978,8 +998,8 @@ CREATE INDEX IF NOT EXISTS idx_cca_class
 ALTER TABLE public.class_custom_activities ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "cca_public" ON public.class_custom_activities;
-CREATE POLICY "cca_public"
-  ON public.class_custom_activities
+DROP POLICY IF EXISTS "cca_public" ON public.class_custom_activities;
+CREATE POLICY "cca_public" ON public.class_custom_activities
   FOR ALL
   USING (true)
   WITH CHECK (true);
@@ -1011,8 +1031,8 @@ CREATE TABLE IF NOT EXISTS public.class_activity_config (
 ALTER TABLE public.class_activity_config ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "cac_public" ON public.class_activity_config;
-CREATE POLICY "cac_public"
-  ON public.class_activity_config
+DROP POLICY IF EXISTS "cac_public" ON public.class_activity_config;
+CREATE POLICY "cac_public" ON public.class_activity_config
   FOR ALL
   USING (true)
   WITH CHECK (true);
@@ -1057,16 +1077,16 @@ CREATE TABLE IF NOT EXISTS public.fee_payments (
   UNIQUE(student_id, month)
 );
 
-CREATE INDEX idx_fee_payments_month ON public.fee_payments(month);
-CREATE INDEX idx_fee_payments_student ON public.fee_payments(student_id);
+CREATE INDEX IF NOT EXISTS idx_fee_payments_month ON public.fee_payments(month);
+CREATE INDEX IF NOT EXISTS idx_fee_payments_student ON public.fee_payments(student_id);
 
 ALTER TABLE public.fee_payments ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "auth users read fee_payments"
-  ON public.fee_payments FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "auth users read fee_payments" ON public.fee_payments;
+CREATE POLICY "auth users read fee_payments" ON public.fee_payments FOR SELECT TO authenticated USING (true);
 
-CREATE POLICY "admins manage fee_payments"
-  ON public.fee_payments FOR ALL TO authenticated
+DROP POLICY IF EXISTS "admins manage fee_payments" ON public.fee_payments;
+CREATE POLICY "admins manage fee_payments" ON public.fee_payments FOR ALL TO authenticated
   USING ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher'));
 
 
@@ -1089,18 +1109,18 @@ ON CONFLICT (id) DO UPDATE
       allowed_mime_types= ARRAY['image/jpeg','image/jpg','image/png','image/webp'];
 
 -- Anon can upload (students are unauthenticated)
-CREATE POLICY "avatar_anon_upload"
-  ON storage.objects FOR INSERT TO anon
+DROP POLICY IF EXISTS "avatar_anon_upload" ON storage.objects;
+CREATE POLICY "avatar_anon_upload" ON storage.objects FOR INSERT TO anon
   WITH CHECK (bucket_id = 'student-avatars');
 
 -- Anon can update/replace their own avatar
-CREATE POLICY "avatar_anon_update"
-  ON storage.objects FOR UPDATE TO anon
+DROP POLICY IF EXISTS "avatar_anon_update" ON storage.objects;
+CREATE POLICY "avatar_anon_update" ON storage.objects FOR UPDATE TO anon
   USING (bucket_id = 'student-avatars');
 
 -- Anyone can read (teachers see via public URL)
-CREATE POLICY "avatar_public_read"
-  ON storage.objects FOR SELECT TO public
+DROP POLICY IF EXISTS "avatar_public_read" ON storage.objects;
+CREATE POLICY "avatar_public_read" ON storage.objects FOR SELECT TO public
   USING (bucket_id = 'student-avatars');
 
 
@@ -1143,18 +1163,18 @@ END $$;
 -- submissions appear to vanish after a refresh.
 -- ============================================================
 
-CREATE POLICY "ssr_auth_select"
-  ON public.student_self_reports
+DROP POLICY IF EXISTS "ssr_auth_select" ON public.student_self_reports;
+CREATE POLICY "ssr_auth_select" ON public.student_self_reports
   FOR SELECT TO authenticated
   USING (true);
 
-CREATE POLICY "ssr_auth_insert"
-  ON public.student_self_reports
+DROP POLICY IF EXISTS "ssr_auth_insert" ON public.student_self_reports;
+CREATE POLICY "ssr_auth_insert" ON public.student_self_reports
   FOR INSERT TO authenticated
   WITH CHECK (true);
 
-CREATE POLICY "ssr_auth_update"
-  ON public.student_self_reports
+DROP POLICY IF EXISTS "ssr_auth_update" ON public.student_self_reports;
+CREATE POLICY "ssr_auth_update" ON public.student_self_reports
   FOR UPDATE TO authenticated
   USING (true)
   WITH CHECK (true);
@@ -1224,14 +1244,14 @@ CREATE TRIGGER trg_staff_updated_at
 ALTER TABLE public.staff_members ENABLE ROW LEVEL SECURITY;
 
 -- Authenticated users (teachers/admin) can read all staff
-CREATE POLICY "staff_members_auth_select"
-  ON public.staff_members
+DROP POLICY IF EXISTS "staff_members_auth_select" ON public.staff_members;
+CREATE POLICY "staff_members_auth_select" ON public.staff_members
   FOR SELECT TO authenticated
   USING (true);
 
 -- Only service_role (server-side API) can insert / update / delete
-CREATE POLICY "staff_members_service_write"
-  ON public.staff_members
+DROP POLICY IF EXISTS "staff_members_service_write" ON public.staff_members;
+CREATE POLICY "staff_members_service_write" ON public.staff_members
   FOR ALL TO service_role
   USING (true)
   WITH CHECK (true);
@@ -1276,8 +1296,8 @@ DROP POLICY IF EXISTS "Anyone authenticated can read exam scores" ON public.exam
 -- 2. Student-scoped read policy:
 --    • admin / teacher can read everything
 --    • a student can only read their own scores
-CREATE POLICY "exam_scores_select"
-  ON public.exam_scores
+DROP POLICY IF EXISTS "exam_scores_select" ON public.exam_scores;
+CREATE POLICY "exam_scores_select" ON public.exam_scores
   FOR SELECT TO authenticated
   USING (
     (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher')
@@ -1286,8 +1306,7 @@ CREATE POLICY "exam_scores_select"
   );
 
 -- 3. Ensure scores cannot be negative
-ALTER TABLE public.exam_scores
-  ADD CONSTRAINT IF NOT EXISTS chk_score_non_negative CHECK (score >= 0);
+DO $do$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_score_non_negative') THEN ALTER TABLE public.exam_scores ADD CONSTRAINT chk_score_non_negative CHECK (score >= 0); END IF; END $do$;
 
 -- ============================================================
 -- App-wide settings table (key/value)
@@ -1303,14 +1322,14 @@ CREATE TABLE IF NOT EXISTS public.app_settings (
 ALTER TABLE public.app_settings ENABLE ROW LEVEL SECURITY;
 
 -- Any authenticated user can read settings
-CREATE POLICY "settings_select"
-  ON public.app_settings
+DROP POLICY IF EXISTS "settings_select" ON public.app_settings;
+CREATE POLICY "settings_select" ON public.app_settings
   FOR SELECT TO authenticated
   USING (true);
 
 -- Only admins can write settings
-CREATE POLICY "settings_admin_write"
-  ON public.app_settings
+DROP POLICY IF EXISTS "settings_admin_write" ON public.app_settings;
+CREATE POLICY "settings_admin_write" ON public.app_settings
   FOR ALL TO authenticated
   USING   ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) = 'admin')
   WITH CHECK ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) = 'admin');
@@ -1421,11 +1440,11 @@ ALTER TABLE public.fee_payment_audit ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "auth read fee_payment_audit"    ON public.fee_payment_audit;
 DROP POLICY IF EXISTS "admin insert fee_payment_audit" ON public.fee_payment_audit;
 
-CREATE POLICY "auth read fee_payment_audit"
-  ON public.fee_payment_audit FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "auth read fee_payment_audit" ON public.fee_payment_audit;
+CREATE POLICY "auth read fee_payment_audit" ON public.fee_payment_audit FOR SELECT TO authenticated USING (true);
 
-CREATE POLICY "admin insert fee_payment_audit"
-  ON public.fee_payment_audit FOR INSERT TO authenticated
+DROP POLICY IF EXISTS "admin insert fee_payment_audit" ON public.fee_payment_audit;
+CREATE POLICY "admin insert fee_payment_audit" ON public.fee_payment_audit FOR INSERT TO authenticated
   WITH CHECK ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'accountant'));
 
 -- 9. Tighten fee_payments policy: writes restricted to admin/accountant,
@@ -1436,11 +1455,11 @@ DROP POLICY IF EXISTS "auth users read fee_payments"   ON public.fee_payments;
 DROP POLICY IF EXISTS "auth read fee_payments"         ON public.fee_payments;
 DROP POLICY IF EXISTS "admin insert fee_payments"      ON public.fee_payments;
 
-CREATE POLICY "auth read fee_payments"
-  ON public.fee_payments FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "auth read fee_payments" ON public.fee_payments;
+CREATE POLICY "auth read fee_payments" ON public.fee_payments FOR SELECT TO authenticated USING (true);
 
-CREATE POLICY "admin insert fee_payments"
-  ON public.fee_payments FOR INSERT TO authenticated
+DROP POLICY IF EXISTS "admin insert fee_payments" ON public.fee_payments;
+CREATE POLICY "admin insert fee_payments" ON public.fee_payments FOR INSERT TO authenticated
   WITH CHECK ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'accountant'));
 
 -- Note: deliberately NO update/delete policy — ledger entries are immutable.
@@ -1478,8 +1497,8 @@ DROP POLICY IF EXISTS "Admins and teachers can manage exam scores" ON public.exa
 DROP POLICY IF EXISTS "exam_scores: staff manage"                  ON public.exam_scores;
 DROP POLICY IF EXISTS "exam_scores: staff write"                   ON public.exam_scores;
 
-CREATE POLICY "exam_scores: staff write"
-  ON public.exam_scores
+DROP POLICY IF EXISTS "exam_scores: staff write" ON public.exam_scores;
+CREATE POLICY "exam_scores: staff write" ON public.exam_scores
   FOR ALL TO authenticated
   USING (
     (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher')
@@ -1493,8 +1512,8 @@ DROP POLICY IF EXISTS "Admins and teachers can manage exam subjects" ON public.e
 DROP POLICY IF EXISTS "exam_subjects: staff manage"                  ON public.exam_subjects;
 DROP POLICY IF EXISTS "exam_subjects: staff write"                   ON public.exam_subjects;
 
-CREATE POLICY "exam_subjects: staff write"
-  ON public.exam_subjects
+DROP POLICY IF EXISTS "exam_subjects: staff write" ON public.exam_subjects;
+CREATE POLICY "exam_subjects: staff write" ON public.exam_subjects
   FOR ALL TO authenticated
   USING (
     (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher')
@@ -1508,8 +1527,8 @@ DROP POLICY IF EXISTS "Admins and teachers can manage exams" ON public.exams;
 DROP POLICY IF EXISTS "exams: staff manage"                  ON public.exams;
 DROP POLICY IF EXISTS "exams: staff write"                   ON public.exams;
 
-CREATE POLICY "exams: staff write"
-  ON public.exams
+DROP POLICY IF EXISTS "exams: staff write" ON public.exams;
+CREATE POLICY "exams: staff write" ON public.exams
   FOR ALL TO authenticated
   USING (
     (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher')
@@ -1582,12 +1601,12 @@ DO $$ BEGIN
     DROP POLICY IF EXISTS "Admin/accountant read salaries"  ON public.monthly_salaries;
     DROP POLICY IF EXISTS "Admin/accountant write salaries" ON public.monthly_salaries;
 
-    CREATE POLICY "Admin/accountant read salaries"
-      ON public.monthly_salaries FOR SELECT TO authenticated
+    DROP POLICY IF EXISTS "Admin/accountant read salaries" ON public.monthly_salaries;
+    CREATE POLICY "Admin/accountant read salaries" ON public.monthly_salaries FOR SELECT TO authenticated
       USING (public.app_role() IN ('admin', 'accountant'));
 
-    CREATE POLICY "Admin/accountant write salaries"
-      ON public.monthly_salaries FOR ALL TO authenticated
+    DROP POLICY IF EXISTS "Admin/accountant write salaries" ON public.monthly_salaries;
+    CREATE POLICY "Admin/accountant write salaries" ON public.monthly_salaries FOR ALL TO authenticated
       USING (public.app_role() IN ('admin', 'accountant'))
       WITH CHECK (public.app_role() IN ('admin', 'accountant'));
   END IF;
@@ -1599,8 +1618,8 @@ DO $$ BEGIN
     DROP POLICY IF EXISTS "admins manage fee_payments"   ON public.fee_payments;
     DROP POLICY IF EXISTS "admin insert fee_payments"    ON public.fee_payments;
 
-    CREATE POLICY "admin insert fee_payments"
-      ON public.fee_payments FOR INSERT TO authenticated
+    DROP POLICY IF EXISTS "admin insert fee_payments" ON public.fee_payments;
+    CREATE POLICY "admin insert fee_payments" ON public.fee_payments FOR INSERT TO authenticated
       WITH CHECK (public.app_role() IN ('admin', 'accountant'));
   END IF;
 END $$;
@@ -1611,12 +1630,12 @@ DO $$ BEGIN
     DROP POLICY IF EXISTS "auth read fee_payment_audit"    ON public.fee_payment_audit;
     DROP POLICY IF EXISTS "admin insert fee_payment_audit" ON public.fee_payment_audit;
 
-    CREATE POLICY "auth read fee_payment_audit"
-      ON public.fee_payment_audit FOR SELECT TO authenticated
+    DROP POLICY IF EXISTS "auth read fee_payment_audit" ON public.fee_payment_audit;
+    CREATE POLICY "auth read fee_payment_audit" ON public.fee_payment_audit FOR SELECT TO authenticated
       USING (public.app_role() IN ('admin', 'accountant'));
 
-    CREATE POLICY "admin insert fee_payment_audit"
-      ON public.fee_payment_audit FOR INSERT TO authenticated
+    DROP POLICY IF EXISTS "admin insert fee_payment_audit" ON public.fee_payment_audit;
+    CREATE POLICY "admin insert fee_payment_audit" ON public.fee_payment_audit FOR INSERT TO authenticated
       WITH CHECK (public.app_role() IN ('admin', 'accountant'));
   END IF;
 END $$;
@@ -1626,8 +1645,8 @@ DO $$ BEGIN
   IF to_regclass('public.app_settings') IS NOT NULL THEN
     DROP POLICY IF EXISTS "settings_admin_write" ON public.app_settings;
 
-    CREATE POLICY "settings_admin_write"
-      ON public.app_settings FOR ALL TO authenticated
+    DROP POLICY IF EXISTS "settings_admin_write" ON public.app_settings;
+    CREATE POLICY "settings_admin_write" ON public.app_settings FOR ALL TO authenticated
       USING (public.app_role() = 'admin')
       WITH CHECK (public.app_role() = 'admin');
   END IF;
@@ -1639,16 +1658,16 @@ DO $$ BEGIN
     DROP POLICY IF EXISTS "exam_scores_select"   ON public.exam_scores;
     DROP POLICY IF EXISTS "exam_scores: staff write" ON public.exam_scores;
 
-    CREATE POLICY "exam_scores_select"
-      ON public.exam_scores FOR SELECT TO authenticated
+    DROP POLICY IF EXISTS "exam_scores_select" ON public.exam_scores;
+    CREATE POLICY "exam_scores_select" ON public.exam_scores FOR SELECT TO authenticated
       USING (
         public.app_role() IN ('admin', 'teacher')
         OR student_id = (auth.jwt() -> 'user_metadata' ->> 'student_id')  -- self-read identifier, not a privilege
         OR student_id = auth.uid()::text
       );
 
-    CREATE POLICY "exam_scores: staff write"
-      ON public.exam_scores FOR ALL TO authenticated
+    DROP POLICY IF EXISTS "exam_scores: staff write" ON public.exam_scores;
+    CREATE POLICY "exam_scores: staff write" ON public.exam_scores FOR ALL TO authenticated
       USING (public.app_role() IN ('admin', 'teacher'))
       WITH CHECK (public.app_role() IN ('admin', 'teacher'));
   END IF;
@@ -1658,16 +1677,16 @@ END $$;
 DO $$ BEGIN
   IF to_regclass('public.exam_subjects') IS NOT NULL THEN
     DROP POLICY IF EXISTS "exam_subjects: staff write" ON public.exam_subjects;
-    CREATE POLICY "exam_subjects: staff write"
-      ON public.exam_subjects FOR ALL TO authenticated
+    DROP POLICY IF EXISTS "exam_subjects: staff write" ON public.exam_subjects;
+    CREATE POLICY "exam_subjects: staff write" ON public.exam_subjects FOR ALL TO authenticated
       USING (public.app_role() IN ('admin', 'teacher'))
       WITH CHECK (public.app_role() IN ('admin', 'teacher'));
   END IF;
 
   IF to_regclass('public.exams') IS NOT NULL THEN
     DROP POLICY IF EXISTS "exams: staff write" ON public.exams;
-    CREATE POLICY "exams: staff write"
-      ON public.exams FOR ALL TO authenticated
+    DROP POLICY IF EXISTS "exams: staff write" ON public.exams;
+    CREATE POLICY "exams: staff write" ON public.exams FOR ALL TO authenticated
       USING (public.app_role() IN ('admin', 'teacher'))
       WITH CHECK (public.app_role() IN ('admin', 'teacher'));
   END IF;
@@ -1682,8 +1701,8 @@ END $$;
 DO $$ BEGIN
   IF to_regclass('public.staff_members') IS NOT NULL THEN
     DROP POLICY IF EXISTS "staff_members_auth_select" ON public.staff_members;
-    CREATE POLICY "staff_members_auth_select"
-      ON public.staff_members FOR SELECT TO authenticated
+    DROP POLICY IF EXISTS "staff_members_auth_select" ON public.staff_members;
+    CREATE POLICY "staff_members_auth_select" ON public.staff_members FOR SELECT TO authenticated
       USING (public.app_role() IN ('admin', 'accountant', 'teacher'));
   END IF;
 END $$;
@@ -1727,11 +1746,13 @@ DO $$ BEGIN
     DROP POLICY IF EXISTS "ssr_staff_select" ON public.student_self_reports;
 
     -- Teachers/admins/accountants read class reports via authenticated session.
+    DROP POLICY IF EXISTS "ssr_staff_select" ON public.student_self_reports;
     CREATE POLICY "ssr_staff_select" ON public.student_self_reports
       FOR SELECT TO authenticated
       USING (public.app_role() IN ('admin', 'accountant', 'teacher'));
 
     -- All portal writes happen server-side via the service role API route.
+    DROP POLICY IF EXISTS "ssr_service_all" ON public.student_self_reports;
     CREATE POLICY "ssr_service_all" ON public.student_self_reports
       FOR ALL TO service_role
       USING (true)
@@ -1861,8 +1882,8 @@ ALTER TABLE public.recitation_sessions ENABLE ROW LEVEL SECURITY;
 
 -- Read: staff see all; students/parents see only their own student_id
 DROP POLICY IF EXISTS "recitation_select" ON public.recitation_sessions;
-CREATE POLICY "recitation_select"
-  ON public.recitation_sessions FOR SELECT TO authenticated
+DROP POLICY IF EXISTS "recitation_select" ON public.recitation_sessions;
+CREATE POLICY "recitation_select" ON public.recitation_sessions FOR SELECT TO authenticated
   USING (
     public.app_role() IN ('admin', 'teacher')
     OR student_id = (auth.jwt() -> 'user_metadata' ->> 'student_id')  -- self-read identifier, not a privilege
@@ -1871,8 +1892,8 @@ CREATE POLICY "recitation_select"
 
 -- Write (insert/update/delete): admin + teacher only
 DROP POLICY IF EXISTS "recitation_staff_write" ON public.recitation_sessions;
-CREATE POLICY "recitation_staff_write"
-  ON public.recitation_sessions FOR ALL TO authenticated
+DROP POLICY IF EXISTS "recitation_staff_write" ON public.recitation_sessions;
+CREATE POLICY "recitation_staff_write" ON public.recitation_sessions FOR ALL TO authenticated
   USING (public.app_role() IN ('admin', 'teacher'))
   WITH CHECK (public.app_role() IN ('admin', 'teacher'));
 
@@ -2010,13 +2031,13 @@ CREATE INDEX IF NOT EXISTS idx_period_timetables_teacher ON public.period_timeta
 ALTER TABLE public.period_timetables ENABLE ROW LEVEL SECURITY;
 
 -- All signed-in users may read timetables (view/print/export).
-CREATE POLICY "auth users read period_timetables"
-  ON public.period_timetables FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "auth users read period_timetables" ON public.period_timetables;
+CREATE POLICY "auth users read period_timetables" ON public.period_timetables FOR SELECT TO authenticated USING (true);
 
 -- Only admins may create/update/delete. Role is read from app_metadata, which
 -- is NOT user-writable (see src/lib/api-auth.ts and the security RLS migration).
-CREATE POLICY "admins manage period_timetables"
-  ON public.period_timetables FOR ALL TO authenticated
+DROP POLICY IF EXISTS "admins manage period_timetables" ON public.period_timetables;
+CREATE POLICY "admins manage period_timetables" ON public.period_timetables FOR ALL TO authenticated
   USING ((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin')
   WITH CHECK ((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin');
 
@@ -2044,15 +2065,15 @@ ALTER TABLE public.disabled_teachers ENABLE ROW LEVEL SECURITY;
 -- Authenticated users (teachers/admin) can read who is disabled, so every
 -- surface can filter consistently.
 DROP POLICY IF EXISTS "disabled_teachers_auth_select" ON public.disabled_teachers;
-CREATE POLICY "disabled_teachers_auth_select"
-  ON public.disabled_teachers
+DROP POLICY IF EXISTS "disabled_teachers_auth_select" ON public.disabled_teachers;
+CREATE POLICY "disabled_teachers_auth_select" ON public.disabled_teachers
   FOR SELECT TO authenticated
   USING (true);
 
 -- Only service_role (the admin API) can disable / re-enable.
 DROP POLICY IF EXISTS "disabled_teachers_service_write" ON public.disabled_teachers;
-CREATE POLICY "disabled_teachers_service_write"
-  ON public.disabled_teachers
+DROP POLICY IF EXISTS "disabled_teachers_service_write" ON public.disabled_teachers;
+CREATE POLICY "disabled_teachers_service_write" ON public.disabled_teachers
   FOR ALL TO service_role
   USING (true)
   WITH CHECK (true);
@@ -2093,16 +2114,19 @@ DO $$ BEGIN
     DROP POLICY IF EXISTS "students: staff update" ON public.students;
 
     -- ADD a student → admin / accountant
+    DROP POLICY IF EXISTS "students: admin/accountant insert" ON public.students;
     CREATE POLICY "students: admin/accountant insert" ON public.students
       FOR INSERT TO authenticated
       WITH CHECK (public.is_admin_or_accountant());
 
     -- REMOVE a student → admin / accountant
+    DROP POLICY IF EXISTS "students: admin/accountant delete" ON public.students;
     CREATE POLICY "students: admin/accountant delete" ON public.students
       FOR DELETE TO authenticated
       USING (public.is_admin_or_accountant());
 
     -- EDIT a student (profile, photo) → all staff (incl. teachers)
+    DROP POLICY IF EXISTS "students: staff update" ON public.students;
     CREATE POLICY "students: staff update" ON public.students
       FOR UPDATE TO authenticated
       USING (public.is_staff())
@@ -2163,8 +2187,8 @@ create index if not exists idx_students_disenrolled_at
 DO $$ BEGIN
   IF to_regclass('public.recitation_sessions') IS NOT NULL THEN
     DROP POLICY IF EXISTS "recitation_select" ON public.recitation_sessions;
-    CREATE POLICY "recitation_select"
-      ON public.recitation_sessions FOR SELECT TO authenticated
+    DROP POLICY IF EXISTS "recitation_select" ON public.recitation_sessions;
+    CREATE POLICY "recitation_select" ON public.recitation_sessions FOR SELECT TO authenticated
       USING (
         public.app_role() IN ('admin', 'accountant', 'teacher')
         OR student_id = (auth.jwt() -> 'user_metadata' ->> 'student_id')  -- self-read identifier, not a privilege
@@ -2172,8 +2196,8 @@ DO $$ BEGIN
       );
 
     DROP POLICY IF EXISTS "recitation_staff_write" ON public.recitation_sessions;
-    CREATE POLICY "recitation_staff_write"
-      ON public.recitation_sessions FOR ALL TO authenticated
+    DROP POLICY IF EXISTS "recitation_staff_write" ON public.recitation_sessions;
+    CREATE POLICY "recitation_staff_write" ON public.recitation_sessions FOR ALL TO authenticated
       USING (public.app_role() IN ('admin', 'accountant', 'teacher'))
       WITH CHECK (public.app_role() IN ('admin', 'accountant', 'teacher'));
   END IF;
@@ -2185,16 +2209,16 @@ DO $$ BEGIN
     DROP POLICY IF EXISTS "exam_scores_select"   ON public.exam_scores;
     DROP POLICY IF EXISTS "exam_scores: staff write" ON public.exam_scores;
 
-    CREATE POLICY "exam_scores_select"
-      ON public.exam_scores FOR SELECT TO authenticated
+    DROP POLICY IF EXISTS "exam_scores_select" ON public.exam_scores;
+    CREATE POLICY "exam_scores_select" ON public.exam_scores FOR SELECT TO authenticated
       USING (
         public.app_role() IN ('admin', 'accountant', 'teacher')
         OR student_id = (auth.jwt() -> 'user_metadata' ->> 'student_id')  -- self-read identifier, not a privilege
         OR student_id = auth.uid()::text
       );
 
-    CREATE POLICY "exam_scores: staff write"
-      ON public.exam_scores FOR ALL TO authenticated
+    DROP POLICY IF EXISTS "exam_scores: staff write" ON public.exam_scores;
+    CREATE POLICY "exam_scores: staff write" ON public.exam_scores FOR ALL TO authenticated
       USING (public.app_role() IN ('admin', 'accountant', 'teacher'))
       WITH CHECK (public.app_role() IN ('admin', 'accountant', 'teacher'));
   END IF;
@@ -2204,16 +2228,16 @@ END $$;
 DO $$ BEGIN
   IF to_regclass('public.exam_subjects') IS NOT NULL THEN
     DROP POLICY IF EXISTS "exam_subjects: staff write" ON public.exam_subjects;
-    CREATE POLICY "exam_subjects: staff write"
-      ON public.exam_subjects FOR ALL TO authenticated
+    DROP POLICY IF EXISTS "exam_subjects: staff write" ON public.exam_subjects;
+    CREATE POLICY "exam_subjects: staff write" ON public.exam_subjects FOR ALL TO authenticated
       USING (public.app_role() IN ('admin', 'accountant', 'teacher'))
       WITH CHECK (public.app_role() IN ('admin', 'accountant', 'teacher'));
   END IF;
 
   IF to_regclass('public.exams') IS NOT NULL THEN
     DROP POLICY IF EXISTS "exams: staff write" ON public.exams;
-    CREATE POLICY "exams: staff write"
-      ON public.exams FOR ALL TO authenticated
+    DROP POLICY IF EXISTS "exams: staff write" ON public.exams;
+    CREATE POLICY "exams: staff write" ON public.exams FOR ALL TO authenticated
       USING (public.app_role() IN ('admin', 'accountant', 'teacher'))
       WITH CHECK (public.app_role() IN ('admin', 'accountant', 'teacher'));
   END IF;
@@ -2247,13 +2271,13 @@ CREATE INDEX IF NOT EXISTS idx_edu_teacher_subjects_grade ON public.edu_teacher_
 ALTER TABLE public.edu_teacher_subjects ENABLE ROW LEVEL SECURITY;
 
 -- All signed-in users may read the eligibility (needed to generate timetables).
-CREATE POLICY "auth users read edu_teacher_subjects"
-  ON public.edu_teacher_subjects FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "auth users read edu_teacher_subjects" ON public.edu_teacher_subjects;
+CREATE POLICY "auth users read edu_teacher_subjects" ON public.edu_teacher_subjects FOR SELECT TO authenticated USING (true);
 
 -- Only admins may change assignments. Role is read from app_metadata, which is
 -- NOT user-writable (see src/lib/api-auth.ts and the security RLS migration).
-CREATE POLICY "admins manage edu_teacher_subjects"
-  ON public.edu_teacher_subjects FOR ALL TO authenticated
+DROP POLICY IF EXISTS "admins manage edu_teacher_subjects" ON public.edu_teacher_subjects;
+CREATE POLICY "admins manage edu_teacher_subjects" ON public.edu_teacher_subjects FOR ALL TO authenticated
   USING ((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin')
   WITH CHECK ((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin');
 
@@ -2580,9 +2604,11 @@ ALTER TABLE public.fest_audit_log        ENABLE ROW LEVEL SECURITY;
 
 -- editions: admin writes; staff read all; public reads non-draft editions.
 DROP POLICY IF EXISTS fest_editions_public_read ON public.fest_editions;
+DROP POLICY IF EXISTS fest_editions_public_read ON public.fest_editions;
 CREATE POLICY fest_editions_public_read ON public.fest_editions
   FOR SELECT TO anon, authenticated
   USING (status <> 'draft' OR public.fest_is_staff());
+DROP POLICY IF EXISTS fest_editions_admin_write ON public.fest_editions;
 DROP POLICY IF EXISTS fest_editions_admin_write ON public.fest_editions;
 CREATE POLICY fest_editions_admin_write ON public.fest_editions
   FOR ALL TO authenticated
@@ -2596,6 +2622,7 @@ BEGIN
   FOREACH t IN ARRAY ARRAY['fest_houses','fest_categories','fest_items'] LOOP
     EXECUTE format('DROP POLICY IF EXISTS %I ON public.%I', t||'_public_read', t);
     EXECUTE format($f$
+      DROP POLICY IF EXISTS %I ON public.%I;
       CREATE POLICY %I ON public.%I FOR SELECT TO anon, authenticated
       USING (
         public.fest_is_staff()
@@ -2604,6 +2631,7 @@ BEGIN
       )$f$, t||'_public_read', t, t);
     EXECUTE format('DROP POLICY IF EXISTS %I ON public.%I', t||'_staff_write', t);
     EXECUTE format($f$
+      DROP POLICY IF EXISTS %I ON public.%I;
       CREATE POLICY %I ON public.%I FOR ALL TO authenticated
       USING (public.fest_is_staff()) WITH CHECK (public.fest_is_staff())$f$,
       t||'_staff_write', t);
@@ -2612,8 +2640,10 @@ END $$;
 
 -- sections are global (no edition_id): public read, staff manage.
 DROP POLICY IF EXISTS fest_sections_public_read ON public.fest_sections;
+DROP POLICY IF EXISTS fest_sections_public_read ON public.fest_sections;
 CREATE POLICY fest_sections_public_read ON public.fest_sections
   FOR SELECT TO anon, authenticated USING (true);
+DROP POLICY IF EXISTS fest_sections_staff_write ON public.fest_sections;
 DROP POLICY IF EXISTS fest_sections_staff_write ON public.fest_sections;
 CREATE POLICY fest_sections_staff_write ON public.fest_sections
   FOR ALL TO authenticated
@@ -2627,6 +2657,7 @@ BEGIN
                            'fest_registrations','fest_group_members'] LOOP
     EXECUTE format('DROP POLICY IF EXISTS %I ON public.%I', t||'_staff_all', t);
     EXECUTE format($f$
+      DROP POLICY IF EXISTS %I ON public.%I;
       CREATE POLICY %I ON public.%I FOR ALL TO authenticated
       USING (public.fest_is_staff()) WITH CHECK (public.fest_is_staff())$f$,
       t||'_staff_all', t);
@@ -2635,8 +2666,10 @@ END $$;
 
 -- audit_log: staff insert, admin read.
 DROP POLICY IF EXISTS fest_audit_admin_read ON public.fest_audit_log;
+DROP POLICY IF EXISTS fest_audit_admin_read ON public.fest_audit_log;
 CREATE POLICY fest_audit_admin_read ON public.fest_audit_log
   FOR SELECT TO authenticated USING (public.app_role() = 'admin');
+DROP POLICY IF EXISTS fest_audit_staff_insert ON public.fest_audit_log;
 DROP POLICY IF EXISTS fest_audit_staff_insert ON public.fest_audit_log;
 CREATE POLICY fest_audit_staff_insert ON public.fest_audit_log
   FOR INSERT TO authenticated WITH CHECK (public.fest_is_staff());
@@ -2816,6 +2849,7 @@ CREATE INDEX IF NOT EXISTS fest_items_stage_idx ON public.fest_items (stage_id);
 ALTER TABLE public.fest_stages ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS fest_stages_public_read ON public.fest_stages;
+DROP POLICY IF EXISTS fest_stages_public_read ON public.fest_stages;
 CREATE POLICY fest_stages_public_read ON public.fest_stages
   FOR SELECT TO anon, authenticated
   USING (
@@ -2823,6 +2857,7 @@ CREATE POLICY fest_stages_public_read ON public.fest_stages
     OR EXISTS (SELECT 1 FROM public.fest_editions e
                WHERE e.id = fest_stages.edition_id AND e.status <> 'draft')
   );
+DROP POLICY IF EXISTS fest_stages_staff_write ON public.fest_stages;
 DROP POLICY IF EXISTS fest_stages_staff_write ON public.fest_stages;
 CREATE POLICY fest_stages_staff_write ON public.fest_stages
   FOR ALL TO authenticated
@@ -2903,9 +2938,11 @@ ALTER TABLE public.fest_results     ENABLE ROW LEVEL SECURITY;
 
 -- item_judges: staff manage; a judge can see their own assignments.
 DROP POLICY IF EXISTS fest_item_judges_staff_write ON public.fest_item_judges;
+DROP POLICY IF EXISTS fest_item_judges_staff_write ON public.fest_item_judges;
 CREATE POLICY fest_item_judges_staff_write ON public.fest_item_judges
   FOR ALL TO authenticated
   USING (public.fest_is_staff()) WITH CHECK (public.fest_is_staff());
+DROP POLICY IF EXISTS fest_item_judges_self_read ON public.fest_item_judges;
 DROP POLICY IF EXISTS fest_item_judges_self_read ON public.fest_item_judges;
 CREATE POLICY fest_item_judges_self_read ON public.fest_item_judges
   FOR SELECT TO authenticated
@@ -2914,10 +2951,12 @@ CREATE POLICY fest_item_judges_self_read ON public.fest_item_judges
 -- scores: a judge reads/writes ONLY their own rows, and only while the item is
 -- unlocked and they're assigned. Staff read all (the reveal/oversight path).
 DROP POLICY IF EXISTS fest_scores_select ON public.fest_scores;
+DROP POLICY IF EXISTS fest_scores_select ON public.fest_scores;
 CREATE POLICY fest_scores_select ON public.fest_scores
   FOR SELECT TO authenticated
   USING (public.fest_is_staff() OR judge_id = auth.uid());
 
+DROP POLICY IF EXISTS fest_scores_judge_write ON public.fest_scores;
 DROP POLICY IF EXISTS fest_scores_judge_write ON public.fest_scores;
 CREATE POLICY fest_scores_judge_write ON public.fest_scores
   FOR ALL TO authenticated
@@ -2944,6 +2983,7 @@ CREATE POLICY fest_scores_judge_write ON public.fest_scores
 
 -- results: staff read always; public reads once the edition is published.
 DROP POLICY IF EXISTS fest_results_read ON public.fest_results;
+DROP POLICY IF EXISTS fest_results_read ON public.fest_results;
 CREATE POLICY fest_results_read ON public.fest_results
   FOR SELECT TO anon, authenticated
   USING (
@@ -2952,6 +2992,7 @@ CREATE POLICY fest_results_read ON public.fest_results
                WHERE e.id = fest_results.edition_id AND e.status = 'results_published')
   );
 -- writes happen only through the SECURITY DEFINER recompute function below.
+DROP POLICY IF EXISTS fest_results_staff_write ON public.fest_results;
 DROP POLICY IF EXISTS fest_results_staff_write ON public.fest_results;
 CREATE POLICY fest_results_staff_write ON public.fest_results
   FOR ALL TO authenticated
@@ -3180,6 +3221,7 @@ CREATE INDEX IF NOT EXISTS fest_certificates_edition_idx ON public.fest_certific
 ALTER TABLE public.fest_certificates ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS fest_certificates_staff_all ON public.fest_certificates;
+DROP POLICY IF EXISTS fest_certificates_staff_all ON public.fest_certificates;
 CREATE POLICY fest_certificates_staff_all ON public.fest_certificates
   FOR ALL TO authenticated
   USING (public.fest_is_staff()) WITH CHECK (public.fest_is_staff());
@@ -3242,6 +3284,7 @@ CREATE INDEX IF NOT EXISTS fest_media_edition_idx ON public.fest_media (edition_
 ALTER TABLE public.fest_media ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS fest_media_public_read ON public.fest_media;
+DROP POLICY IF EXISTS fest_media_public_read ON public.fest_media;
 CREATE POLICY fest_media_public_read ON public.fest_media
   FOR SELECT TO anon, authenticated
   USING (
@@ -3249,6 +3292,7 @@ CREATE POLICY fest_media_public_read ON public.fest_media
     OR EXISTS (SELECT 1 FROM public.fest_editions e
                WHERE e.id = fest_media.edition_id AND e.status <> 'draft')
   );
+DROP POLICY IF EXISTS fest_media_staff_write ON public.fest_media;
 DROP POLICY IF EXISTS fest_media_staff_write ON public.fest_media;
 CREATE POLICY fest_media_staff_write ON public.fest_media
   FOR ALL TO authenticated
@@ -3261,11 +3305,14 @@ VALUES ('fest-media', 'fest-media', true, 10485760,
 ON CONFLICT (id) DO UPDATE SET public = true, file_size_limit = 10485760;
 
 DROP POLICY IF EXISTS "fest-media staff upload" ON storage.objects;
+DROP POLICY IF EXISTS "fest-media staff upload" ON storage.objects;
 CREATE POLICY "fest-media staff upload" ON storage.objects FOR INSERT TO authenticated
   WITH CHECK (bucket_id = 'fest-media' AND public.fest_is_staff());
 DROP POLICY IF EXISTS "fest-media public read" ON storage.objects;
+DROP POLICY IF EXISTS "fest-media public read" ON storage.objects;
 CREATE POLICY "fest-media public read" ON storage.objects FOR SELECT TO anon, authenticated
   USING (bucket_id = 'fest-media');
+DROP POLICY IF EXISTS "fest-media staff delete" ON storage.objects;
 DROP POLICY IF EXISTS "fest-media staff delete" ON storage.objects;
 CREATE POLICY "fest-media staff delete" ON storage.objects FOR DELETE TO authenticated
   USING (bucket_id = 'fest-media' AND public.fest_is_staff());
@@ -3501,10 +3548,12 @@ ALTER TABLE public.app_settings ENABLE ROW LEVEL SECURITY;
 
 DO $$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'app_settings' AND policyname = 'settings_select') THEN
+    DROP POLICY IF EXISTS "settings_select" ON public.app_settings;
     CREATE POLICY "settings_select" ON public.app_settings
       FOR SELECT TO authenticated USING (true);
   END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'app_settings' AND policyname = 'settings_admin_write') THEN
+    DROP POLICY IF EXISTS "settings_admin_write" ON public.app_settings;
     CREATE POLICY "settings_admin_write" ON public.app_settings
       FOR ALL TO authenticated
       USING   ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) = 'admin')
@@ -3843,6 +3892,7 @@ DO $$ BEGIN
     DROP POLICY IF EXISTS "students: admin/accountant insert" ON public.students;
     DROP POLICY IF EXISTS "students: staff insert" ON public.students;
 
+    DROP POLICY IF EXISTS "students: staff insert" ON public.students;
     CREATE POLICY "students: staff insert" ON public.students
       FOR INSERT TO authenticated
       WITH CHECK (public.is_staff());
@@ -4017,10 +4067,12 @@ DROP POLICY IF EXISTS "office reports: insert" ON public.office_daily_reports;
 DROP POLICY IF EXISTS "office reports: update" ON public.office_daily_reports;
 DROP POLICY IF EXISTS "office reports: delete" ON public.office_daily_reports;
 
+DROP POLICY IF EXISTS "office reports: read" ON public.office_daily_reports;
 CREATE POLICY "office reports: read" ON public.office_daily_reports
   FOR SELECT TO authenticated
   USING (public.app_role() IN ('admin', 'accountant'));
 
+DROP POLICY IF EXISTS "office reports: insert" ON public.office_daily_reports;
 CREATE POLICY "office reports: insert" ON public.office_daily_reports
   FOR INSERT TO authenticated
   WITH CHECK (
@@ -4028,6 +4080,7 @@ CREATE POLICY "office reports: insert" ON public.office_daily_reports
     OR (public.app_role() = 'accountant' AND staff_id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "office reports: update" ON public.office_daily_reports;
 CREATE POLICY "office reports: update" ON public.office_daily_reports
   FOR UPDATE TO authenticated
   USING (
@@ -4039,6 +4092,7 @@ CREATE POLICY "office reports: update" ON public.office_daily_reports
     OR (public.app_role() = 'accountant' AND staff_id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "office reports: delete" ON public.office_daily_reports;
 CREATE POLICY "office reports: delete" ON public.office_daily_reports
   FOR DELETE TO authenticated
   USING (public.app_role() = 'admin');
@@ -4058,6 +4112,7 @@ BEGIN
   ] LOOP
     EXECUTE format('DROP POLICY IF EXISTS "office child: all" ON public.%I', t);
     EXECUTE format($f$
+      DROP POLICY IF EXISTS "office child: all" ON public.%I;
       CREATE POLICY "office child: all" ON public.%I
         FOR ALL TO authenticated
         USING (public.app_role() IN ('admin', 'accountant'))
@@ -4071,14 +4126,17 @@ DROP POLICY IF EXISTS "lesson plans: read"   ON public.lesson_plan_submissions;
 DROP POLICY IF EXISTS "lesson plans: insert" ON public.lesson_plan_submissions;
 DROP POLICY IF EXISTS "lesson plans: manage" ON public.lesson_plan_submissions;
 
+DROP POLICY IF EXISTS "lesson plans: read" ON public.lesson_plan_submissions;
 CREATE POLICY "lesson plans: read" ON public.lesson_plan_submissions
   FOR SELECT TO authenticated
   USING (public.app_role() IN ('admin', 'accountant', 'teacher'));
 
+DROP POLICY IF EXISTS "lesson plans: insert" ON public.lesson_plan_submissions;
 CREATE POLICY "lesson plans: insert" ON public.lesson_plan_submissions
   FOR INSERT TO authenticated
   WITH CHECK (public.app_role() IN ('admin', 'accountant', 'teacher'));
 
+DROP POLICY IF EXISTS "lesson plans: manage" ON public.lesson_plan_submissions;
 CREATE POLICY "lesson plans: manage" ON public.lesson_plan_submissions
   FOR ALL TO authenticated
   USING (public.app_role() = 'admin')
@@ -4121,16 +4179,16 @@ DROP POLICY IF EXISTS "lesson_plans_staff_upload" ON storage.objects;
 DROP POLICY IF EXISTS "lesson_plans_staff_read"   ON storage.objects;
 DROP POLICY IF EXISTS "lesson_plans_admin_manage" ON storage.objects;
 
-CREATE POLICY "lesson_plans_staff_upload"
-  ON storage.objects FOR INSERT TO authenticated
+DROP POLICY IF EXISTS "lesson_plans_staff_upload" ON storage.objects;
+CREATE POLICY "lesson_plans_staff_upload" ON storage.objects FOR INSERT TO authenticated
   WITH CHECK (bucket_id = 'lesson-plans' AND public.app_role() IN ('admin', 'accountant', 'teacher'));
 
-CREATE POLICY "lesson_plans_staff_read"
-  ON storage.objects FOR SELECT TO authenticated
+DROP POLICY IF EXISTS "lesson_plans_staff_read" ON storage.objects;
+CREATE POLICY "lesson_plans_staff_read" ON storage.objects FOR SELECT TO authenticated
   USING (bucket_id = 'lesson-plans' AND public.app_role() IN ('admin', 'accountant', 'teacher'));
 
-CREATE POLICY "lesson_plans_admin_manage"
-  ON storage.objects FOR ALL TO authenticated
+DROP POLICY IF EXISTS "lesson_plans_admin_manage" ON storage.objects;
+CREATE POLICY "lesson_plans_admin_manage" ON storage.objects FOR ALL TO authenticated
   USING (bucket_id = 'lesson-plans' AND public.app_role() = 'admin')
   WITH CHECK (bucket_id = 'lesson-plans' AND public.app_role() = 'admin');
 
@@ -4209,11 +4267,13 @@ DROP POLICY IF EXISTS "office finance ledger: update" ON public.office_finance_l
 DROP POLICY IF EXISTS "office finance ledger: delete" ON public.office_finance_ledger;
 
 -- Read: any office user (admin + accountant) sees the whole shared ledger.
+DROP POLICY IF EXISTS "office finance ledger: read" ON public.office_finance_ledger;
 CREATE POLICY "office finance ledger: read" ON public.office_finance_ledger
   FOR SELECT TO authenticated
   USING (public.app_role() IN ('admin', 'accountant'));
 
 -- Insert: admin + accountant, and the row must be attributed to the inserter.
+DROP POLICY IF EXISTS "office finance ledger: insert" ON public.office_finance_ledger;
 CREATE POLICY "office finance ledger: insert" ON public.office_finance_ledger
   FOR INSERT TO authenticated
   WITH CHECK (
@@ -4221,11 +4281,13 @@ CREATE POLICY "office finance ledger: insert" ON public.office_finance_ledger
   );
 
 -- Update / delete: an entry's own author, or any admin.
+DROP POLICY IF EXISTS "office finance ledger: update" ON public.office_finance_ledger;
 CREATE POLICY "office finance ledger: update" ON public.office_finance_ledger
   FOR UPDATE TO authenticated
   USING (public.app_role() = 'admin' OR created_by = auth.uid())
   WITH CHECK (public.app_role() = 'admin' OR created_by = auth.uid());
 
+DROP POLICY IF EXISTS "office finance ledger: delete" ON public.office_finance_ledger;
 CREATE POLICY "office finance ledger: delete" ON public.office_finance_ledger
   FOR DELETE TO authenticated
   USING (public.app_role() = 'admin' OR created_by = auth.uid());
@@ -4264,11 +4326,13 @@ DO $$ BEGIN
   DROP POLICY IF EXISTS "office finance ledger: delete" ON public.office_finance_ledger;
 
   -- Read: any office user (admin + accountant) sees the whole shared ledger.
+  DROP POLICY IF EXISTS "office finance ledger: read" ON public.office_finance_ledger;
   CREATE POLICY "office finance ledger: read" ON public.office_finance_ledger
     FOR SELECT TO authenticated
     USING (public.app_role() IN ('admin', 'accountant'));
 
   -- Insert: admin + accountant, and the row must be attributed to the inserter.
+  DROP POLICY IF EXISTS "office finance ledger: insert" ON public.office_finance_ledger;
   CREATE POLICY "office finance ledger: insert" ON public.office_finance_ledger
     FOR INSERT TO authenticated
     WITH CHECK (
@@ -4276,11 +4340,13 @@ DO $$ BEGIN
     );
 
   -- Update / delete: an entry's own author, or any admin.
+  DROP POLICY IF EXISTS "office finance ledger: update" ON public.office_finance_ledger;
   CREATE POLICY "office finance ledger: update" ON public.office_finance_ledger
     FOR UPDATE TO authenticated
     USING (public.app_role() = 'admin' OR created_by = auth.uid())
     WITH CHECK (public.app_role() = 'admin' OR created_by = auth.uid());
 
+  DROP POLICY IF EXISTS "office finance ledger: delete" ON public.office_finance_ledger;
   CREATE POLICY "office finance ledger: delete" ON public.office_finance_ledger
     FOR DELETE TO authenticated
     USING (public.app_role() = 'admin' OR created_by = auth.uid());
@@ -4447,16 +4513,16 @@ DROP POLICY IF EXISTS "session_proofs_admin_manage" ON storage.objects;
 
 -- Staff upload straight from the browser (bypasses the serverless body
 -- limit, same pattern as lesson-plans); staff read via signed URLs.
-CREATE POLICY "session_proofs_staff_upload"
-  ON storage.objects FOR INSERT TO authenticated
+DROP POLICY IF EXISTS "session_proofs_staff_upload" ON storage.objects;
+CREATE POLICY "session_proofs_staff_upload" ON storage.objects FOR INSERT TO authenticated
   WITH CHECK (bucket_id = 'session-proofs' AND public.app_role() IN ('admin', 'accountant', 'teacher'));
 
-CREATE POLICY "session_proofs_staff_read"
-  ON storage.objects FOR SELECT TO authenticated
+DROP POLICY IF EXISTS "session_proofs_staff_read" ON storage.objects;
+CREATE POLICY "session_proofs_staff_read" ON storage.objects FOR SELECT TO authenticated
   USING (bucket_id = 'session-proofs' AND public.app_role() IN ('admin', 'accountant', 'teacher'));
 
-CREATE POLICY "session_proofs_admin_manage"
-  ON storage.objects FOR ALL TO authenticated
+DROP POLICY IF EXISTS "session_proofs_admin_manage" ON storage.objects;
+CREATE POLICY "session_proofs_admin_manage" ON storage.objects FOR ALL TO authenticated
   USING (bucket_id = 'session-proofs' AND public.app_role() = 'admin')
   WITH CHECK (bucket_id = 'session-proofs' AND public.app_role() = 'admin');
 
@@ -4490,8 +4556,8 @@ CREATE INDEX IF NOT EXISTS session_proofs_date_idx
 ALTER TABLE public.session_proofs ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "session_proofs_staff_select" ON public.session_proofs;
-CREATE POLICY "session_proofs_staff_select"
-  ON public.session_proofs FOR SELECT TO authenticated
+DROP POLICY IF EXISTS "session_proofs_staff_select" ON public.session_proofs;
+CREATE POLICY "session_proofs_staff_select" ON public.session_proofs FOR SELECT TO authenticated
   USING (public.app_role() IN ('admin', 'accountant', 'teacher'));
 -- No INSERT/UPDATE/DELETE policies on purpose: only the service role writes.
 
