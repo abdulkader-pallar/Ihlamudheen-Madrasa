@@ -1,11 +1,12 @@
 -- ============================================================================
---  LOCK THE ACCOUNTING MODULE TO THE TWO SUPER-ADMINS
+--  LOCK THE ACCOUNTING MODULE TO THE TWO SUPER-ADMINS   (v2 - resilient)
 --
---  Restricts every accounting table (transactions, categories, funds, staff,
---  staff attendance) so ONLY the two institute super-admins can read or write.
---  No other user — including future admins, teachers and office staff — can
---  see this data, even by calling the API directly.
+--  Restricts every accounting table that exists (transactions, categories,
+--  funds, staff, attendance) so ONLY the two institute super-admins can read
+--  or write. No other user - including future admins, teachers and office
+--  staff - can see this data, even by calling the API directly.
 --
+--  Tables that do not exist in this database are skipped automatically.
 --  This does NOT delete any data. It only replaces access policies.
 --  Run in: Supabase Dashboard -> SQL Editor -> New query -> paste -> Run.
 --  Safe to re-run.
@@ -25,52 +26,51 @@ as $$
     ), false);
 $$;
 
--- ── transactions ────────────────────────────────────────────────────────────
-drop policy if exists "members read transactions"   on public.transactions;
-drop policy if exists "editors insert transactions" on public.transactions;
-drop policy if exists "editors update transactions" on public.transactions;
-drop policy if exists "editors delete transactions" on public.transactions;
-drop policy if exists "superadmin transactions"     on public.transactions;
-create policy "superadmin transactions" on public.transactions
-  for all using (public.is_superadmin()) with check (public.is_superadmin());
+-- ---------------------------------------------------------------------------
+-- For each accounting table that exists: drop every existing policy on it and
+-- install a single super-admin-only policy.
+-- ---------------------------------------------------------------------------
+DO $lock$
+DECLARE
+  t    text;
+  pol  record;
+  done text := '';
+  skip text := '';
+BEGIN
+  FOREACH t IN ARRAY ARRAY['transactions','categories','funds','staff','attendance']
+  LOOP
+    IF to_regclass('public.' || t) IS NULL THEN
+      skip := skip || t || ' ';
+      CONTINUE;
+    END IF;
 
--- ── categories ──────────────────────────────────────────────────────────────
-drop policy if exists "members read categories"  on public.categories;
-drop policy if exists "editors write categories" on public.categories;
-drop policy if exists "superadmin categories"    on public.categories;
-create policy "superadmin categories" on public.categories
-  for all using (public.is_superadmin()) with check (public.is_superadmin());
+    -- remove any existing policies on this table
+    FOR pol IN
+      SELECT policyname FROM pg_policies
+      WHERE schemaname = 'public' AND tablename = t
+    LOOP
+      EXECUTE format('DROP POLICY IF EXISTS %I ON public.%I', pol.policyname, t);
+    END LOOP;
 
--- ── funds ───────────────────────────────────────────────────────────────────
-drop policy if exists "members read funds"  on public.funds;
-drop policy if exists "editors write funds" on public.funds;
-drop policy if exists "superadmin funds"    on public.funds;
-create policy "superadmin funds" on public.funds
-  for all using (public.is_superadmin()) with check (public.is_superadmin());
+    -- enable RLS and install the super-admin-only policy
+    EXECUTE format('ALTER TABLE public.%I ENABLE ROW LEVEL SECURITY', t);
+    EXECUTE format(
+      'CREATE POLICY %I ON public.%I FOR ALL TO authenticated '
+      'USING (public.is_superadmin()) WITH CHECK (public.is_superadmin())',
+      'superadmin only - ' || t, t);
 
--- ── staff (accounting staff register) ───────────────────────────────────────
-drop policy if exists "members read staff"  on public.staff;
-drop policy if exists "editors write staff" on public.staff;
-drop policy if exists "superadmin staff"    on public.staff;
-create policy "superadmin staff" on public.staff
-  for all using (public.is_superadmin()) with check (public.is_superadmin());
+    done := done || t || ' ';
+  END LOOP;
 
--- ── attendance (accounting staff attendance / punches) ──────────────────────
-drop policy if exists "members read attendance"  on public.attendance;
-drop policy if exists "editors write attendance" on public.attendance;
-drop policy if exists "superadmin attendance"    on public.attendance;
-create policy "superadmin attendance" on public.attendance
-  for all using (public.is_superadmin()) with check (public.is_superadmin());
+  RAISE NOTICE 'Locked: %', done;
+  IF skip <> '' THEN
+    RAISE NOTICE 'Skipped (table not in this database): %', skip;
+  END IF;
+END
+$lock$;
 
--- RLS must stay enabled on all of them (it already is; this is a no-op guard).
-alter table public.transactions enable row level security;
-alter table public.categories   enable row level security;
-alter table public.funds        enable row level security;
-alter table public.staff        enable row level security;
-alter table public.attendance   enable row level security;
-
--- ── Verify (should list exactly one "superadmin ..." policy per table) ──────
-select tablename, policyname
+-- ── Verify: one "superadmin only - <table>" policy per existing table ───────
+select tablename, policyname, roles
 from pg_policies
 where schemaname = 'public'
   and tablename in ('transactions','categories','funds','staff','attendance')
