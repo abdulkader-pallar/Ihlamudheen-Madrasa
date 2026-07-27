@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient, SERVICE_ROLE_KEY } from "@/lib/supabase/admin";
-import { SUPERADMIN_EMAIL, type Role } from "@/lib/types";
+import { isSuperadmin, type Role } from "@/lib/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Not signed in." }, { status: 401 });
-  if (user.email !== SUPERADMIN_EMAIL) {
+  if (!isSuperadmin(user.email)) {
     return NextResponse.json({ error: "Only the super-admin can add users." }, { status: 403 });
   }
 

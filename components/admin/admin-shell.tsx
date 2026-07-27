@@ -11,7 +11,7 @@ import { Toaster } from "@/components/ui/toast";
 import { DataProvider } from "./data-context";
 import { getMenuForRole } from "@/components/app-launcher";
 import type { UserRole } from "@/lib/roles";
-import { isEditor, SUPERADMIN_EMAIL, type Profile, type Role } from "@/lib/types";
+import { isEditor, isSuperadmin, type Profile, type Role } from "@/lib/types";
 import { cx } from "@/lib/ui";
 
 const NAV: { href: string; label: string; icon: LucideIcon; exact?: boolean; editor?: boolean; admin?: boolean; superadmin?: boolean }[] = [
@@ -39,7 +39,7 @@ export function AdminShell({ profile, children }: { profile: Profile; children: 
   const [appsOpen, setAppsOpen] = useState(false);
   const editor = isEditor(profile.role);
   const admin = profile.role === "admin";
-  const superadmin = profile.email === SUPERADMIN_EMAIL;
+  const superadmin = isSuperadmin(profile.email);
   const name = profile.full_name || "Staff";
 
   const signOut = async () => {
@@ -148,7 +148,7 @@ export function AdminShell({ profile, children }: { profile: Profile; children: 
 
 function AppsMenu({ role, email, onClose, onSignOut }: { role: Role; email?: string | null; onClose: () => void; onSignOut: () => void }) {
   const editor = isEditor(role);
-  const superadmin = email === SUPERADMIN_EMAIL;
+  const superadmin = isSuperadmin(email);
   const apps: { label: string; href: string; icon: LucideIcon; color: string }[] = [
     { label: "Dashboard", href: "/admin", icon: LayoutDashboard, color: "var(--brand)" },
     { label: "Transactions", href: "/admin/transactions", icon: ListOrdered, color: "#3b82f6" },
@@ -169,7 +169,7 @@ function AppsMenu({ role, email, onClose, onSignOut }: { role: Role; email?: str
   // Finance, Tools, Reports…) shown alongside the accounting apps. Accounting
   // roles viewer/pending fall back to the student menu.
   const erpRole: UserRole = role === "admin" ? "admin" : role === "accountant" ? "accountant" : "student";
-  const erpCategories = getMenuForRole(erpRole);
+  const erpCategories = getMenuForRole(erpRole, { isSuperadmin: superadmin });
 
   return (
     <>

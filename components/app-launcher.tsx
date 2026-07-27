@@ -65,8 +65,14 @@ interface NavCategory {
   items: NavItem[]
 }
 
-export function getMenuForRole(role: UserRole, options?: { isEduSupport?: boolean }): NavCategory[] {
+export function getMenuForRole(
+  role: UserRole,
+  options?: { isEduSupport?: boolean; isSuperadmin?: boolean },
+): NavCategory[] {
   const isEduSupport = options?.isEduSupport ?? false
+  // The Accounts (accounting) module is super-admin only — see lib/types.ts and
+  // supabase/lock-accounting-to-superadmins.sql.
+  const isSuperadmin = options?.isSuperadmin ?? false
   const common: NavCategory = {
     title: "Dashboard",
     items: [
@@ -159,7 +165,10 @@ export function getMenuForRole(role: UserRole, options?: { isEduSupport?: boolea
       {
         title: "Administration",
         items: [
-          { href: "/admin", label: "Admin Panel", icon: Shield, color: "bg-red-500" },
+          // Accounts module — visible only to the institute super-admins.
+          ...(isSuperadmin
+            ? [{ href: "/admin", label: "Accounts", icon: Shield, color: "bg-red-500" }]
+            : []),
           { href: "/dashboard/user-mgmt", label: "User Mgmt", icon: UserCog, color: "bg-navy-500" },
           { href: "/dashboard/system-setup", label: "System Setup", icon: Wrench, color: "bg-gray-500" },
           { href: "/dashboard/access", label: "Access Control", icon: Lock, color: "bg-stone-500" },
@@ -404,14 +413,15 @@ export function NavMenuBody({ categories, onItemClick, onLogout }: NavMenuBodyPr
 interface AppLauncherProps {
   role?: UserRole
   isEduSupport?: boolean
+  isSuperadmin?: boolean
   onLogout?: () => void
   sidebarPinned?: boolean
   onTogglePin?: () => void
 }
 
-export function AppLauncher({ role = "student", isEduSupport = false, onLogout, sidebarPinned }: AppLauncherProps) {
+export function AppLauncher({ role = "student", isEduSupport = false, isSuperadmin = false, onLogout, sidebarPinned }: AppLauncherProps) {
   const [open, setOpen] = useState(false)
-  const categories = getMenuForRole(role, { isEduSupport })
+  const categories = getMenuForRole(role, { isEduSupport, isSuperadmin })
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {

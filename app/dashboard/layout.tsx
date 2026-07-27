@@ -12,6 +12,7 @@ import { useAuth } from "@/hooks/use-auth"
 import { DashboardSkeleton } from "@/components/loading-skeleton"
 import { getUserRole, ROLE_LABELS, ROLE_BADGE_COLORS } from "@/lib/roles"
 import { cn, toTitleCase } from "@/lib/utils"
+import { isSuperadmin } from "@/lib/types"
 import { initialTeachers } from "@/data/courses"
 
 const FULL_NAME_TO_TEACHER: Record<string, string> = Object.fromEntries(
@@ -38,7 +39,8 @@ export default function DashboardLayout({
   const isEduSupport = teacherId
     ? initialTeachers.find(t => t.id === teacherId)?.payType === "monthly-edu-support"
     : false
-  const categories = getMenuForRole(userRole, { isEduSupport })
+  const superadmin = isSuperadmin(user.email)
+  const categories = getMenuForRole(userRole, { isEduSupport, isSuperadmin: superadmin })
 
   return (
     <div className="flex min-h-screen flex-col bg-navy-50/30 dark:bg-navy-950">
@@ -80,6 +82,7 @@ export default function DashboardLayout({
             <AppLauncher
               role={userRole}
               isEduSupport={isEduSupport}
+              isSuperadmin={superadmin}
               onLogout={signOut}
               sidebarPinned={sidebarPinned}
               onTogglePin={() => setSidebarPinned((v) => !v)}

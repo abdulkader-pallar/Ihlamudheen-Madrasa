@@ -55,8 +55,22 @@ export interface Attendance {
   remarks: string | null;
 }
 
-// The single super-admin account allowed to create login accounts.
-export const SUPERADMIN_EMAIL = "cryptolife676@gmail.com";
+// The institute super-admins. ONLY these accounts may open the Accounts
+// (accounting) module and create login accounts. Every other user — including
+// other admins, teachers and office staff — is denied. This is mirrored in the
+// database by public.is_superadmin() (see
+// supabase/lock-accounting-to-superadmins.sql), which is the real security
+// boundary; the checks in the app are just the UI/route layer.
+export const SUPERADMIN_EMAILS = [
+  "cryptolife676@gmail.com",
+  "abdulkaderpallar@gmail.com",
+] as const;
+
+export const isSuperadmin = (email?: string | null): boolean =>
+  !!email && (SUPERADMIN_EMAILS as readonly string[]).includes(email.trim().toLowerCase());
+
+/** @deprecated use SUPERADMIN_EMAILS / isSuperadmin() */
+export const SUPERADMIN_EMAIL = SUPERADMIN_EMAILS[0];
 
 export const isEditor = (role?: Role | null) => role === "admin" || role === "accountant";
 

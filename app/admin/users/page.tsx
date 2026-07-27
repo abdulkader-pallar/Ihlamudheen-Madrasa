@@ -6,7 +6,7 @@ import { useData } from "@/components/admin/data-context";
 import { EmptyState, Panel, Spinner } from "@/components/admin/ui";
 import { toast } from "@/components/ui/toast";
 import { btn, cx, inputClass, labelClass } from "@/lib/ui";
-import { SUPERADMIN_EMAIL, type Role } from "@/lib/types";
+import { isSuperadmin, type Role } from "@/lib/types";
 
 type Row = { id: string; full_name: string | null; role: Role; created_at: string };
 
@@ -21,7 +21,7 @@ export default function UsersPage() {
   const { profile, supabase } = useData();
   const [rows, setRows] = useState<Row[] | null>(null);
   const isAdmin = profile.role === "admin";
-  const isSuperadmin = profile.email === SUPERADMIN_EMAIL;
+  const isSuperadminUser = isSuperadmin(profile.email);
 
   const load = useCallback(async () => {
     const { data, error } = await supabase
@@ -74,14 +74,14 @@ export default function UsersPage() {
           <ShieldCheck size={20} className="mt-0.5 shrink-0 text-brand" />
           <p className="text-[14px] text-muted">
             Roles control what each staff member can do.
-            {isSuperadmin
+            {isSuperadminUser
               ? " Add a new person below — they can sign in immediately with the email and password you set."
               : " New accounts are created by the super-admin; you can adjust their roles here."}
           </p>
         </div>
       </Panel>
 
-      {isSuperadmin && <AddUserForm onCreated={load} />}
+      {isSuperadminUser && <AddUserForm onCreated={load} />}
 
       <Panel title={`Staff (${rows.length})`}>
         {rows.length === 0 ? (
