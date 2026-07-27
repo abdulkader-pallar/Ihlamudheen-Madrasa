@@ -6,7 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { supabaseConfigured } from "@/lib/supabase/config";
-import { hasAccess, type Role } from "@/lib/types";
+import { hasAccess, isSuperadmin, type Role } from "@/lib/types";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { btn, cx } from "@/lib/ui";
 
@@ -51,6 +51,12 @@ export default function LoginPage() {
       .getUser()
       .then(async ({ data }) => {
         if (!data?.user) return;
+        // Super-admins land in the Accounts portal; everyone else in the school
+        // dashboard. Only a super-admin without accounting access is signed out.
+        if (!isSuperadmin(data.user.email)) {
+          router.replace("/dashboard");
+          return;
+        }
         const { data: p } = await sb.from("profiles").select("role").eq("id", data.user.id).single();
         if (p && hasAccess(p.role as Role)) router.replace("/admin");
         else await sb.auth.signOut();
@@ -63,9 +69,10 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
     const f = new FormData(e.currentTarget);
+    const email = String(f.get("email")).trim();
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithPassword({
-      email: String(f.get("email")).trim(),
+      email,
       password: String(f.get("password")),
     });
     if (error) {
@@ -73,7 +80,11 @@ export default function LoginPage() {
       setError(error.message || "Sign in failed.");
       return;
     }
-    const next = new URLSearchParams(window.location.search).get("next") || "/admin";
+    // Super-admins go to the Accounts portal; all other staff and students go
+    // to the school dashboard.
+    const next =
+      new URLSearchParams(window.location.search).get("next") ||
+      (isSuperadmin(email) ? "/admin" : "/dashboard");
     router.push(next);
     router.refresh();
   };
@@ -81,7 +92,7 @@ export default function LoginPage() {
   const oauth = async (provider: "google") => {
     setError("");
     setOauthBusy(provider);
-    const next = new URLSearchParams(window.location.search).get("next") || "/admin";
+    const next = new URLSearchParams(window.location.search).get("next") || "/dashboard";
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithOAuth({
       provider,

@@ -29,18 +29,20 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   // Signed in but not a registered/approved user (no profile, or role still
   // "pending") → sign out and bounce. This blocks unregistered Google/Apple
   // sign-ins from ever reaching the portal.
+  // The Accounts (accounting) module is restricted to the institute
+  // super-admins. Any other signed-in user — including other admins, teachers
+  // and office staff — is sent to the school dashboard instead. Checked FIRST,
+  // before the accounting-role check below, so a normal ERP user is simply
+  // redirected rather than being signed out. The database enforces the same
+  // rule via public.is_superadmin(), so the financial data is unreachable even
+  // outside this UI.
+  if (!isSuperadmin(user.email)) {
+    redirect("/dashboard");
+  }
+
   if (!profile || !hasAccess(profile.role)) {
     await supabase.auth.signOut();
     redirect(profile ? "/login?error=unauthorized" : "/login?error=no-access");
-  }
-
-  // The Accounts (accounting) module is restricted to the institute
-  // super-admins. Any other signed-in user — including other admins, teachers
-  // and office staff — is sent to the school dashboard instead. The database
-  // enforces the same rule via public.is_superadmin(), so the financial data is
-  // unreachable even outside this UI.
-  if (!isSuperadmin(user.email)) {
-    redirect("/dashboard");
   }
 
   return <AdminShell profile={profileWithEmail as Profile}>{children}</AdminShell>;
