@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { ShieldCheck, UserPlus, UserRound } from "lucide-react";
+import { ShieldCheck, Trash2, UserPlus, UserRound } from "lucide-react";
 import { useData } from "@/components/admin/data-context";
 import { EmptyState, Panel, Spinner } from "@/components/admin/ui";
 import { toast } from "@/components/ui/toast";
@@ -20,6 +20,7 @@ const ROLE_INFO: Record<Role, { label: string; desc: string; color: string }> = 
 export default function UsersPage() {
   const { profile, supabase } = useData();
   const [rows, setRows] = useState<Row[] | null>(null);
+  const [removingId, setRemovingId] = useState<string | null>(null);
   const isAdmin = profile.role === "admin";
   const isSuperadminUser = isSuperadmin(profile.email);
 
@@ -63,6 +64,27 @@ export default function UsersPage() {
     }
     toast(`${row.full_name || "User"} is now ${ROLE_INFO[role].label}`);
     await load();
+  };
+
+  const removeUser = async (row: Row) => {
+    const who = row.full_name || "this user";
+    if (!window.confirm(
+      `Remove ${who}?\n\nTheir login will be deleted permanently and they will lose all access. This cannot be undone.`
+    )) return;
+
+    setRemovingId(row.id);
+    try {
+      const res = await fetch(`/api/admin/users/${row.id}`, { method: "DELETE" });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        toast(body.error || "Could not remove that user.", true);
+        return;
+      }
+      toast(`${who} has been removed`);
+      await load();
+    } finally {
+      setRemovingId(null);
+    }
   };
 
   if (rows === null) return <Spinner />;
@@ -123,6 +145,18 @@ export default function UsersPage() {
                       </option>
                     ))}
                   </select>
+                  {/* Remove: super-admins only; never for yourself or another super-admin. */}
+                  {isSuperadminUser && !me && (
+                    <button
+                      onClick={() => removeUser(r)}
+                      disabled={removingId === r.id}
+                      title={`Remove ${r.full_name || "user"}`}
+                      aria-label={`Remove ${r.full_name || "user"}`}
+                      className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-line text-muted transition hover:border-bad hover:text-bad disabled:opacity-50"
+                    >
+                      <Trash2 size={17} />
+                    </button>
+                  )}
                 </div>
               );
             })}
