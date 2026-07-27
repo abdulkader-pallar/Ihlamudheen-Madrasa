@@ -1,11 +1,8 @@
--- >>> ERP SCHEMA v4 (users to profiles FIXED) -- if you do NOT see this exact line at the top, you have an OLD file, re-download <<<
+-- >>> ERP SCHEMA v5 (dependency-ordered) -- if line 1 is not v5, you have an OLD file, re-download <<<
 -- ============================================================================
 --  Ihlamudheen Madrasa — SCHOOL ERP schema (consolidated, collision-free)
---  Additive: creates NEW ERP tables only. Never touches accounting data
---  (attendance=staff, staff, categories, funds, transactions). Adds optional
---  columns to profiles. Re-runnable. Paste ALL into Supabase SQL Editor -> Run.
+--  Additive only; never touches accounting data. Re-runnable. Paste ALL -> Run.
 -- ============================================================================
-
 create or replace function public.is_admin()
 returns boolean language sql stable security definer set search_path = public as $do$
   select coalesce((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin'
@@ -147,418 +144,6 @@ CREATE POLICY "Admins and teachers can manage exam scores" ON public.exam_scores
   );
 
 
--- ==================== migration-add-profile-fields.sql ====================
--- Migration: Add phone and bio columns to users table
--- Run this in Supabase SQL Editor (https://supabase.com/dashboard > SQL Editor)
-
--- 1. Add missing columns
-ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS phone text;
-ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS bio text;
-
--- 2. Add INSERT policy so upsert works for users saving their own profile
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_policies
-    WHERE tablename = 'profiles' AND policyname = 'Users: insert own row'
-  ) THEN
-    DROP POLICY IF EXISTS "Users: insert own row" ON public.profiles;
-    CREATE POLICY "Users: insert own row" ON public.profiles FOR INSERT
-      WITH CHECK (auth.uid() = id);
-  END IF;
-END
-$$;
-
--- 3. Create avatars storage bucket (if it doesn't exist)
-INSERT INTO storage.buckets (id, name, public)
-VALUES ('avatars', 'avatars', true)
-ON CONFLICT (id) DO NOTHING;
-
--- 4. Storage policies for avatars bucket
-DO $$
-BEGIN
-  -- Allow authenticated users to upload their own avatar
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_policies
-    WHERE tablename = 'objects' AND policyname = 'Avatar upload'
-  ) THEN
-    DROP POLICY IF EXISTS "Avatar upload" ON storage.objects;
-    CREATE POLICY "Avatar upload" ON storage.objects FOR INSERT
-      WITH CHECK (
-        bucket_id = 'avatars'
-        AND auth.uid()::text = (storage.foldername(name))[1]
-      );
-  END IF;
-
-  -- Allow authenticated users to update their own avatar
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_policies
-    WHERE tablename = 'objects' AND policyname = 'Avatar update'
-  ) THEN
-    DROP POLICY IF EXISTS "Avatar update" ON storage.objects;
-    CREATE POLICY "Avatar update" ON storage.objects FOR UPDATE
-      USING (
-        bucket_id = 'avatars'
-        AND auth.uid()::text = (storage.foldername(name))[1]
-      );
-  END IF;
-
-  -- Allow anyone to read avatars (public bucket)
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_policies
-    WHERE tablename = 'objects' AND policyname = 'Avatar public read'
-  ) THEN
-    DROP POLICY IF EXISTS "Avatar public read" ON storage.objects;
-    CREATE POLICY "Avatar public read" ON storage.objects FOR SELECT
-      USING (bucket_id = 'avatars');
-  END IF;
-END
-$$;
-
-
--- ==================== migration-assessments.sql ====================
--- Assessments — link-based quizzes / tests / assignments (no file uploads)
--- Run in Supabase SQL Editor → New Query → Run
-
-CREATE TABLE IF NOT EXISTS public.assessments (
-  id           UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  class_id     TEXT NOT NULL,
-  teacher_id   TEXT NOT NULL,
-  teacher_name TEXT NOT NULL,
-  title        TEXT NOT NULL,
-  description  TEXT,
-  link_url     TEXT NOT NULL,
-  due_date     DATE,
-  max_marks    INTEGER,
-  created_at   TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE INDEX IF NOT EXISTS idx_assessments_class
-  ON public.assessments(class_id, created_at DESC);
-
-CREATE INDEX IF NOT EXISTS idx_assessments_teacher
-  ON public.assessments(teacher_id);
-
-ALTER TABLE public.assessments ENABLE ROW LEVEL SECURITY;
-
--- Public (anon) + authenticated read so students can see assessments
-DROP POLICY IF EXISTS "Anyone can read assessments" ON public.assessments;
-CREATE POLICY "Anyone can read assessments" ON public.assessments FOR SELECT
-  TO anon, authenticated
-  USING (true);
-
--- Authenticated (teachers/admins) can create/update/delete.
--- Ownership enforced in application layer.
-DROP POLICY IF EXISTS "Authenticated users can insert assessments" ON public.assessments;
-CREATE POLICY "Authenticated users can insert assessments" ON public.assessments FOR INSERT
-  TO authenticated
-  WITH CHECK (true);
-
-DROP POLICY IF EXISTS "Authenticated users can update assessments" ON public.assessments;
-CREATE POLICY "Authenticated users can update assessments" ON public.assessments FOR UPDATE
-  TO authenticated
-  USING (true);
-
-DROP POLICY IF EXISTS "Authenticated users can delete assessments" ON public.assessments;
-CREATE POLICY "Authenticated users can delete assessments" ON public.assessments FOR DELETE
-  TO authenticated
-  USING (true);
-
-
--- ==================== migration-attendance-requests.sql ====================
--- Teacher Self-Attendance Requests
--- Run this in Supabase SQL Editor → New Query → Run
-
-CREATE TABLE IF NOT EXISTS public.staff_attendance_requests (
-  id              UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  teacher_id      TEXT NOT NULL,
-  teacher_name    TEXT NOT NULL,
-  date            DATE NOT NULL,
-  morning_status  TEXT NOT NULL DEFAULT 'present',  -- present | absent | late
-  afternoon_status TEXT NOT NULL DEFAULT 'present', -- present | absent | late
-  transport_allowance BOOLEAN DEFAULT false,
-  session_type    TEXT NOT NULL DEFAULT 'offline',  -- online | offline
-  notes           TEXT,
-  status          TEXT NOT NULL DEFAULT 'pending',  -- pending | approved | rejected
-  submitted_at    TIMESTAMPTZ DEFAULT NOW(),
-  reviewed_by     TEXT,
-  reviewed_at     TIMESTAMPTZ,
-  UNIQUE(teacher_id, date)
-);
-
--- Allow authenticated users to insert/read their own requests
-ALTER TABLE public.staff_attendance_requests ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "Teachers can submit own requests" ON public.staff_attendance_requests;
-CREATE POLICY "Teachers can submit own requests" ON public.staff_attendance_requests FOR INSERT
-  TO authenticated
-  WITH CHECK (true);
-
-DROP POLICY IF EXISTS "Teachers can view own requests" ON public.staff_attendance_requests;
-CREATE POLICY "Teachers can view own requests" ON public.staff_attendance_requests FOR SELECT
-  TO authenticated
-  USING (true);
-
-DROP POLICY IF EXISTS "Admins can update requests" ON public.staff_attendance_requests;
-CREATE POLICY "Admins can update requests" ON public.staff_attendance_requests FOR UPDATE
-  TO authenticated
-  USING (true);
-
-
--- ==================== migration-fix-staff-attendance-rls.sql ====================
--- ══════════════════════════════════════════════════════════
--- Ihlamudheen — Fix: staff_attendance save errors
--- Run this in Supabase SQL Editor → New Query → Run
--- ══════════════════════════════════════════════════════════
-
--- 1. Ensure optional columns exist (safe if already added)
-ALTER TABLE public.staff_attendance ADD COLUMN IF NOT EXISTS transport_allowance BOOLEAN DEFAULT false;
-ALTER TABLE public.staff_attendance ADD COLUMN IF NOT EXISTS ta_remarks TEXT;
-ALTER TABLE public.staff_attendance ADD COLUMN IF NOT EXISTS arrival_time TIME;
-
--- 2. Drop old restrictive RLS policies and replace with permissive ones
-DROP POLICY IF EXISTS "Admin and accountant can manage staff attendance" ON public.staff_attendance;
-DROP POLICY IF EXISTS "Anyone authenticated can read staff attendance" ON public.staff_attendance;
-
--- Allow all authenticated users to read staff attendance
-DROP POLICY IF EXISTS "Authenticated users can read staff attendance" ON public.staff_attendance;
-CREATE POLICY "Authenticated users can read staff attendance" ON public.staff_attendance FOR SELECT
-  TO authenticated
-  USING (true);
-
--- Allow all authenticated users to insert/update (admin check is done in app layer)
-DROP POLICY IF EXISTS "Authenticated users can upsert staff attendance" ON public.staff_attendance;
-CREATE POLICY "Authenticated users can upsert staff attendance" ON public.staff_attendance FOR INSERT
-  TO authenticated
-  WITH CHECK (true);
-
-DROP POLICY IF EXISTS "Authenticated users can update staff attendance" ON public.staff_attendance;
-CREATE POLICY "Authenticated users can update staff attendance" ON public.staff_attendance FOR UPDATE
-  TO authenticated
-  USING (true)
-  WITH CHECK (true);
-
--- 3. Fix payments table RLS (old role-based policies can silently block updates)
-DROP POLICY IF EXISTS "Admin and accountant can read payments" ON public.payments;
-DROP POLICY IF EXISTS "Admin and accountant can manage payments" ON public.payments;
-
-DROP POLICY IF EXISTS "Authenticated users can read payments" ON public.payments;
-CREATE POLICY "Authenticated users can read payments" ON public.payments FOR SELECT
-  TO authenticated USING (true);
-
-DROP POLICY IF EXISTS "Authenticated users can insert payments" ON public.payments;
-CREATE POLICY "Authenticated users can insert payments" ON public.payments FOR INSERT
-  TO authenticated WITH CHECK (true);
-
-DROP POLICY IF EXISTS "Authenticated users can update payments" ON public.payments;
-CREATE POLICY "Authenticated users can update payments" ON public.payments FOR UPDATE
-  TO authenticated USING (true) WITH CHECK (true);
-
--- 4. Ensure staff_attendance_requests table exists (for teacher self-reporting)
-CREATE TABLE IF NOT EXISTS public.staff_attendance_requests (
-  id              UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  teacher_id      TEXT NOT NULL,
-  teacher_name    TEXT NOT NULL,
-  date            DATE NOT NULL,
-  morning_status  TEXT NOT NULL DEFAULT 'present',
-  afternoon_status TEXT NOT NULL DEFAULT 'present',
-  transport_allowance BOOLEAN DEFAULT false,
-  session_type    TEXT NOT NULL DEFAULT 'offline',
-  notes           TEXT,
-  status          TEXT NOT NULL DEFAULT 'pending',
-  submitted_at    TIMESTAMPTZ DEFAULT NOW(),
-  reviewed_by     TEXT,
-  reviewed_at     TIMESTAMPTZ,
-  UNIQUE(teacher_id, date)
-);
-
-ALTER TABLE public.staff_attendance_requests ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "Teachers can submit own requests" ON public.staff_attendance_requests;
-DROP POLICY IF EXISTS "Teachers can view own requests" ON public.staff_attendance_requests;
-DROP POLICY IF EXISTS "Admins can update requests" ON public.staff_attendance_requests;
-
-DROP POLICY IF EXISTS "Authenticated can insert requests" ON public.staff_attendance_requests;
-CREATE POLICY "Authenticated can insert requests" ON public.staff_attendance_requests FOR INSERT
-  TO authenticated WITH CHECK (true);
-
-DROP POLICY IF EXISTS "Authenticated can read requests" ON public.staff_attendance_requests;
-CREATE POLICY "Authenticated can read requests" ON public.staff_attendance_requests FOR SELECT
-  TO authenticated USING (true);
-
-DROP POLICY IF EXISTS "Authenticated can update requests" ON public.staff_attendance_requests;
-CREATE POLICY "Authenticated can update requests" ON public.staff_attendance_requests FOR UPDATE
-  TO authenticated USING (true) WITH CHECK (true);
-
-
--- ==================== migration-lms-notes.sql ====================
--- LMS Notes — link-based class notes (Google Drive, YouTube, Docs, etc.)
--- Run this in Supabase SQL Editor → New Query → Run
-
-CREATE TABLE IF NOT EXISTS public.lms_notes (
-  id           UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  class_id     TEXT NOT NULL,
-  teacher_id   TEXT NOT NULL,
-  teacher_name TEXT NOT NULL,
-  title        TEXT NOT NULL,
-  description  TEXT,
-  link_url     TEXT NOT NULL,
-  link_type    TEXT NOT NULL DEFAULT 'other',   -- drive | youtube | doc | other
-  created_at   TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE INDEX IF NOT EXISTS idx_lms_notes_class
-  ON public.lms_notes(class_id, created_at DESC);
-
-CREATE INDEX IF NOT EXISTS idx_lms_notes_teacher
-  ON public.lms_notes(teacher_id);
-
-ALTER TABLE public.lms_notes ENABLE ROW LEVEL SECURITY;
-
--- Students (anonymous) and teachers can read all notes
-DROP POLICY IF EXISTS "Anyone can read lms notes" ON public.lms_notes;
-CREATE POLICY "Anyone can read lms notes" ON public.lms_notes FOR SELECT
-  TO anon, authenticated
-  USING (true);
-
--- Authenticated users (teachers, admins) can add notes
-DROP POLICY IF EXISTS "Authenticated users can insert notes" ON public.lms_notes;
-CREATE POLICY "Authenticated users can insert notes" ON public.lms_notes FOR INSERT
-  TO authenticated
-  WITH CHECK (true);
-
--- Authenticated users can delete notes (ownership enforced in app layer)
-DROP POLICY IF EXISTS "Authenticated users can delete notes" ON public.lms_notes;
-CREATE POLICY "Authenticated users can delete notes" ON public.lms_notes FOR DELETE
-  TO authenticated
-  USING (true);
-
--- Authenticated users can update notes (ownership enforced in app layer)
-DROP POLICY IF EXISTS "Authenticated users can update notes" ON public.lms_notes;
-CREATE POLICY "Authenticated users can update notes" ON public.lms_notes FOR UPDATE
-  TO authenticated
-  USING (true);
-
-
--- ==================== migration-marked-by.sql ====================
--- ══════════════════════════════════════════════════════════
--- Ihlamudheen Madrasa — Migration: marked_by + TA columns
--- Run this in Supabase SQL Editor AFTER migration-staff-payments.sql
--- ══════════════════════════════════════════════════════════
-
--- 1. Add marked_by column to attendance table
---    Tracks which teacher/admin last marked each attendance record.
-ALTER TABLE public.student_attendance ADD COLUMN IF NOT EXISTS marked_by TEXT;
-
--- Index for fast lookups when displaying "last marked by" on class cards
-CREATE INDEX IF NOT EXISTS idx_attendance_marked_by ON public.student_attendance(class_id, date);
-
--- 2. Add missing transport_allowance and ta_remarks columns to staff_attendance
---    (These were used in code but missing from the original migration SQL)
-ALTER TABLE public.staff_attendance ADD COLUMN IF NOT EXISTS transport_allowance BOOLEAN DEFAULT false;
-ALTER TABLE public.staff_attendance ADD COLUMN IF NOT EXISTS ta_remarks TEXT;
-
--- 3. RLS: allow authenticated users to read marked_by
---    (already covered by existing attendance RLS policies — no extra policy needed)
-
-
--- ==================== migration-monthly-salaries.sql ====================
--- ══════════════════════════════════════════════════════════
--- Monthly Salaries — approval & payment audit trail
--- One row per (teacher_id, year, month). Computed by app from
--- staff_attendance + payroll rules, then persisted here at
--- approval time. Paid rows are LOCKED via trigger.
--- ══════════════════════════════════════════════════════════
-
-CREATE TABLE IF NOT EXISTS public.monthly_salaries (
-  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  teacher_id TEXT NOT NULL,
-  year SMALLINT NOT NULL CHECK (year BETWEEN 2024 AND 2100),
-  month SMALLINT NOT NULL CHECK (month BETWEEN 1 AND 12),
-
-  -- Snapshot of the calc at the moment of approval (frozen for audit)
-  days_present SMALLINT NOT NULL DEFAULT 0,
-  sessions SMALLINT NOT NULL DEFAULT 0,
-  hours NUMERIC(8,2) NOT NULL DEFAULT 0,
-  gross_pay NUMERIC(10,2) NOT NULL DEFAULT 0,
-  deductions NUMERIC(10,2) NOT NULL DEFAULT 0,
-  net_pay NUMERIC(10,2) NOT NULL DEFAULT 0,
-
-  -- Workflow state
-  status TEXT NOT NULL DEFAULT 'pending'
-    CHECK (status IN ('pending', 'approved', 'paid')),
-  approved_by UUID REFERENCES auth.users(id),
-  approved_at TIMESTAMPTZ,
-  paid_by UUID REFERENCES auth.users(id),
-  paid_at TIMESTAMPTZ,
-  payment_note TEXT,
-
-  created_at TIMESTAMPTZ DEFAULT now(),
-  updated_at TIMESTAMPTZ DEFAULT now(),
-
-  UNIQUE (teacher_id, year, month)
-);
-
-CREATE INDEX IF NOT EXISTS idx_monthly_salaries_year_month
-  ON public.monthly_salaries(year, month);
-CREATE INDEX IF NOT EXISTS idx_monthly_salaries_teacher
-  ON public.monthly_salaries(teacher_id);
-CREATE INDEX IF NOT EXISTS idx_monthly_salaries_status
-  ON public.monthly_salaries(status);
-
--- ── Immutability trigger: PAID rows cannot be altered ────
--- Only allow updates that keep the row in/transition to a valid state.
--- Once status='paid', any further UPDATE/DELETE is blocked.
-CREATE OR REPLACE FUNCTION public.lock_paid_salaries()
-RETURNS TRIGGER AS $$
-BEGIN
-  IF TG_OP = 'UPDATE' AND OLD.status = 'paid' THEN
-    RAISE EXCEPTION 'Cannot modify a paid salary record (teacher=%, %-%). Paid records are immutable.',
-      OLD.teacher_id, OLD.year, OLD.month;
-  END IF;
-  IF TG_OP = 'DELETE' AND OLD.status = 'paid' THEN
-    RAISE EXCEPTION 'Cannot delete a paid salary record (teacher=%, %-%). Paid records are immutable.',
-      OLD.teacher_id, OLD.year, OLD.month;
-  END IF;
-
-  -- Touch updated_at on UPDATE
-  IF TG_OP = 'UPDATE' THEN
-    NEW.updated_at = now();
-  END IF;
-
-  RETURN COALESCE(NEW, OLD);
-END;
-$$ LANGUAGE plpgsql;
-
-DROP TRIGGER IF EXISTS trg_lock_paid_salaries_upd ON public.monthly_salaries;
-CREATE TRIGGER trg_lock_paid_salaries_upd
-  BEFORE UPDATE ON public.monthly_salaries
-  FOR EACH ROW EXECUTE FUNCTION public.lock_paid_salaries();
-
-DROP TRIGGER IF EXISTS trg_lock_paid_salaries_del ON public.monthly_salaries;
-CREATE TRIGGER trg_lock_paid_salaries_del
-  BEFORE DELETE ON public.monthly_salaries
-  FOR EACH ROW EXECUTE FUNCTION public.lock_paid_salaries();
-
--- ── RLS ──────────────────────────────────────────────────
-ALTER TABLE public.monthly_salaries ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "Admin/accountant read salaries"  ON public.monthly_salaries;
-DROP POLICY IF EXISTS "Admin/accountant write salaries" ON public.monthly_salaries;
-
-DROP POLICY IF EXISTS "Admin/accountant read salaries" ON public.monthly_salaries;
-CREATE POLICY "Admin/accountant read salaries" ON public.monthly_salaries FOR SELECT TO authenticated
-  USING ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'accountant'));
-
-DROP POLICY IF EXISTS "Admin/accountant write salaries" ON public.monthly_salaries;
-CREATE POLICY "Admin/accountant write salaries" ON public.monthly_salaries FOR ALL TO authenticated
-  USING ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'accountant'))
-  WITH CHECK ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'accountant'));
-
--- ── Enable realtime ──────────────────────────────────────
-ALTER PUBLICATION supabase_realtime ADD TABLE public.monthly_salaries;
-
-
 -- ==================== migration-staff-payments.sql ====================
 -- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 -- Ihlamudheen Madrasa â€” Staff, Attendance & Payment Tables
@@ -656,6 +241,241 @@ CREATE POLICY "Admin and accountant can manage payments" ON public.payments FOR 
 -- reference project are intentionally NOT included. Add your own staff
 -- via the app (Setup / Add Staff) or your own INSERT statements.
 -- ══════════════════════════════════════════════════════════
+
+
+-- ==================== migration-assessments.sql ====================
+-- Assessments — link-based quizzes / tests / assignments (no file uploads)
+-- Run in Supabase SQL Editor → New Query → Run
+
+CREATE TABLE IF NOT EXISTS public.assessments (
+  id           UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  class_id     TEXT NOT NULL,
+  teacher_id   TEXT NOT NULL,
+  teacher_name TEXT NOT NULL,
+  title        TEXT NOT NULL,
+  description  TEXT,
+  link_url     TEXT NOT NULL,
+  due_date     DATE,
+  max_marks    INTEGER,
+  created_at   TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_assessments_class
+  ON public.assessments(class_id, created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_assessments_teacher
+  ON public.assessments(teacher_id);
+
+ALTER TABLE public.assessments ENABLE ROW LEVEL SECURITY;
+
+-- Public (anon) + authenticated read so students can see assessments
+DROP POLICY IF EXISTS "Anyone can read assessments" ON public.assessments;
+CREATE POLICY "Anyone can read assessments" ON public.assessments FOR SELECT
+  TO anon, authenticated
+  USING (true);
+
+-- Authenticated (teachers/admins) can create/update/delete.
+-- Ownership enforced in application layer.
+DROP POLICY IF EXISTS "Authenticated users can insert assessments" ON public.assessments;
+CREATE POLICY "Authenticated users can insert assessments" ON public.assessments FOR INSERT
+  TO authenticated
+  WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Authenticated users can update assessments" ON public.assessments;
+CREATE POLICY "Authenticated users can update assessments" ON public.assessments FOR UPDATE
+  TO authenticated
+  USING (true);
+
+DROP POLICY IF EXISTS "Authenticated users can delete assessments" ON public.assessments;
+CREATE POLICY "Authenticated users can delete assessments" ON public.assessments FOR DELETE
+  TO authenticated
+  USING (true);
+
+
+-- ==================== migration-attendance-requests.sql ====================
+-- Teacher Self-Attendance Requests
+-- Run this in Supabase SQL Editor → New Query → Run
+
+CREATE TABLE IF NOT EXISTS public.staff_attendance_requests (
+  id              UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  teacher_id      TEXT NOT NULL,
+  teacher_name    TEXT NOT NULL,
+  date            DATE NOT NULL,
+  morning_status  TEXT NOT NULL DEFAULT 'present',  -- present | absent | late
+  afternoon_status TEXT NOT NULL DEFAULT 'present', -- present | absent | late
+  transport_allowance BOOLEAN DEFAULT false,
+  session_type    TEXT NOT NULL DEFAULT 'offline',  -- online | offline
+  notes           TEXT,
+  status          TEXT NOT NULL DEFAULT 'pending',  -- pending | approved | rejected
+  submitted_at    TIMESTAMPTZ DEFAULT NOW(),
+  reviewed_by     TEXT,
+  reviewed_at     TIMESTAMPTZ,
+  UNIQUE(teacher_id, date)
+);
+
+-- Allow authenticated users to insert/read their own requests
+ALTER TABLE public.staff_attendance_requests ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Teachers can submit own requests" ON public.staff_attendance_requests;
+CREATE POLICY "Teachers can submit own requests" ON public.staff_attendance_requests FOR INSERT
+  TO authenticated
+  WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Teachers can view own requests" ON public.staff_attendance_requests;
+CREATE POLICY "Teachers can view own requests" ON public.staff_attendance_requests FOR SELECT
+  TO authenticated
+  USING (true);
+
+DROP POLICY IF EXISTS "Admins can update requests" ON public.staff_attendance_requests;
+CREATE POLICY "Admins can update requests" ON public.staff_attendance_requests FOR UPDATE
+  TO authenticated
+  USING (true);
+
+
+-- ==================== migration-lms-notes.sql ====================
+-- LMS Notes — link-based class notes (Google Drive, YouTube, Docs, etc.)
+-- Run this in Supabase SQL Editor → New Query → Run
+
+CREATE TABLE IF NOT EXISTS public.lms_notes (
+  id           UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  class_id     TEXT NOT NULL,
+  teacher_id   TEXT NOT NULL,
+  teacher_name TEXT NOT NULL,
+  title        TEXT NOT NULL,
+  description  TEXT,
+  link_url     TEXT NOT NULL,
+  link_type    TEXT NOT NULL DEFAULT 'other',   -- drive | youtube | doc | other
+  created_at   TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_lms_notes_class
+  ON public.lms_notes(class_id, created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_lms_notes_teacher
+  ON public.lms_notes(teacher_id);
+
+ALTER TABLE public.lms_notes ENABLE ROW LEVEL SECURITY;
+
+-- Students (anonymous) and teachers can read all notes
+DROP POLICY IF EXISTS "Anyone can read lms notes" ON public.lms_notes;
+CREATE POLICY "Anyone can read lms notes" ON public.lms_notes FOR SELECT
+  TO anon, authenticated
+  USING (true);
+
+-- Authenticated users (teachers, admins) can add notes
+DROP POLICY IF EXISTS "Authenticated users can insert notes" ON public.lms_notes;
+CREATE POLICY "Authenticated users can insert notes" ON public.lms_notes FOR INSERT
+  TO authenticated
+  WITH CHECK (true);
+
+-- Authenticated users can delete notes (ownership enforced in app layer)
+DROP POLICY IF EXISTS "Authenticated users can delete notes" ON public.lms_notes;
+CREATE POLICY "Authenticated users can delete notes" ON public.lms_notes FOR DELETE
+  TO authenticated
+  USING (true);
+
+-- Authenticated users can update notes (ownership enforced in app layer)
+DROP POLICY IF EXISTS "Authenticated users can update notes" ON public.lms_notes;
+CREATE POLICY "Authenticated users can update notes" ON public.lms_notes FOR UPDATE
+  TO authenticated
+  USING (true);
+
+
+-- ==================== migration-monthly-salaries.sql ====================
+-- ══════════════════════════════════════════════════════════
+-- Monthly Salaries — approval & payment audit trail
+-- One row per (teacher_id, year, month). Computed by app from
+-- staff_attendance + payroll rules, then persisted here at
+-- approval time. Paid rows are LOCKED via trigger.
+-- ══════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS public.monthly_salaries (
+  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  teacher_id TEXT NOT NULL,
+  year SMALLINT NOT NULL CHECK (year BETWEEN 2024 AND 2100),
+  month SMALLINT NOT NULL CHECK (month BETWEEN 1 AND 12),
+
+  -- Snapshot of the calc at the moment of approval (frozen for audit)
+  days_present SMALLINT NOT NULL DEFAULT 0,
+  sessions SMALLINT NOT NULL DEFAULT 0,
+  hours NUMERIC(8,2) NOT NULL DEFAULT 0,
+  gross_pay NUMERIC(10,2) NOT NULL DEFAULT 0,
+  deductions NUMERIC(10,2) NOT NULL DEFAULT 0,
+  net_pay NUMERIC(10,2) NOT NULL DEFAULT 0,
+
+  -- Workflow state
+  status TEXT NOT NULL DEFAULT 'pending'
+    CHECK (status IN ('pending', 'approved', 'paid')),
+  approved_by UUID REFERENCES auth.users(id),
+  approved_at TIMESTAMPTZ,
+  paid_by UUID REFERENCES auth.users(id),
+  paid_at TIMESTAMPTZ,
+  payment_note TEXT,
+
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now(),
+
+  UNIQUE (teacher_id, year, month)
+);
+
+CREATE INDEX IF NOT EXISTS idx_monthly_salaries_year_month
+  ON public.monthly_salaries(year, month);
+CREATE INDEX IF NOT EXISTS idx_monthly_salaries_teacher
+  ON public.monthly_salaries(teacher_id);
+CREATE INDEX IF NOT EXISTS idx_monthly_salaries_status
+  ON public.monthly_salaries(status);
+
+-- ── Immutability trigger: PAID rows cannot be altered ────
+-- Only allow updates that keep the row in/transition to a valid state.
+-- Once status='paid', any further UPDATE/DELETE is blocked.
+CREATE OR REPLACE FUNCTION public.lock_paid_salaries()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF TG_OP = 'UPDATE' AND OLD.status = 'paid' THEN
+    RAISE EXCEPTION 'Cannot modify a paid salary record (teacher=%, %-%). Paid records are immutable.',
+      OLD.teacher_id, OLD.year, OLD.month;
+  END IF;
+  IF TG_OP = 'DELETE' AND OLD.status = 'paid' THEN
+    RAISE EXCEPTION 'Cannot delete a paid salary record (teacher=%, %-%). Paid records are immutable.',
+      OLD.teacher_id, OLD.year, OLD.month;
+  END IF;
+
+  -- Touch updated_at on UPDATE
+  IF TG_OP = 'UPDATE' THEN
+    NEW.updated_at = now();
+  END IF;
+
+  RETURN COALESCE(NEW, OLD);
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_lock_paid_salaries_upd ON public.monthly_salaries;
+CREATE TRIGGER trg_lock_paid_salaries_upd
+  BEFORE UPDATE ON public.monthly_salaries
+  FOR EACH ROW EXECUTE FUNCTION public.lock_paid_salaries();
+
+DROP TRIGGER IF EXISTS trg_lock_paid_salaries_del ON public.monthly_salaries;
+CREATE TRIGGER trg_lock_paid_salaries_del
+  BEFORE DELETE ON public.monthly_salaries
+  FOR EACH ROW EXECUTE FUNCTION public.lock_paid_salaries();
+
+-- ── RLS ──────────────────────────────────────────────────
+ALTER TABLE public.monthly_salaries ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Admin/accountant read salaries"  ON public.monthly_salaries;
+DROP POLICY IF EXISTS "Admin/accountant write salaries" ON public.monthly_salaries;
+
+DROP POLICY IF EXISTS "Admin/accountant read salaries" ON public.monthly_salaries;
+CREATE POLICY "Admin/accountant read salaries" ON public.monthly_salaries FOR SELECT TO authenticated
+  USING ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'accountant'));
+
+DROP POLICY IF EXISTS "Admin/accountant write salaries" ON public.monthly_salaries;
+CREATE POLICY "Admin/accountant write salaries" ON public.monthly_salaries FOR ALL TO authenticated
+  USING ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'accountant'))
+  WITH CHECK ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'accountant'));
+
+-- ── Enable realtime ──────────────────────────────────────
+ALTER PUBLICATION supabase_realtime ADD TABLE public.monthly_salaries;
 
 
 -- ==================== migration-storage-photos.sql ====================
@@ -765,6 +585,183 @@ SELECT column_name, data_type
 FROM information_schema.columns
 WHERE table_schema = 'public' AND table_name = 'students'
 ORDER BY ordinal_position;
+
+
+-- ==================== migration-add-profile-fields.sql ====================
+-- Migration: Add phone and bio columns to users table
+-- Run this in Supabase SQL Editor (https://supabase.com/dashboard > SQL Editor)
+
+-- 1. Add missing columns
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS phone text;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS bio text;
+
+-- 2. Add INSERT policy so upsert works for users saving their own profile
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE tablename = 'profiles' AND policyname = 'Users: insert own row'
+  ) THEN
+    DROP POLICY IF EXISTS "Users: insert own row" ON public.profiles;
+    CREATE POLICY "Users: insert own row" ON public.profiles FOR INSERT
+      WITH CHECK (auth.uid() = id);
+  END IF;
+END
+$$;
+
+-- 3. Create avatars storage bucket (if it doesn't exist)
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('avatars', 'avatars', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- 4. Storage policies for avatars bucket
+DO $$
+BEGIN
+  -- Allow authenticated users to upload their own avatar
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE tablename = 'objects' AND policyname = 'Avatar upload'
+  ) THEN
+    DROP POLICY IF EXISTS "Avatar upload" ON storage.objects;
+    CREATE POLICY "Avatar upload" ON storage.objects FOR INSERT
+      WITH CHECK (
+        bucket_id = 'avatars'
+        AND auth.uid()::text = (storage.foldername(name))[1]
+      );
+  END IF;
+
+  -- Allow authenticated users to update their own avatar
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE tablename = 'objects' AND policyname = 'Avatar update'
+  ) THEN
+    DROP POLICY IF EXISTS "Avatar update" ON storage.objects;
+    CREATE POLICY "Avatar update" ON storage.objects FOR UPDATE
+      USING (
+        bucket_id = 'avatars'
+        AND auth.uid()::text = (storage.foldername(name))[1]
+      );
+  END IF;
+
+  -- Allow anyone to read avatars (public bucket)
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE tablename = 'objects' AND policyname = 'Avatar public read'
+  ) THEN
+    DROP POLICY IF EXISTS "Avatar public read" ON storage.objects;
+    CREATE POLICY "Avatar public read" ON storage.objects FOR SELECT
+      USING (bucket_id = 'avatars');
+  END IF;
+END
+$$;
+
+
+-- ==================== migration-fix-staff-attendance-rls.sql ====================
+-- ══════════════════════════════════════════════════════════
+-- Ihlamudheen — Fix: staff_attendance save errors
+-- Run this in Supabase SQL Editor → New Query → Run
+-- ══════════════════════════════════════════════════════════
+
+-- 1. Ensure optional columns exist (safe if already added)
+ALTER TABLE public.staff_attendance ADD COLUMN IF NOT EXISTS transport_allowance BOOLEAN DEFAULT false;
+ALTER TABLE public.staff_attendance ADD COLUMN IF NOT EXISTS ta_remarks TEXT;
+ALTER TABLE public.staff_attendance ADD COLUMN IF NOT EXISTS arrival_time TIME;
+
+-- 2. Drop old restrictive RLS policies and replace with permissive ones
+DROP POLICY IF EXISTS "Admin and accountant can manage staff attendance" ON public.staff_attendance;
+DROP POLICY IF EXISTS "Anyone authenticated can read staff attendance" ON public.staff_attendance;
+
+-- Allow all authenticated users to read staff attendance
+DROP POLICY IF EXISTS "Authenticated users can read staff attendance" ON public.staff_attendance;
+CREATE POLICY "Authenticated users can read staff attendance" ON public.staff_attendance FOR SELECT
+  TO authenticated
+  USING (true);
+
+-- Allow all authenticated users to insert/update (admin check is done in app layer)
+DROP POLICY IF EXISTS "Authenticated users can upsert staff attendance" ON public.staff_attendance;
+CREATE POLICY "Authenticated users can upsert staff attendance" ON public.staff_attendance FOR INSERT
+  TO authenticated
+  WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Authenticated users can update staff attendance" ON public.staff_attendance;
+CREATE POLICY "Authenticated users can update staff attendance" ON public.staff_attendance FOR UPDATE
+  TO authenticated
+  USING (true)
+  WITH CHECK (true);
+
+-- 3. Fix payments table RLS (old role-based policies can silently block updates)
+DROP POLICY IF EXISTS "Admin and accountant can read payments" ON public.payments;
+DROP POLICY IF EXISTS "Admin and accountant can manage payments" ON public.payments;
+
+DROP POLICY IF EXISTS "Authenticated users can read payments" ON public.payments;
+CREATE POLICY "Authenticated users can read payments" ON public.payments FOR SELECT
+  TO authenticated USING (true);
+
+DROP POLICY IF EXISTS "Authenticated users can insert payments" ON public.payments;
+CREATE POLICY "Authenticated users can insert payments" ON public.payments FOR INSERT
+  TO authenticated WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Authenticated users can update payments" ON public.payments;
+CREATE POLICY "Authenticated users can update payments" ON public.payments FOR UPDATE
+  TO authenticated USING (true) WITH CHECK (true);
+
+-- 4. Ensure staff_attendance_requests table exists (for teacher self-reporting)
+CREATE TABLE IF NOT EXISTS public.staff_attendance_requests (
+  id              UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  teacher_id      TEXT NOT NULL,
+  teacher_name    TEXT NOT NULL,
+  date            DATE NOT NULL,
+  morning_status  TEXT NOT NULL DEFAULT 'present',
+  afternoon_status TEXT NOT NULL DEFAULT 'present',
+  transport_allowance BOOLEAN DEFAULT false,
+  session_type    TEXT NOT NULL DEFAULT 'offline',
+  notes           TEXT,
+  status          TEXT NOT NULL DEFAULT 'pending',
+  submitted_at    TIMESTAMPTZ DEFAULT NOW(),
+  reviewed_by     TEXT,
+  reviewed_at     TIMESTAMPTZ,
+  UNIQUE(teacher_id, date)
+);
+
+ALTER TABLE public.staff_attendance_requests ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Teachers can submit own requests" ON public.staff_attendance_requests;
+DROP POLICY IF EXISTS "Teachers can view own requests" ON public.staff_attendance_requests;
+DROP POLICY IF EXISTS "Admins can update requests" ON public.staff_attendance_requests;
+
+DROP POLICY IF EXISTS "Authenticated can insert requests" ON public.staff_attendance_requests;
+CREATE POLICY "Authenticated can insert requests" ON public.staff_attendance_requests FOR INSERT
+  TO authenticated WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Authenticated can read requests" ON public.staff_attendance_requests;
+CREATE POLICY "Authenticated can read requests" ON public.staff_attendance_requests FOR SELECT
+  TO authenticated USING (true);
+
+DROP POLICY IF EXISTS "Authenticated can update requests" ON public.staff_attendance_requests;
+CREATE POLICY "Authenticated can update requests" ON public.staff_attendance_requests FOR UPDATE
+  TO authenticated USING (true) WITH CHECK (true);
+
+
+-- ==================== migration-marked-by.sql ====================
+-- ══════════════════════════════════════════════════════════
+-- Ihlamudheen Madrasa — Migration: marked_by + TA columns
+-- Run this in Supabase SQL Editor AFTER migration-staff-payments.sql
+-- ══════════════════════════════════════════════════════════
+
+-- 1. Add marked_by column to attendance table
+--    Tracks which teacher/admin last marked each attendance record.
+ALTER TABLE public.student_attendance ADD COLUMN IF NOT EXISTS marked_by TEXT;
+
+-- Index for fast lookups when displaying "last marked by" on class cards
+CREATE INDEX IF NOT EXISTS idx_attendance_marked_by ON public.student_attendance(class_id, date);
+
+-- 2. Add missing transport_allowance and ta_remarks columns to staff_attendance
+--    (These were used in code but missing from the original migration SQL)
+ALTER TABLE public.staff_attendance ADD COLUMN IF NOT EXISTS transport_allowance BOOLEAN DEFAULT false;
+ALTER TABLE public.staff_attendance ADD COLUMN IF NOT EXISTS ta_remarks TEXT;
+
+-- 3. RLS: allow authenticated users to read marked_by
+--    (already covered by existing attendance RLS policies — no extra policy needed)
 
 
 -- ==================== migrations/20260516000000_student_self_reports.sql ====================
