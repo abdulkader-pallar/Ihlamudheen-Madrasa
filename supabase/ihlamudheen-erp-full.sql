@@ -1,3 +1,4 @@
+-- >>> ERP SCHEMA v4 (users to profiles FIXED) -- if you do NOT see this exact line at the top, you have an OLD file, re-download <<<
 -- ============================================================================
 --  Ihlamudheen Madrasa — SCHOOL ERP schema (consolidated, collision-free)
 --  Additive: creates NEW ERP tables only. Never touches accounting data
