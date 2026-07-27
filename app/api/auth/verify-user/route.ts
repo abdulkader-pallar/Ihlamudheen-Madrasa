@@ -7,7 +7,8 @@ import { authenticate } from "@/lib/api-auth"
 // Add your own staff here; keys are lower-cased emails. Keep in sync with
 // setup-teachers/route.ts. Only the super-admin is seeded by default.
 const AUTHORIZED: Record<string, { role: "admin" | "teacher" | "accountant"; name: string; teacherId?: string }> = {
-  "cryptolife676@gmail.com":       { role: "admin",   name: "Administrator" },
+  "cryptolife676@gmail.com":     { role: "admin", name: "Administrator" },
+  "abdulkaderpallar@gmail.com":  { role: "admin", name: "Administrator" },
 }
 
 export async function POST(req: NextRequest) {
