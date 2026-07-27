@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js"
 import { NextResponse } from "next/server"
 import type { UserRole } from "@/lib/roles"
 import { requireRole } from "@/lib/api-auth"
+import { isSuperadmin } from "@/lib/types"
 
 function adminClient() {
   return createClient(
@@ -61,6 +62,13 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
   }
 
   const client = adminClient()
+
+  // Super-admin accounts can never be deleted, from anywhere.
+  const { data: target } = await client.auth.admin.getUserById(id)
+  if (target?.user && isSuperadmin(target.user.email)) {
+    return NextResponse.json({ error: "Super-admin accounts cannot be removed." }, { status: 400 })
+  }
+
   const { error } = await client.auth.admin.deleteUser(id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ success: true })

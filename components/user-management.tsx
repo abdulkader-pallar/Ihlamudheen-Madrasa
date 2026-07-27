@@ -17,6 +17,7 @@ import { useAuth } from "@/hooks/use-auth"
 import { getUserRole, ROLE_BADGE_COLORS, ROLE_LABELS } from "@/lib/roles"
 import type { UserRole } from "@/lib/roles"
 import { initialTeachers } from "@/data/courses"
+import { isSuperadmin } from "@/lib/types"
 
 // A person the admin can pick from when adding a user, so existing details are
 // not retyped. Sourced from current platform accounts + the teacher roster.
@@ -562,9 +563,12 @@ export function UserManagement() {
                               <button onClick={() => { setResetPasswordId(resetPasswordId === u.id ? null : u.id); setNewPassword("") }} className="p-1 rounded hover:bg-navy-100 dark:hover:bg-navy-700 text-amber-500 hover:text-amber-600" title="Reset password">
                                 <KeyRound className="size-3.5" />
                               </button>
-                              <button onClick={() => handleRemoveUser(u.id)} className="p-1 rounded hover:bg-red-50 dark:hover:bg-red-500/10 text-red-400 hover:text-red-600" title="Remove user">
-                                <Trash2 className="size-3.5" />
-                              </button>
+                              {/* Super-admin accounts can never be removed. */}
+                              {!isSuperadmin(u.email) && (
+                                <button onClick={() => handleRemoveUser(u.id)} className="p-1 rounded hover:bg-red-50 dark:hover:bg-red-500/10 text-red-400 hover:text-red-600" title="Remove user">
+                                  <Trash2 className="size-3.5" />
+                                </button>
+                              )}
                             </div>
                             {resetPasswordId === u.id && (
                               <div className="flex items-center gap-1 mt-1">
