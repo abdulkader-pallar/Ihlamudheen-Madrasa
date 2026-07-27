@@ -21,6 +21,8 @@ export default function UsersPage() {
   const { profile, supabase } = useData();
   const [rows, setRows] = useState<Row[] | null>(null);
   const [removingId, setRemovingId] = useState<string | null>(null);
+  // Super-admin account ids — these can never be removed, so no Remove button.
+  const [superadminIds, setSuperadminIds] = useState<string[]>([]);
   const isAdmin = profile.role === "admin";
   const isSuperadminUser = isSuperadmin(profile.email);
 
@@ -40,6 +42,14 @@ export default function UsersPage() {
   useEffect(() => {
     if (isAdmin) load();
   }, [isAdmin, load]);
+
+  useEffect(() => {
+    if (!isSuperadminUser) return;
+    fetch("/api/admin/users")
+      .then((r) => r.json())
+      .then((d) => setSuperadminIds(d.superadminIds ?? []))
+      .catch(() => {});
+  }, [isSuperadminUser]);
 
   if (!isAdmin) {
     return (
@@ -145,8 +155,8 @@ export default function UsersPage() {
                       </option>
                     ))}
                   </select>
-                  {/* Remove: super-admins only; never for yourself or another super-admin. */}
-                  {isSuperadminUser && !me && (
+                  {/* Remove: super-admins only; never on a super-admin's row. */}
+                  {isSuperadminUser && !me && !superadminIds.includes(r.id) && (
                     <button
                       onClick={() => removeUser(r)}
                       disabled={removingId === r.id}

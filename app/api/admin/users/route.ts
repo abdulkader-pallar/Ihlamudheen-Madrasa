@@ -8,6 +8,28 @@ export const dynamic = "force-dynamic";
 
 const ALLOWED_ROLES: Role[] = ["admin", "accountant", "viewer"];
 
+// GET /api/admin/users — returns the ids of the super-admin accounts so the UI
+// can hide destructive controls (Remove) for them. Super-admins only; returns
+// an empty list to anyone else rather than leaking who the super-admins are.
+export async function GET() {
+  const empty = NextResponse.json({ superadminIds: [] as string[] });
+  if (!SERVICE_ROLE_KEY) return empty;
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user || !isSuperadmin(user.email)) return empty;
+
+  const admin = createAdminClient();
+  const { data, error } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+  if (error) return empty;
+
+  const superadminIds = (data?.users ?? [])
+    .filter((u) => isSuperadmin(u.email))
+    .map((u) => u.id);
+
+  return NextResponse.json({ superadminIds });
+}
+
 // POST /api/admin/users — create a login account.
 // Restricted to the institute super-admins (see SUPERADMIN_EMAILS in
 // lib/types.ts). Identity is taken from the caller's httpOnly session cookie,
