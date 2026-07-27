@@ -67,6 +67,9 @@ export function UserManagement() {
   const [newPhone, setNewPhone] = useState("")
   const [newGender, setNewGender] = useState<"" | "male" | "female">("")
   const [newRole, setNewRole] = useState<UserRole>("student")
+  // Optional: set the person's first password yourself. Left blank, a secure
+  // one is generated and shown once after creation.
+  const [newTempPassword, setNewTempPassword] = useState("")
   const [addError, setAddError] = useState<string | null>(null)
   // Autocomplete state for the add-user form.
   const [activeField, setActiveField] = useState<null | "name" | "id" | "email" | "phone">(null)
@@ -196,7 +199,7 @@ export function UserManagement() {
   }
 
   const resetAddForm = () => {
-    setNewName(""); setNewIdNumber(""); setNewEmail(""); setNewPhone(""); setNewGender(""); setNewRole("student"); setAddError(null)
+    setNewName(""); setNewIdNumber(""); setNewEmail(""); setNewPhone(""); setNewGender(""); setNewRole("student"); setNewTempPassword(""); setAddError(null)
     setActiveField(null); setDupNotice(null)
   }
 
@@ -220,6 +223,12 @@ export function UserManagement() {
       setAddError("Enter a valid phone number.")
       return
     }
+    // Password is optional — but if one is typed it must be usable.
+    const tempPassword = newTempPassword.trim()
+    if (tempPassword && tempPassword.length < 8) {
+      setAddError("The temporary password must be at least 8 characters (or leave it blank to generate one).")
+      return
+    }
 
     setAddError(null)
     setSaving(true)
@@ -227,13 +236,19 @@ export function UserManagement() {
       const res = await authFetch("/api/erp/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, idNumber, email, phone, gender: newGender, role: newRole }),
+        body: JSON.stringify({
+          name, idNumber, email, phone, gender: newGender, role: newRole,
+          ...(tempPassword ? { password: tempPassword } : {}),
+        }),
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error)
-      if (json.tempPassword) {
+      // The server returns a generated password when none was supplied; when
+      // you set one yourself, show that back so it can be shared right away.
+      const shown = json.tempPassword || tempPassword
+      if (shown) {
         window.alert(
-          `User created.\n\nTemporary password: ${json.tempPassword}\n\nShare it securely. They should change it on first login.`
+          `User created.\n\nEmail: ${email}\nTemporary password: ${shown}\n\nShare it securely. They should change it on first login.`
         )
       }
       resetAddForm(); setShowAddUser(false)
@@ -433,6 +448,19 @@ export function UserManagement() {
                     ))}
                   </select>
                 </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-navy-600 dark:text-navy-300">
+                    Temporary password <span className="font-normal text-navy-400">(optional)</span>
+                  </label>
+                  <Input
+                    type="text"
+                    autoComplete="new-password"
+                    placeholder="Leave blank to generate one"
+                    value={newTempPassword}
+                    onChange={(e) => { setNewTempPassword(e.target.value); setAddError(null) }}
+                  />
+                  <p className="text-[11px] text-navy-400">At least 8 characters. Shown once after creation.</p>
+                </div>
               </div>
               {dupNotice && (
                 <p className="rounded-md border border-amber-500/40 bg-amber-50/60 dark:bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-400">
@@ -440,7 +468,7 @@ export function UserManagement() {
                 </p>
               )}
               {addError && <p className="text-xs text-red-500">{addError}</p>}
-              <p className="text-xs text-navy-400">Start typing a name, ID, email, or phone to pick from existing records — details auto-fill. A unique temporary password is generated and shown once after creation.</p>
+              <p className="text-xs text-navy-400">Start typing a name, ID, email, or phone to pick from existing records — details auto-fill. Set a temporary password above, or leave it blank and a secure one is generated. Either way it is shown once after creation.</p>
               <div className="flex gap-2">
                 <Button className="bg-gold-500 text-navy-950 hover:bg-gold-400" onClick={handleAddUser} disabled={saving}>
                   <Save className="size-4 mr-1" /> {saving ? "Creating..." : "Create User"}
