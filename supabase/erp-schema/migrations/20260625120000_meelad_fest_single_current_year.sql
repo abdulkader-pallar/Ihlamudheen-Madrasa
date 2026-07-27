@@ -103,10 +103,8 @@ BEGIN
       'tie_break',         'rank_then_grade_count'
     )
   FROM (VALUES
-    ('1', 'Ihlamudheen Madrasa Malayalam Madrasa'),
-    ('2', 'Ihlamudheen Madrasa English Madrasa'),
-    ('3', 'CIBIS Certification'),
-    ('4', 'Ihlamudheen Madrasa EDU Support')
+    ('1', 'Ihlamudheen Madrasa'),
+    ('2', 'Kammu Musliyar Memorial School')
   ) AS c(cid, cname)
   WHERE NOT EXISTS (
     SELECT 1 FROM public.fest_editions e

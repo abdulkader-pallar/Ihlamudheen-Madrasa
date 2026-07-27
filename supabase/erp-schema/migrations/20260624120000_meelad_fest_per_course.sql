@@ -8,7 +8,7 @@
 -- ║                                                                    ║
 -- ║ Courses are static app data (src/data/courses.ts), so the course    ║
 -- ║ list is seeded here explicitly. The pre-existing generic            ║
--- ║ 'meelad-2026' edition is adopted as course 1 (Malayalam Madrasa);   ║
+-- ║ 'meelad-2026' edition is adopted as course 1 (Ihlamudheen Madrasa);   ║
 -- ║ courses 2–4 get a fresh edition each with the default houses and     ║
 -- ║ category bands. Idempotent — safe to re-run.                       ║
 -- ╚══════════════════════════════════════════════════════════════════╝
@@ -22,7 +22,7 @@ CREATE INDEX IF NOT EXISTS fest_editions_course_idx ON public.fest_editions (cou
 -- ── Adopt the existing generic edition as the course-1 fest ───────────────────
 UPDATE public.fest_editions
    SET course_id = '1',
-       name = 'Meelad 2026 — Ihlamudheen Madrasa Malayalam Madrasa'
+       name = 'Meelad 2026 — Ihlamudheen Madrasa'
  WHERE slug = 'meelad-2026'
    AND course_id IS NULL;
 
@@ -43,9 +43,7 @@ SELECT
     'tie_break',         'rank_then_grade_count'
   )
 FROM (VALUES
-  ('2', 'meelad-2026-c2', 'Meelad 2026 — Ihlamudheen Madrasa English Madrasa'),
-  ('3', 'meelad-2026-c3', 'Meelad 2026 — CIBIS Certification'),
-  ('4', 'meelad-2026-c4', 'Meelad 2026 — Ihlamudheen Madrasa EDU Support')
+  ('2', 'meelad-2026-c2', 'Meelad 2026 - Kammu Musliyar Memorial School')
 ) AS c(cid, slug, name)
 ON CONFLICT (slug) DO NOTHING;
 

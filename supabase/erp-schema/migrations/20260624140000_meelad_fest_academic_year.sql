@@ -94,10 +94,8 @@ BEGIN
       'tie_break',         'rank_then_grade_count'
     )
   FROM (VALUES
-    ('1', 'Ihlamudheen Madrasa Malayalam Madrasa'),
-    ('2', 'Ihlamudheen Madrasa English Madrasa'),
-    ('3', 'CIBIS Certification'),
-    ('4', 'Ihlamudheen Madrasa EDU Support')
+    ('1', 'Ihlamudheen Madrasa'),
+    ('2', 'Kammu Musliyar Memorial School')
   ) AS c(cid, cname)
   CROSS JOIN (SELECT jsonb_array_elements_text(v_years) AS ay) y
   WHERE NOT EXISTS (
