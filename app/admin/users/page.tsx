@@ -22,7 +22,10 @@ export default function UsersPage() {
   const [rows, setRows] = useState<Row[] | null>(null);
   const [removingId, setRemovingId] = useState<string | null>(null);
   // Super-admin account ids — these can never be removed, so no Remove button.
-  const [superadminIds, setSuperadminIds] = useState<string[]>([]);
+  // null = not loaded yet; while null we show no Remove buttons at all, so a
+  // destructive control can never appear on a super-admin row (not even for a
+  // moment, and not if this lookup fails).
+  const [superadminIds, setSuperadminIds] = useState<string[] | null>(null);
   const isAdmin = profile.role === "admin";
   const isSuperadminUser = isSuperadmin(profile.email);
 
@@ -47,8 +50,8 @@ export default function UsersPage() {
     if (!isSuperadminUser) return;
     fetch("/api/admin/users")
       .then((r) => r.json())
-      .then((d) => setSuperadminIds(d.superadminIds ?? []))
-      .catch(() => {});
+      .then((d) => setSuperadminIds(Array.isArray(d.superadminIds) ? d.superadminIds : []))
+      .catch(() => {}); // stays null -> Remove stays hidden
   }, [isSuperadminUser]);
 
   if (!isAdmin) {
@@ -156,7 +159,7 @@ export default function UsersPage() {
                     ))}
                   </select>
                   {/* Remove: super-admins only; never on a super-admin's row. */}
-                  {isSuperadminUser && !me && !superadminIds.includes(r.id) && (
+                  {isSuperadminUser && !me && superadminIds !== null && !superadminIds.includes(r.id) && (
                     <button
                       onClick={() => removeUser(r)}
                       disabled={removingId === r.id}
