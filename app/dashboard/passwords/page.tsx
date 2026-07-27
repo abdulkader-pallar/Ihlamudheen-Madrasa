@@ -50,7 +50,7 @@ export default function PasswordsPage() {
     setLoading(true)
     setError(null)
     try {
-      const res = await authFetch("/api/admin/users")
+      const res = await authFetch("/api/erp/users")
       const json = await res.json()
       if (!res.ok) throw new Error(json.error ?? "Failed to load users")
       setUsers(json.users)
@@ -86,7 +86,7 @@ export default function PasswordsPage() {
     setSaving(true)
     setNotice(null)
     try {
-      const res = await authFetch(`/api/admin/users/${u.id}`, {
+      const res = await authFetch(`/api/erp/users/${u.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password: password.trim() }),

@@ -2233,7 +2233,7 @@ function StaffDirectory() {
   // from their login credentials. Restricted to admin/accountant; for other
   // roles the request 403s and we simply fall back to staff_members emails.
   useEffect(() => {
-    authFetch("/api/admin/users")
+    authFetch("/api/erp/users")
       .then(res => res.ok ? res.json() : null)
       .then(json => {
         if (json?.users) {
