@@ -9,8 +9,9 @@ export const dynamic = "force-dynamic";
 const ALLOWED_ROLES: Role[] = ["admin", "accountant", "viewer"];
 
 // POST /api/admin/users — create a login account.
-// Restricted to the single super-admin (cryptolife676@gmail.com). Identity is
-// taken from the caller's httpOnly session cookie, verified server-side.
+// Restricted to the institute super-admins (see SUPERADMIN_EMAILS in
+// lib/types.ts). Identity is taken from the caller's httpOnly session cookie,
+// verified server-side.
 export async function POST(request: Request) {
   if (!SERVICE_ROLE_KEY) {
     return NextResponse.json({ error: "Server not configured (missing service role key)." }, { status: 500 });
