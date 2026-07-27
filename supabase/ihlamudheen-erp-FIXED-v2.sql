@@ -1,4 +1,4 @@
--- >>> ERP SCHEMA v7 (column fixes) -- if line 1 is not v7, you have an OLD file, re-download <<<
+-- >>> ERP SCHEMA v8 (dynamic-SQL fix) -- if line 1 is not v8, you have an OLD file, re-download <<<
 -- ============================================================================
 --  Ihlamudheen Madrasa - SCHOOL ERP schema (consolidated, collision-free)
 --  Additive only; never touches accounting data. Re-runnable. Paste ALL -> Run.
@@ -2552,7 +2552,6 @@ BEGIN
   FOREACH t IN ARRAY ARRAY['fest_houses','fest_categories','fest_items'] LOOP
     EXECUTE format('DROP POLICY IF EXISTS %I ON public.%I', t||'_public_read', t);
     EXECUTE format($f$
-      DROP POLICY IF EXISTS %I ON public.%I;
       CREATE POLICY %I ON public.%I FOR SELECT TO anon, authenticated
       USING (
         public.fest_is_staff()
@@ -2561,7 +2560,6 @@ BEGIN
       )$f$, t||'_public_read', t, t);
     EXECUTE format('DROP POLICY IF EXISTS %I ON public.%I', t||'_staff_write', t);
     EXECUTE format($f$
-      DROP POLICY IF EXISTS %I ON public.%I;
       CREATE POLICY %I ON public.%I FOR ALL TO authenticated
       USING (public.fest_is_staff()) WITH CHECK (public.fest_is_staff())$f$,
       t||'_staff_write', t);
@@ -2587,7 +2585,6 @@ BEGIN
                            'fest_registrations','fest_group_members'] LOOP
     EXECUTE format('DROP POLICY IF EXISTS %I ON public.%I', t||'_staff_all', t);
     EXECUTE format($f$
-      DROP POLICY IF EXISTS %I ON public.%I;
       CREATE POLICY %I ON public.%I FOR ALL TO authenticated
       USING (public.fest_is_staff()) WITH CHECK (public.fest_is_staff())$f$,
       t||'_staff_all', t);
@@ -4036,7 +4033,6 @@ BEGIN
   ] LOOP
     EXECUTE format('DROP POLICY IF EXISTS "office child: all" ON public.%I', t);
     EXECUTE format($f$
-      DROP POLICY IF EXISTS "office child: all" ON public.%I;
       CREATE POLICY "office child: all" ON public.%I
         FOR ALL TO authenticated
         USING (public.app_role() IN ('admin', 'accountant'))
