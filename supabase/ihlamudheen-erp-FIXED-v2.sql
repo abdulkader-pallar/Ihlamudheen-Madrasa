@@ -1,12 +1,44 @@
--- >>> ERP SCHEMA v5 (dependency-ordered) -- if line 1 is not v5, you have an OLD file, re-download <<<
+-- >>> ERP SCHEMA v6 (helper functions added) -- if line 1 is not v6, you have an OLD file, re-download <<<
 -- ============================================================================
---  Ihlamudheen Madrasa — SCHOOL ERP schema (consolidated, collision-free)
+--  Ihlamudheen Madrasa - SCHOOL ERP schema (consolidated, collision-free)
 --  Additive only; never touches accounting data. Re-runnable. Paste ALL -> Run.
 -- ============================================================================
+
+-- ---------------------------------------------------------------------------
+-- Role helper functions used by the ERP row-level-security policies.
+-- All read the role from auth metadata (app_metadata first, then user_metadata).
+-- These are NEW names and do not affect the accounting helpers
+-- (is_editor / is_member / current_user_role).
+-- ---------------------------------------------------------------------------
+create or replace function public.erp_role()
+returns text language sql stable as $do$
+  select coalesce(auth.jwt() -> 'app_metadata'  ->> 'role',
+                  auth.jwt() -> 'user_metadata' ->> 'role');
+$do$;
+
 create or replace function public.is_admin()
-returns boolean language sql stable security definer set search_path = public as $do$
-  select coalesce((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin'
-    or (auth.jwt() -> 'user_metadata' ->> 'role') = 'admin', false);
+returns boolean language sql stable as $do$
+  select coalesce(public.erp_role() = 'admin', false);
+$do$;
+
+create or replace function public.is_instructor()
+returns boolean language sql stable as $do$
+  select coalesce(public.erp_role() = 'teacher', false);
+$do$;
+
+create or replace function public.is_admin_or_accountant()
+returns boolean language sql stable as $do$
+  select coalesce(public.erp_role() in ('admin','accountant'), false);
+$do$;
+
+create or replace function public.is_teacher_or_admin()
+returns boolean language sql stable as $do$
+  select coalesce(public.erp_role() in ('admin','teacher'), false);
+$do$;
+
+create or replace function public.is_staff()
+returns boolean language sql stable as $do$
+  select coalesce(public.erp_role() in ('admin','accountant','teacher'), false);
 $do$;
 
 -- ==================== 00-base-app-tables.sql ====================
