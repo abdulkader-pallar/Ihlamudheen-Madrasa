@@ -60,7 +60,7 @@ export function AdminShell({ profile, children }: { profile: Profile; children: 
           style={{ background: "var(--navy)" }}
         >
           <div className="flex items-center gap-3 px-2 pb-5 pt-1.5">
-            <img className="h-10" src="/Logo of Ihlamudheen Madrasa dark.png" alt="" />
+            <img className="h-10" src="/Logo of Ihlamudheen Madrasa dark-bg removed.png" alt="" />
             <div className="leading-tight">
               <b className="font-display text-base font-semibold text-white">Ihlamudheen</b>
               <br />

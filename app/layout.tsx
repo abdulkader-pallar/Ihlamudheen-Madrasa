@@ -26,7 +26,7 @@ const JSON_LD = {
   name: "Ihlamudheen Madrasa",
   alternateName: ["Ilamudheen Madrasa", "Ilamuddeen Madrasa", "Pallar Madrasa", "مدرسة إعلام الدين"],
   url: SITE_URL,
-  logo: `${SITE_URL}/Logo of Ihlamudheen Madrasa light.png`,
+  logo: `${SITE_URL}/Logo of Ihlamudheen Madrasa light-bg removed.png`,
   foundingDate: "1954",
   description: SITE_DESC,
   address: {
@@ -67,7 +67,7 @@ export const metadata: Metadata = {
     type: "website",
     url: SITE_URL,
     locale: "en_IN",
-    images: [{ url: "/Logo of Ihlamudheen Madrasa light.png", alt: "Ihlamudheen Madrasa" }],
+    images: [{ url: "/Logo of Ihlamudheen Madrasa light-bg removed.png", alt: "Ihlamudheen Madrasa" }],
   },
   twitter: { card: "summary", title: "Ihlamudheen Madrasa — Pallar, Kerala", description: SITE_DESC },
   alternates: { canonical: SITE_URL },

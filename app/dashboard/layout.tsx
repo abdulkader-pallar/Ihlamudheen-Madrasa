@@ -51,9 +51,9 @@ export default function DashboardLayout({
             {/* Theme-aware logo — no backing plate; .logo-light / .logo-dark
                 swap with the active theme (see app/globals.css). */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className="logo-light size-9 w-auto object-contain" src="/Logo of Ihlamudheen Madrasa light.png" alt="Ihlamudheen Madrasa" />
+            <img className="logo-light size-9 w-auto object-contain" src="/Logo of Ihlamudheen Madrasa light-bg removed.png" alt="Ihlamudheen Madrasa" />
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className="logo-dark size-9 w-auto object-contain" src="/Logo of Ihlamudheen Madrasa dark.png" alt="Ihlamudheen Madrasa" />
+            <img className="logo-dark size-9 w-auto object-contain" src="/Logo of Ihlamudheen Madrasa dark-bg removed.png" alt="Ihlamudheen Madrasa" />
             <div className="hidden sm:flex flex-col leading-none">
               <span className="text-base font-bold text-navy-800 dark:text-white tracking-tight">Ihlamudheen</span>
             </div>

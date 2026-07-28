@@ -12,8 +12,8 @@ export interface CourseLogoEntry {
   alt: string
 }
 
-const INSTITUTE_LIGHT = "/Logo of Ihlamudheen Madrasa light.png"
-const INSTITUTE_DARK = "/Logo of Ihlamudheen Madrasa dark.png"
+const INSTITUTE_LIGHT = "/Logo of Ihlamudheen Madrasa light-bg removed.png"
+const INSTITUTE_DARK = "/Logo of Ihlamudheen Madrasa dark-bg removed.png"
 
 export const COURSE_LOGOS: Record<string, CourseLogoEntry> = {
   "1": {

@@ -138,8 +138,8 @@ export default function Home() {
 
   const Logo = ({ h = "h-11" }: { h?: string }) => (
     <>
-      <img className={cx("logo-light w-auto", h)} src="/Logo of Ihlamudheen Madrasa light.png" alt="Ihlamudheen Madrasa" />
-      <img className={cx("logo-dark w-auto", h)} src="/Logo of Ihlamudheen Madrasa dark.png" alt="Ihlamudheen Madrasa" />
+      <img className={cx("logo-light w-auto", h)} src="/Logo of Ihlamudheen Madrasa light-bg removed.png" alt="Ihlamudheen Madrasa" />
+      <img className={cx("logo-dark w-auto", h)} src="/Logo of Ihlamudheen Madrasa dark-bg removed.png" alt="Ihlamudheen Madrasa" />
     </>
   );
 
@@ -203,8 +203,8 @@ export default function Home() {
           <div className="reveal relative grid place-items-center">
             <div aria-hidden className="absolute inset-0 m-auto aspect-square w-[min(115%,520px)] blur-md" style={{ background: "radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--brand) 30%, transparent), transparent 62%)" }} />
             <div className="relative z-[2] aspect-square w-[min(80%,420px)] overflow-hidden rounded-[32px] border border-line bg-surface shadow-lift lg:w-[min(100%,440px)]">
-              <img className="logo-light h-full w-full object-cover" src="/Logo of Ihlamudheen Madrasa light.png" alt="Ihlamudheen Madrasa calligraphic logo" />
-              <img className="logo-dark h-full w-full object-cover" src="/Logo of Ihlamudheen Madrasa dark.png" alt="Ihlamudheen Madrasa calligraphic logo" />
+              <img className="logo-light h-full w-full object-cover" src="/Logo of Ihlamudheen Madrasa light-bg removed.png" alt="Ihlamudheen Madrasa calligraphic logo" />
+              <img className="logo-dark h-full w-full object-cover" src="/Logo of Ihlamudheen Madrasa dark-bg removed.png" alt="Ihlamudheen Madrasa calligraphic logo" />
             </div>
             <div className="absolute -bottom-3.5 right-0 z-[3] flex items-center gap-2 rounded-2xl bg-accent px-4 py-3 text-[13.5px] font-extrabold text-[#3a2a05] shadow-lg lg:-right-2"><Check size={16} /> Admissions Open 2026</div>
           </div>
@@ -395,7 +395,7 @@ export default function Home() {
         <div className="mx-auto max-w-[1180px] px-5 sm:px-10">
           <div className="grid gap-9 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
             <div>
-              <img className="mb-4 h-13" style={{ height: 52 }} src="/Logo of Ihlamudheen Madrasa dark.png" alt="Ihlamudheen Madrasa" />
+              <img className="mb-4 h-13" style={{ height: 52 }} src="/Logo of Ihlamudheen Madrasa dark-bg removed.png" alt="Ihlamudheen Madrasa" />
               <p className="max-w-[34ch] text-sm">Nurturing faith, character, and knowledge — grounding every student in the light of the Deen since 1954.</p>
             </div>
             <FooterCol title="Explore" links={[["Home", "#home"], ["About Us", "#about"], ["Programs", "#programs"], ["Admissions", "#admissions"]]} />

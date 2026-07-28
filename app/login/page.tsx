@@ -117,8 +117,8 @@ export default function LoginPage() {
 
       <div className="w-full max-w-[400px] rounded-2xl border border-line bg-surface p-8 shadow-lift">
         <div className="mb-4 grid place-items-center">
-          <img className="logo-light h-[76px]" src="/Logo of Ihlamudheen Madrasa light.png" alt="Ihlamudheen Madrasa" />
-          <img className="logo-dark h-[76px]" src="/Logo of Ihlamudheen Madrasa dark.png" alt="Ihlamudheen Madrasa" />
+          <img className="logo-light h-[76px]" src="/Logo of Ihlamudheen Madrasa light-bg removed.png" alt="Ihlamudheen Madrasa" />
+          <img className="logo-dark h-[76px]" src="/Logo of Ihlamudheen Madrasa dark-bg removed.png" alt="Ihlamudheen Madrasa" />
         </div>
         <h1 className="text-center font-display text-2xl font-semibold">Accounts Portal</h1>
         <p className="mb-6 mt-1.5 text-center text-sm text-muted">
