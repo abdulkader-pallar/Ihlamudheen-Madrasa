@@ -1,5 +1,5 @@
 // ╔══════════════════════════════════════════════════════════════════╗
-// ║ Ihlamudheen Madrasa Fest — Annual Ihlamudheen Madrasa Book (one-click yearbook PDF, §L) ║
+// ║ Meelad Fest — Annual Ihlamudheen Madrasa Book (one-click yearbook PDF, §L) ║
 // ║                                                                    ║
 // ║ Renders a complete edition into a printable/shareable PDF on the    ║
 // ║ Ihlamudheen Madrasa letterhead: cover/theme, summary, house standings, event  ║

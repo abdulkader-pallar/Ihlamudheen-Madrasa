@@ -38,7 +38,7 @@ function getLast12Months(): { value: string; label: string }[] {
   for (let i = 0; i < 12; i++) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
     const value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`
-    const label = d.toLocaleDateString("en-AE", { month: "long", year: "numeric" })
+    const label = d.toLocaleDateString("en-IN", { month: "long", year: "numeric" })
     result.push({ value, label })
   }
   return result
@@ -121,7 +121,7 @@ async function downloadPDF(rows: ReportRow[], monthLabel: string, instLabel: str
   y += 5
   doc.setFontSize(8.5); doc.setFont("helvetica", "normal")
   doc.setTextColor(110, 110, 110)
-  doc.text(`${instLabel}  ·  Generated ${new Date().toLocaleString("en-AE")}`, 14, y)
+  doc.text(`${instLabel}  ·  Generated ${new Date().toLocaleString("en-IN")}`, 14, y)
   y += 9
 
   // Summary boxes
@@ -132,9 +132,9 @@ async function downloadPDF(rows: ReportRow[], monthLabel: string, instLabel: str
 
   const boxes = [
     { label: "STAFF",       value: String(rows.length),                   sub: "employees"       },
-    { label: "GROSS PAY",   value: `AED ${totalGross.toLocaleString()}`,   sub: "before deductions" },
-    { label: "DEDUCTIONS",  value: `AED ${totalDeductions.toLocaleString()}`, sub: "late marks"   },
-    { label: "NET PAYABLE", value: `AED ${totalNet.toLocaleString()}`,     sub: "final amount"    },
+    { label: "GROSS PAY",   value: `totalGross.toLocaleString()}`,   sub: "before deductions" },
+    { label: "DEDUCTIONS",  value: `totalDeductions.toLocaleString()}`, sub: "late marks"   },
+    { label: "NET PAYABLE", value: `totalNet.toLocaleString()}`,     sub: "final amount"    },
   ]
   const bw = (pageW - 28 - 6) / 4
   boxes.forEach((box, i) => {
@@ -174,14 +174,14 @@ async function downloadPDF(rows: ReportRow[], monthLabel: string, instLabel: str
   tableBody.push([
     "", `TOTAL — ${rows.length} staff`, "", "",
     totalDays > 0 ? String(totalDays) : "—", "",
-    `AED ${totalGross.toLocaleString()}`,
+    `totalGross.toLocaleString()}`,
     totalDeductions > 0 ? `−${totalDeductions.toLocaleString()}` : "—",
-    `AED ${totalNet.toLocaleString()}`,
+    `totalNet.toLocaleString()}`,
   ])
 
   autoTable(doc, {
     startY: y,
-    head: [["#", "Name", "Institution", "Pay Type", "Days", "Sess / Hrs", "Gross (AED)", "Deduct.", "Net Pay (AED)"]],
+    head: [["#", "Name", "Institution", "Pay Type", "Days", "Sess / Hrs", "Gross (", "Deduct.", "Net Pay ("]],
     body: tableBody,
     styles: { fontSize: 8, cellPadding: 2.5, lineColor: [220, 225, 235], lineWidth: 0.2 },
     headStyles: { fillColor: [30, 58, 95], textColor: 255, fontStyle: "bold", fontSize: 8 },
@@ -229,8 +229,8 @@ async function downloadPDF(rows: ReportRow[], monthLabel: string, instLabel: str
 function downloadCSV(rows: ReportRow[], monthLabel: string, instLabel: string) {
   const header = [
     "No.", "Name", "Institution", "Pay Type",
-    "Days Present", "Sessions / Hours", "Gross Pay (AED)",
-    "Deductions (AED)", "Net Pay (AED)",
+    "Days Present", "Sessions / Hours", "Gross Pay (",
+    "Deductions (", "Net Pay (",
   ]
   const dataRows = rows.map((r, i) => [
     String(i + 1),
@@ -257,7 +257,7 @@ function downloadCSV(rows: ReportRow[], monthLabel: string, instLabel: string) {
   const csvLines = [
     [`Ihlamudheen Centre — Staff Payment Report`],
     [`Month: ${monthLabel}`, `Group: ${instLabel}`],
-    [`Generated: ${new Date().toLocaleString("en-AE")}`],
+    [`Generated: ${new Date().toLocaleString("en-IN")}`],
     [],
     header,
     ...dataRows,
@@ -443,7 +443,7 @@ export default function StaffPaymentReportPage() {
             <img src="/logo.png" alt="Ihlamudheen Madrasa" className="h-12 w-auto object-contain mb-2" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none' }} />
             <h2 className="text-xl font-bold text-black">Ihlamudheen Madrasa</h2>
             <p className="text-base font-semibold text-gray-700">Staff Payment Report — {monthLabel}</p>
-            <p className="text-sm text-gray-500">{instLabel} · Generated {new Date().toLocaleDateString("en-AE")}</p>
+            <p className="text-sm text-gray-500">{instLabel} · Generated {new Date().toLocaleDateString("en-IN")}</p>
           </div>
         </div>
       </div>
@@ -457,9 +457,9 @@ export default function StaffPaymentReportPage() {
         >
           {[
             { label: "Staff",          value: reportRows.length,                         sub: "employees",         color: "from-navy-500 to-navy-600",    text: "text-white" },
-            { label: "Gross Pay",      value: `AED ${totalGross.toLocaleString()}`, sub: "before deductions", color: "from-emerald-500 to-emerald-600", text: "text-white" },
-            { label: "Deductions",     value: `AED ${totalDeductions.toLocaleString()}`, sub: "late marks",   color: "from-red-500 to-red-600",       text: "text-white" },
-            { label: "Net Payable",    value: `AED ${totalNet.toLocaleString()}`,   sub: "final amount",      color: "from-cyan-500 to-cyan-600",     text: "text-white" },
+            { label: "Gross Pay",      value: `INR ${totalGross.toLocaleString()}`, sub: "before deductions", color: "from-emerald-500 to-emerald-600", text: "text-white" },
+            { label: "Deductions",     value: `INR ${totalDeductions.toLocaleString()}`, sub: "late marks",   color: "from-red-500 to-red-600",       text: "text-white" },
+            { label: "Net Payable",    value: `INR ${totalNet.toLocaleString()}`,   sub: "final amount",      color: "from-cyan-500 to-cyan-600",     text: "text-white" },
           ].map(card => (
             <div
               key={card.label}
@@ -584,7 +584,7 @@ export default function StaffPaymentReportPage() {
                           )}
                           {row.payType === "monthly-edu-support" && (
                             <span className="block text-[10px] text-slate-400 leading-tight">
-                              {row.hours.toFixed(1)}h × {row.eduHourlyRate?.toFixed(4)} AED/hr
+                              {row.hours.toFixed(1)}h × {row.eduHourlyRate?.toFixed(4)} INR/hr
                               {row.englishGross !== undefined && row.englishGross > 0
                                 ? ` + ${row.englishGross.toLocaleString()} English`
                                 : ""}
@@ -628,13 +628,13 @@ export default function StaffPaymentReportPage() {
                   </td>
                   <td className="hidden lg:table-cell" />
                   <td className="px-4 py-3 text-right text-sm font-bold text-navy-900 dark:text-white whitespace-nowrap">
-                    AED {totalGross.toLocaleString()}
+                    INR {totalGross.toLocaleString()}
                   </td>
                   <td className="px-4 py-3 text-right text-sm font-bold text-red-600 dark:text-red-400 hidden sm:table-cell whitespace-nowrap">
                     {totalDeductions > 0 ? `−${totalDeductions.toLocaleString()}` : "—"}
                   </td>
                   <td className="px-4 py-3 text-right text-sm font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
-                    AED {totalNet.toLocaleString()}
+                    INR {totalNet.toLocaleString()}
                   </td>
                 </tr>
               </tfoot>

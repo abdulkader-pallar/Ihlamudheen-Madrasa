@@ -105,22 +105,22 @@ export function getInstitutionLabel(t: TeacherData): string {
 
 export function getPayTypeLabel(t: TeacherData): string {
   const englishSuffix = t.dualPayType === "per-day-english"
-    ? ` + ${DAY_RATE_ENGLISH} AED/day (English Fri)`
+    ? ` + ${DAY_RATE_ENGLISH} INR/day (English Fri)`
     : t.dualPayType === "per-day-cibis" && DAY_RATE_CIBIS > 0
-    ? ` + ${DAY_RATE_CIBIS} AED/day (CIBIS Fri)`
+    ? ` + ${DAY_RATE_CIBIS} INR/day (CIBIS Fri)`
     : ""
   switch (t.payType) {
-    case "per-session-madrasa":   return `${SESSION_RATE_MADRASA} AED/session (Ihlamudheen)${englishSuffix}`
-    case "per-day-english":    return `${DAY_RATE_ENGLISH} AED/day (English)`
-    case "per-day-cibis":      return `${DAY_RATE_CIBIS} AED/day (CIBIS)`
+    case "per-session-madrasa":   return `${SESSION_RATE_MADRASA} INR/session (Ihlamudheen)${englishSuffix}`
+    case "per-day-english":    return `${DAY_RATE_ENGLISH} INR/day (English)`
+    case "per-day-cibis":      return `${DAY_RATE_CIBIS} INR/day (CIBIS)`
     case "monthly-edu-support": {
       const monthly = t.fixedMonthlyRate ?? 1500
       const hourly  = (monthly / EDU_SUPPORT_MONTHLY_HOURS).toFixed(4)
-      return `${monthly} AED/month (${hourly} AED/hr ÷ ${EDU_SUPPORT_MONTHLY_HOURS} hrs)${englishSuffix}`
+      return `${monthly} INR/month (${hourly} INR/hr ÷ ${EDU_SUPPORT_MONTHLY_HOURS} hrs)${englishSuffix}`
     }
-    case "monthly-office":      return `${t.fixedMonthlyRate ?? 2000} AED/month`
-    case "monthly-cleaning":    return `${t.fixedMonthlyRate ?? 400} AED/month`
-    case "daily-driver":        return `${t.dailyRate ?? 30} AED/day`
+    case "monthly-office":      return `${t.fixedMonthlyRate ?? 2000} INR/month`
+    case "monthly-cleaning":    return `${t.fixedMonthlyRate ?? 400} INR/month`
+    case "daily-driver":        return `${t.dailyRate ?? 30} INR/day`
     default:                    return "—"
   }
 }
@@ -190,7 +190,7 @@ export interface DeductionItem {
   reasonType: "late-cat-1" | "late-cat-2" | "late-cat-3" | "early-departure" | "out-missing" | "hours-shortfall"
   reason: string
   minusMarks: number          // for late-mark items; 0 otherwise
-  amount: number              // AED actually deducted at this point (only set on deduction-trigger rows)
+  amount: number              // INR actually deducted at this point (only set on deduction-trigger rows)
   cumulativeMarks: number     // running marks after this event
   carriedForward?: boolean    // true = a late occurrence from a prior month, shown for context (no deduction this month)
 }
@@ -459,8 +459,8 @@ export function calcRow(
 
   // Split by program
   let madrasaSessions = 0
-  let madrasaOnline   = 0   // sessions taught online (Google Meet months) — 40 AED
-  let madrasaOffline  = 0   // sessions taught on-site — 60 AED
+  let madrasaOnline   = 0   // sessions taught online (Google Meet months) — 40 INR
+  let madrasaOffline  = 0   // sessions taught on-site — 60 INR
   const englishDates = new Set<string>()
   const cibisDates   = new Set<string>()
   const eduDates     = new Set<string>()
@@ -664,19 +664,19 @@ export function calcRow(
     : `${madrasaSessions} Ihlamudheen sess × ${SESSION_RATE_MADRASA}`
   let payTypeLabel = getPayTypeLabel(teacher)
   if (teacher.payType === "per-session-madrasa" && !teacher.dualPayType && madrasaOnline > 0) {
-    payTypeLabel = `${madrasaSessPart} AED (Ihlamudheen)`
+    payTypeLabel = `${madrasaSessPart} INR (Ihlamudheen)`
   }
   if (teacher.dualPayType === "per-day-english") {
-    const engPart = `${englishDates.size} English day${englishDates.size !== 1 ? "s" : ""} × ${DAY_RATE_ENGLISH} AED`
+    const engPart = `${englishDates.size} English day${englishDates.size !== 1 ? "s" : ""} × ${DAY_RATE_ENGLISH} INR`
     if (teacher.payType === "per-session-madrasa") {
       payTypeLabel = `${madrasaSessPart} + ${engPart}`
     } else {
-      payTypeLabel = `${teacher.fixedMonthlyRate ?? 1500} AED fixed + ${engPart}`
+      payTypeLabel = `${teacher.fixedMonthlyRate ?? 1500} INR fixed + ${engPart}`
     }
   } else if (teacher.dualPayType === "per-day-cibis") {
     payTypeLabel = DAY_RATE_CIBIS > 0
-      ? `${madrasaSessPart} + ${cibisDates.size} CIBIS day${cibisDates.size !== 1 ? "s" : ""} × ${DAY_RATE_CIBIS} AED`
-      : `${madrasaSessPart} AED (CIBIS unpaid)`
+      ? `${madrasaSessPart} + ${cibisDates.size} CIBIS day${cibisDates.size !== 1 ? "s" : ""} × ${DAY_RATE_CIBIS} INR`
+      : `${madrasaSessPart} INR (CIBIS unpaid)`
   }
 
   const isDualRoleInEnglish =
@@ -691,7 +691,7 @@ export function calcRow(
     teacherId: teacher.id,
     name: teacher.name,
     institution: getInstitutionLabel(teacher),
-    payTypeLabel: isDualRoleInEnglish ? `${DAY_RATE_ENGLISH} AED/day (English)` : payTypeLabel,
+    payTypeLabel: isDualRoleInEnglish ? `${DAY_RATE_ENGLISH} INR/day (English)` : payTypeLabel,
     payType: teacher.payType,
     hasDualRole: !!teacher.dualPayType,
     dualRoleLabel: teacher.dualPayType ? getInstitutionLabel(teacher) : undefined,

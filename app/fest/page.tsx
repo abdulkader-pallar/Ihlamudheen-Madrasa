@@ -5,7 +5,7 @@ import { Upload, CalendarDays, Trophy, Users, ClipboardList, Gavel, Medal, Award
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 
-// Phase 1 landing for the Ihlamudheen Madrasa Fest module. Cards for later phases are shown
+// Phase 1 landing for the Meelad Fest module. Cards for later phases are shown
 // as "coming soon" so the build order (§13) is visible but only Import is live.
 const TILES = [
   {
@@ -38,11 +38,11 @@ export default function FestHome() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-3">
-        <h1 className="text-2xl font-bold tracking-tight text-navy-800 dark:text-white">Ihlamudheen Madrasa Fest</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-navy-800 dark:text-white">Meelad Fest</h1>
         <Badge variant="secondary">Per-course editions</Badge>
       </div>
       <p className="max-w-2xl text-sm text-navy-600 dark:text-navy-300">
-        Ihlamudheen Madrasa Fest portal. Each course runs its own fest, by academic year — pick the
+        Meelad Fest portal. Each course runs its own fest, by academic year — pick the
         course (and year) at the top of each tool below to manage that course&apos;s students,
         programs, schedule, judging, and results in isolation. New academic years roll over
         automatically.

@@ -1,5 +1,5 @@
 // ╔══════════════════════════════════════════════════════════════════╗
-// ║ Ihlamudheen Madrasa Fest — Digital Ihlamudheen Madrasa Passport badges (§K)           ║
+// ║ Meelad Fest — Digital Ihlamudheen Madrasa Passport badges (§K)           ║
 // ║                                                                    ║
 // ║ Pure + unit-tested. Derives the badges a student has earned from   ║
 // ║ their lifetime history (editions, items, results) so the profile   ║
@@ -25,7 +25,7 @@ export interface Badge {
 
 const CATALOG: Array<Badge & { earned: (h: StudentHistory, s: Stats) => boolean }> = [
   { key: "participant", label: "Participant", description: "Took part in the fest", earned: (_h, s) => s.totalItems > 0 },
-  { key: "first_timer", label: "First-Timer", description: "First Ihlamudheen Madrasa Fest", earned: (h) => h.editions.length === 1 },
+  { key: "first_timer", label: "First-Timer", description: "First Meelad Fest", earned: (h) => h.editions.length === 1 },
   { key: "veteran", label: "Veteran", description: "Competed in 3+ editions", earned: (h) => h.editions.length >= 3 },
   { key: "winner", label: "Winner", description: "Placed 1st in an item", earned: (_h, s) => s.firsts >= 1 },
   { key: "podium", label: "Podium", description: "Reached the top 3", earned: (_h, s) => s.podiums >= 1 },

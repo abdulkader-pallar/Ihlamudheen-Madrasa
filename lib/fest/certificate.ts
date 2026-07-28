@@ -1,5 +1,5 @@
 // ╔══════════════════════════════════════════════════════════════════╗
-// ║ Ihlamudheen Madrasa Fest — certificate PDF generation (§F)                  ║
+// ║ Meelad Fest — certificate PDF generation (§F)                  ║
 // ║                                                                    ║
 // ║ Uses the shared Ihlamudheen Madrasa letterhead (branding.ts) per CLAUDE.md,   ║
 // ║ then lays out a landscape certificate with the participant's name,  ║

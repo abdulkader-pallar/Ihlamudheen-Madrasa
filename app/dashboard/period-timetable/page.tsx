@@ -744,7 +744,7 @@ async function exportPdf(
   const startY = await addReportHeader(
     doc,
     `Period Timetable — ${className}`,
-    `${courseTitle}${day ? ` · ${day}` : ""} · Generated ${new Date().toLocaleString("en-AE")}`,
+    `${courseTitle}${day ? ` · ${day}` : ""} · Generated ${new Date().toLocaleString("en-IN")}`,
   )
   const rows = rowsForDoc(segments, assignments)
   autoTable(doc, {

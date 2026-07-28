@@ -1,5 +1,5 @@
 // ╔══════════════════════════════════════════════════════════════════╗
-// ║ Ihlamudheen Madrasa Fest — student autocomplete from the existing Ihlamudheen roll ║
+// ║ Meelad Fest — student autocomplete from the existing Ihlamudheen roll ║
 // ║                                                                    ║
 // ║ Teachers shouldn't retype details the institute already holds.     ║
 // ║ As they type a register number or name in the fest "Add student"   ║

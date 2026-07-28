@@ -62,7 +62,7 @@ function StageMode() {
   return (
     <div className="-mx-4 -my-6 min-h-screen bg-gradient-to-br from-navy-950 to-black px-8 py-8 text-white sm:-mx-6 lg:-mx-8">
       <div className="mb-6 text-center">
-        <p className="text-sm uppercase tracking-[0.3em] text-gold-400">Ihlamudheen Madrasa Fest</p>
+        <p className="text-sm uppercase tracking-[0.3em] text-gold-400">Meelad Fest</p>
         <h1 className="text-4xl font-black tracking-tight">{editionName || "Live"}</h1>
       </div>
 

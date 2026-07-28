@@ -1,5 +1,5 @@
 // ╔══════════════════════════════════════════════════════════════════╗
-// ║ Ihlamudheen Madrasa Fest — canonical item catalog + variant normalization   ║
+// ║ Meelad Fest — canonical item catalog + variant normalization   ║
 // ║                                                                    ║
 // ║ The Excel sheet stores free-typed item names in the P1–P4 cells    ║
 // ║ ('Speech Eng', 'Song (G)', 'Song Mlm'…). The importer normalizes   ║

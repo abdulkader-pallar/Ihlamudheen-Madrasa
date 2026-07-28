@@ -1,4 +1,4 @@
-// Course list for the per-course Ihlamudheen Madrasa Fest. Courses are static app data
+// Course list for the per-course Meelad Fest. Courses are static app data
 // (src/data/courses.ts); the fest scopes each edition to a course_id that
 // matches a course's id ("1".."4"). Keeping this thin wrapper here means fest
 // pages don't each reach into the courses dataset directly.

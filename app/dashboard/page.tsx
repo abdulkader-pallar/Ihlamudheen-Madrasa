@@ -78,7 +78,6 @@ import * as db from "@/lib/db"
 import { punchDataAbsenceSessions } from "@/lib/staff-absence"
 import { supabase } from "@/lib/supabase"
 import Link from "next/link"
-import { EduSupportWidget } from "@/components/edu-support-widget"
 
 // ── Institution attendance widgets ──
 // Each institution gets its own card in "School Attendance (Today)".
@@ -1105,12 +1104,6 @@ export default function DashboardPage() {
         })}
       </div>
 
-      {/* ── EDU Support working hours widget (edu-support teachers only) ──── */}
-      {myTeacherId && myTeacher?.payType === "monthly-edu-support" && (
-        <motion.div initial="hidden" animate="visible" custom={1.5} variants={fadeUp}>
-          <EduSupportWidget teacherId={myTeacherId} teacherName={myTeacher.name} />
-        </motion.div>
-      )}
 
       {/* ── My Attendance widget (teachers with a linked profile) ─────────── */}
       {myTeacherId && (
@@ -1920,7 +1913,7 @@ export default function DashboardPage() {
                     <div className="px-2 pt-1 pb-1 text-[9.5px] font-bold uppercase tracking-wider text-navy-400">
                       {(() => {
                         const [y, m] = reportMonth.split("-")
-                        return new Date(Number(y), Number(m) - 1).toLocaleDateString("en-AE", { month: "long", year: "numeric" })
+                        return new Date(Number(y), Number(m) - 1).toLocaleDateString("en-IN", { month: "long", year: "numeric" })
                       })()}
                     </div>
                     <DropdownMenuItem onClick={() => handleDownloadMonthlyReport("csv")} className="cursor-pointer py-2">

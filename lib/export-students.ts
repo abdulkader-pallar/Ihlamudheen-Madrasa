@@ -131,7 +131,7 @@ function openPrintWindow(
   if (!win) {
     return false
   }
-  const today = new Date().toLocaleDateString("en-AE", { day: "numeric", month: "long", year: "numeric" })
+  const today = new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })
   const headRow = headers
     .map((h) => `<th>${escHTML(h)}</th>`)
     .join("")

@@ -450,20 +450,20 @@ export default function SetupTeachersPage() {
     if (staffType === "teaching") {
       switch (teachingProgram) {
         case "madrasa":
-          lines.push("✓ Ihlamudheen Madrasa: Sat & Sun. IN 06:00–10:30, OUT 11:00–16:00. 60 AED/session.")
+          lines.push("✓ Ihlamudheen Madrasa: Sat & Sun. IN 06:00–10:30, OUT 11:00–16:00. 60 INR/session.")
           break
         case "edu-support":
           lines.push("✓ EDU Support: Mon–Fri. IN 06:00–10:30, OUT 11:31–16:00. Fixed monthly salary.")
           break
         case "english":
-          lines.push("✓ English Madrasa: Friday. IN 14:00–17:00, OUT 17:01–22:00. 150 AED/day.")
+          lines.push("✓ English Madrasa: Friday. IN 14:00–17:00, OUT 17:01–22:00. 150 INR/day.")
           break
         case "cibis":
           lines.push("✓ CIBIS: Friday evenings. First punch = IN, second = OUT.")
           break
       }
       if (dualProgram === "english") {
-        lines.push("✓ Dual: +English Madrasa (Friday). IN 14:00–17:00, OUT 17:01–22:00. 150 AED/day.")
+        lines.push("✓ Dual: +English Madrasa (Friday). IN 14:00–17:00, OUT 17:01–22:00. 150 INR/day.")
       }
       if (dualProgram === "cibis") {
         lines.push("✓ Dual: +CIBIS (Friday evenings). First punch = IN, second = OUT.")
@@ -477,7 +477,7 @@ export default function SetupTeachersPage() {
           lines.push("✓ Cleaning Staff: Any day, any time.")
           break
         case "driver":
-          lines.push(`✓ Driver: Any day, any time. ${dailyRate || "—"} AED/day.`)
+          lines.push(`✓ Driver: Any day, any time. ${dailyRate || "—"} INR/day.`)
           break
       }
     }
@@ -690,9 +690,9 @@ export default function SetupTeachersPage() {
                     onChange={(e) => handleTeachingProgramChange(e.target.value as TeachingProgram)}
                     className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
                   >
-                    <option value="madrasa">Ihlamudheen Madrasa (60 AED/session — Sat & Sun)</option>
-                    <option value="edu-support">EDU Support (1,500 AED/month — Mon–Fri)</option>
-                    <option value="english">English Madrasa (150 AED/day — Friday)</option>
+                    <option value="madrasa">Ihlamudheen Madrasa (60 INR/session — Sat & Sun)</option>
+                    <option value="edu-support">EDU Support (1,500 INR/month — Mon–Fri)</option>
+                    <option value="english">English Madrasa (150 INR/day — Friday)</option>
                     <option value="cibis">CIBIS (Friday evenings)</option>
                   </select>
                 </div>
@@ -719,7 +719,7 @@ export default function SetupTeachersPage() {
                 {teachingProgram === "edu-support" && (
                   <div>
                     <label className="block text-sm font-medium text-navy-700 dark:text-navy-200 mb-1">
-                      Monthly Rate (AED) <span className="text-red-500">*</span>
+                      Monthly Rate ( <span className="text-red-500">*</span>
                     </label>
                     <Input
                       type="number"
@@ -797,7 +797,7 @@ export default function SetupTeachersPage() {
                 {(nonTeachingRole === "office" || nonTeachingRole === "cleaning") && (
                   <div>
                     <label className="block text-sm font-medium text-navy-700 dark:text-navy-200 mb-1">
-                      Monthly Salary (AED) <span className="text-red-500">*</span>
+                      Monthly Salary ( <span className="text-red-500">*</span>
                     </label>
                     <Input
                       type="number"
@@ -812,7 +812,7 @@ export default function SetupTeachersPage() {
                 {nonTeachingRole === "driver" && (
                   <div>
                     <label className="block text-sm font-medium text-navy-700 dark:text-navy-200 mb-1">
-                      Daily Rate (AED) <span className="text-red-500">*</span>
+                      Daily Rate ( <span className="text-red-500">*</span>
                     </label>
                     <Input
                       type="number"

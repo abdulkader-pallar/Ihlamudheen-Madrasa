@@ -1,5 +1,5 @@
 // ╔══════════════════════════════════════════════════════════════════╗
-// ║ Ihlamudheen Madrasa Fest — bulk Excel importer (§10)                         ║
+// ║ Meelad Fest — bulk Excel importer (§10)                         ║
 // ║                                                                    ║
 // ║ The source sheet repeats per section: a header row                 ║
 // ║   SL | REG/ID | NAME | <SECTION> | P1 | P2 | P3 | P4 (sometimes P5) ║

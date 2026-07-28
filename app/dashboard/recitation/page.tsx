@@ -54,7 +54,7 @@ function today(): string {
 }
 function fmtDate(d?: string) {
   if (!d) return "—"
-  return new Date(d + "T00:00:00").toLocaleDateString("en-AE", { day: "numeric", month: "short", year: "numeric" })
+  return new Date(d + "T00:00:00").toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })
 }
 function clampScore(v: string, max: number): number {
   const n = Math.round(Number(v) || 0)
@@ -190,7 +190,7 @@ async function downloadStudentRecitationPdf(opts: {
   const contentY = await addReportHeader(
     doc,
     "Quran Recitation — Progress Report",
-    `${className}${courseLabel ? ` · ${courseLabel}` : ""} · Generated ${new Date().toLocaleString("en-AE")}`,
+    `${className}${courseLabel ? ` · ${courseLabel}` : ""} · Generated ${new Date().toLocaleString("en-IN")}`,
   )
   const NAVY: [number, number, number] = [30, 58, 95]
   const pageW = doc.internal.pageSize.getWidth()
@@ -606,7 +606,7 @@ function RecitationConsole({ assessorName, assessorId, role }: { assessorName: s
     const contentY = await addReportHeader(
       doc,
       "Quran Recitation — Class Progress Report",
-      `${currentClass.name} · ${COURSE_DISPLAY[currentClass.courseId] ?? currentClass.courseTitle} · Generated ${new Date().toLocaleString("en-AE")}`,
+      `${currentClass.name} · ${COURSE_DISPLAY[currentClass.courseId] ?? currentClass.courseTitle} · Generated ${new Date().toLocaleString("en-IN")}`,
     )
     const NAVY: [number, number, number] = [30, 58, 95]
     const pageW = doc.internal.pageSize.getWidth()

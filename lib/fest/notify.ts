@@ -1,5 +1,5 @@
 // ╔══════════════════════════════════════════════════════════════════╗
-// ║ Ihlamudheen Madrasa Fest — notification templates (§I)                      ║
+// ║ Meelad Fest — notification templates (§I)                      ║
 // ║                                                                    ║
 // ║ Pure, unit-tested message composers. Email is the free baseline    ║
 // ║ (sent server-side via Resend when configured — see                 ║
@@ -33,7 +33,7 @@ export function composeCertificateReadyEmail(p: {
     body:
       `Assalamu Alaikum,\n\n` +
       `${p.name.trim()}'s certificate for ${p.editionName} is ready to download from the ` +
-      `Ihlamudheen Madrasa Fest portal. Each certificate carries a QR code for verification.\n\n` +
+      `Meelad Fest portal. Each certificate carries a QR code for verification.\n\n` +
       `Ihlamudheen Madrasa`,
   }
 }

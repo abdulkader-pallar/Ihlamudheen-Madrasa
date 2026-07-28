@@ -416,14 +416,14 @@ export default function MyAttendancePage() {
             </div>
             {totalMinusMarks >= 3 && (
               <p className="text-xs text-red-400">
-                {Math.floor(totalMinusMarks / 3)} deduction{Math.floor(totalMinusMarks / 3) > 1 ? "s" : ""} × 30 AED
-                = <strong>{Math.floor(totalMinusMarks / 3) * 30} AED</strong> deducted
+                {Math.floor(totalMinusMarks / 3)} deduction{Math.floor(totalMinusMarks / 3) > 1 ? "s" : ""} × 30 INR
+                = <strong>{Math.floor(totalMinusMarks / 3) * 30} INR</strong> deducted
                 {carryOut > 0 && <> · <span className="text-amber-400">{carryOut} mark{carryOut > 1 ? "s" : ""} carry to next month</span></>}
               </p>
             )}
             {totalMinusMarks > 0 && totalMinusMarks < 3 && (
               <p className="text-xs text-slate-500">
-                {3 - totalMinusMarks} more mark{3 - totalMinusMarks > 1 ? "s" : ""} until a 30 AED deduction
+                {3 - totalMinusMarks} more mark{3 - totalMinusMarks > 1 ? "s" : ""} until a 30 INR deduction
                 {carryOut > 0 && <> · <span className="text-amber-400">{carryOut} mark{carryOut > 1 ? "s" : ""} carry to next month</span></>}
               </p>
             )}

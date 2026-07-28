@@ -141,9 +141,9 @@ export default function LateComersPage() {
 
   const monthLongLabel = (() => {
     const [y, m] = month.split("-").map(Number)
-    return new Date(y, m - 1, 1).toLocaleDateString("en-AE", { month: "long", year: "numeric" })
+    return new Date(y, m - 1, 1).toLocaleDateString("en-IN", { month: "long", year: "numeric" })
   })()
-  const dateLongLabel = new Date(date + "T12:00:00").toLocaleDateString("en-AE", {
+  const dateLongLabel = new Date(date + "T12:00:00").toLocaleDateString("en-IN", {
     weekday: "long", day: "numeric", month: "long", year: "numeric",
   })
   const hasData = mode === "daily" ? dailyRows.length > 0 : monthlyRows.length > 0

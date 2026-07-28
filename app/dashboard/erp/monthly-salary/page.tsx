@@ -65,7 +65,7 @@ function getLast12Months(): { value: string; label: string }[] {
   for (let i = 0; i < 12; i++) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
     const value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`
-    const label = d.toLocaleDateString("en-AE", { month: "long", year: "numeric" })
+    const label = d.toLocaleDateString("en-IN", { month: "long", year: "numeric" })
     result.push({ value, label })
   }
   return result
@@ -109,8 +109,8 @@ function downloadCSV(
 ) {
   const header = [
     "No.", "Name", "Institution", "Pay Type",
-    "Days Present", "Sessions / Hours", "Gross (AED)",
-    "Deductions (AED)", "Net Salary (AED)",
+    "Days Present", "Sessions / Hours", "Gross (",
+    "Deductions (", "Net Salary (",
     "Status", "Approved At", "Paid At",
   ]
   const dataRows = rows.map((r, i) => {
@@ -128,8 +128,8 @@ function downloadCSV(
       String(r.deductions),
       String(r.netPay),
       st?.status ?? "pending",
-      st?.approved_at ? new Date(st.approved_at).toLocaleString("en-AE") : "—",
-      st?.paid_at ? new Date(st.paid_at).toLocaleString("en-AE") : "—",
+      st?.approved_at ? new Date(st.approved_at).toLocaleString("en-IN") : "—",
+      st?.paid_at ? new Date(st.paid_at).toLocaleString("en-IN") : "—",
     ]
   })
   const totals = [
@@ -146,7 +146,7 @@ function downloadCSV(
     [BRAND_NAME],
     [`Ihlamudheen Madrasa · Monthly Salary`],
     [`Month: ${monthLabel}`, `Group: ${instLabel}`],
-    [`Generated: ${new Date().toLocaleString("en-AE")}`],
+    [`Generated: ${new Date().toLocaleString("en-IN")}`],
     [],
     header,
     ...dataRows,
@@ -177,7 +177,7 @@ async function downloadPDF(
   const contentY = await addReportHeader(
     doc,
     "Monthly Salary Report",
-    `Month: ${monthLabel}   ·   Group: ${instLabel}   ·   Generated: ${new Date().toLocaleString("en-AE")}`,
+    `Month: ${monthLabel}   ·   Group: ${instLabel}   ·   Generated: ${new Date().toLocaleString("en-IN")}`,
   )
 
   autoTable(doc, {
@@ -198,7 +198,7 @@ async function downloadPDF(
         r.deductions > 0 ? `-${r.deductions}` : "—",
         r.netPay.toLocaleString(),
         statusLabel.toUpperCase(),
-        st?.paid_at ? new Date(st.paid_at).toLocaleDateString("en-AE") : "—",
+        st?.paid_at ? new Date(st.paid_at).toLocaleDateString("en-IN") : "—",
       ]
     }),
     foot: [[
@@ -244,7 +244,7 @@ async function downloadPayslip(row: ReportRow, deductions: DeductionItem[], mont
   const headerY = await addReportHeader(
     doc,
     "Payslip",
-    `Month: ${monthLabel}   ·   Generated: ${new Date().toLocaleString("en-AE")}`,
+    `Month: ${monthLabel}   ·   Generated: ${new Date().toLocaleString("en-IN")}`,
   )
 
   doc.setFontSize(11); doc.setFont("helvetica", "bold")
@@ -258,9 +258,9 @@ async function downloadPayslip(row: ReportRow, deductions: DeductionItem[], mont
     body: [
       ["Days Present", String(row.daysPresent)],
       ["Sessions / Hours", row.payType === "monthly-edu-support" ? `${row.hours.toFixed(1)}h / 112h` : row.sessions > 0 ? `${row.sessions} sessions` : row.hours > 0 ? `${row.hours.toFixed(1)}h` : "—"],
-      ["Gross Pay", `AED ${row.grossPay.toLocaleString()}`],
-      ["Deductions", row.deductions > 0 ? `AED ${row.deductions.toLocaleString()}` : "—"],
-      ["Net Salary", `AED ${row.netPay.toLocaleString()}`],
+      ["Gross Pay", `row.grossPay.toLocaleString()}`],
+      ["Deductions", row.deductions > 0 ? `row.deductions.toLocaleString()}` : "—"],
+      ["Net Salary", `row.netPay.toLocaleString()}`],
     ],
     styles: { fontSize: 9, cellPadding: 3 },
     headStyles: { fillColor: [30, 58, 95], textColor: 255, fontStyle: "bold" },
@@ -280,7 +280,7 @@ async function downloadPayslip(row: ReportRow, deductions: DeductionItem[], mont
         d.reasonType.startsWith("late") ? `Late Cat-${d.reasonType.slice(-1)}` : d.reasonType === "early-departure" ? "Early Out" : d.reasonType === "out-missing" ? "Missing Punch" : "Other",
         d.reason,
         d.minusMarks > 0 ? `${d.minusMarks} (total ${d.cumulativeMarks})` : "—",
-        d.amount > 0 ? `-AED ${d.amount}` : "flagged",
+        d.amount > 0 ? `-d.amount}` : "flagged",
       ]),
       styles: { fontSize: 7, cellPadding: 2 },
       headStyles: { fillColor: [180, 40, 40], textColor: 255, fontStyle: "bold" },
@@ -306,7 +306,7 @@ async function downloadDeductionReport(name: string, deductions: DeductionItem[]
   const headerY = await addReportHeader(
     doc,
     "Deduction Report",
-    `Staff: ${name}   ·   Month: ${monthLabel}   ·   Total deducted: AED ${totalDeducted}`,
+    `Staff: ${name}   ·   Month: ${monthLabel}   ·   Total deducted: totalDeducted}`,
   )
 
   autoTable(doc, {
@@ -319,9 +319,9 @@ async function downloadDeductionReport(name: string, deductions: DeductionItem[]
       d.reason,
       d.minusMarks > 0 ? String(d.minusMarks) : "—",
       d.cumulativeMarks > 0 ? String(d.cumulativeMarks) : "—",
-      d.amount > 0 ? `-AED ${d.amount}` : "flagged",
+      d.amount > 0 ? `-d.amount}` : "flagged",
     ]),
-    foot: [["", "", "", "", "", "TOTAL", `AED ${totalDeducted}`]],
+    foot: [["", "", "", "", "", "TOTAL", `totalDeducted}`]],
     styles: { fontSize: 7, cellPadding: 2 },
     headStyles: { fillColor: [180, 40, 40], textColor: 255, fontStyle: "bold" },
     footStyles: { fillColor: [240, 240, 245], textColor: 0, fontStyle: "bold" },
@@ -778,9 +778,9 @@ export default function MonthlySalaryPage() {
           className="grid grid-cols-2 sm:grid-cols-4 gap-3"
         >
           {[
-            { label: "Total Payroll", value: `AED ${totalNet.toLocaleString()}`, sub: "net payable", color: "from-emerald-500 to-emerald-600" },
+            { label: "Total Payroll", value: `totalNet.toLocaleString()}`, sub: "net payable", color: "from-emerald-500 to-emerald-600" },
             { label: "Paid / Approved", value: `${filteredRows.filter(r => statusMap[r.teacherId]?.status === "paid").length} / ${filteredRows.filter(r => statusMap[r.teacherId]?.status === "approved").length}`, sub: `of ${filteredRows.length} staff`, color: "from-cyan-500 to-cyan-600" },
-            { label: "Deductions",    value: `AED ${totalDeductions.toLocaleString()}`, sub: `${filteredRows.filter(r => r.deductions > 0).length} staff affected`, color: "from-red-500 to-red-600" },
+            { label: "Deductions",    value: `totalDeductions.toLocaleString()}`, sub: `${filteredRows.filter(r => r.deductions > 0).length} staff affected`, color: "from-red-500 to-red-600" },
             { label: "Flagged",       value: String(flaggedCount), sub: "needs review", color: "from-amber-500 to-amber-600" },
           ].map(card => (
             <div key={card.label} className={`rounded-2xl bg-gradient-to-br ${card.color} p-4 shadow-md`}>
@@ -853,8 +853,8 @@ export default function MonthlySalaryPage() {
                               <button
                                 type="button"
                                 onClick={() => { setModalTeacher(teacher); setModalRow(row) }}
-                                aria-label={`View deduction details for ${row.name} — total AED ${row.deductions}`}
-                                title={`Deductions: AED ${row.deductions} — click for details`}
+                                aria-label={`View deduction details for ${row.name} — total row.deductions}`}
+                                title={`Deductions: row.deductions} — click for details`}
                                 className="inline-flex items-center justify-center size-5 rounded-full bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900/60 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500"
                               >
                                 <AlertCircle className="size-3.5" />
@@ -993,13 +993,13 @@ export default function MonthlySalaryPage() {
                   <td className="px-3 py-3 text-center text-sm font-bold text-navy-900 dark:text-white">{totalDays}</td>
                   <td className="hidden lg:table-cell" />
                   <td className="px-4 py-3 text-right text-sm font-bold text-navy-900 dark:text-white whitespace-nowrap">
-                    AED {totalGross.toLocaleString()}
+                    INR {totalGross.toLocaleString()}
                   </td>
                   <td className="px-4 py-3 text-right text-sm font-bold text-red-600 dark:text-red-400 hidden sm:table-cell whitespace-nowrap">
                     {totalDeductions > 0 ? `−${totalDeductions.toLocaleString()}` : "—"}
                   </td>
                   <td className="px-4 py-3 text-right text-sm font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
-                    AED {totalNet.toLocaleString()}
+                    INR {totalNet.toLocaleString()}
                   </td>
                   <td />
                   <td className="hidden md:table-cell" />
@@ -1031,7 +1031,7 @@ export default function MonthlySalaryPage() {
           <DialogDescription className="text-xs">
             {monthLabel} · Total deducted:{" "}
             <span className="font-bold text-red-600 dark:text-red-400">
-              AED {modalRow?.deductions ?? 0}
+              INR {modalRow?.deductions ?? 0}
             </span>
           </DialogDescription>
 
@@ -1079,7 +1079,7 @@ export default function MonthlySalaryPage() {
                         </td>
                         <td className="px-2 py-2 text-right whitespace-nowrap">
                           {d.amount > 0
-                            ? <span className="font-bold text-red-600 dark:text-red-400">−AED {d.amount}</span>
+                            ? <span className="font-bold text-red-600 dark:text-red-400">−INR {d.amount}</span>
                             : d.carriedForward
                             ? <span className="text-slate-400">carried</span>
                             : <span className="text-slate-400">flagged</span>}
@@ -1094,13 +1094,13 @@ export default function MonthlySalaryPage() {
                       Total deductions
                     </td>
                     <td className="px-2 py-2 text-right font-bold text-red-600 dark:text-red-400 whitespace-nowrap">
-                      −AED {modalRow?.deductions ?? 0}
+                      −INR {modalRow?.deductions ?? 0}
                     </td>
                   </tr>
                 </tfoot>
               </table>
               <p className="mt-3 text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                Late deductions follow the 3-tier minus-mark rule: every {3} accumulated Cat-1 marks triggers an AED {LATE_DEDUCTION} deduction
+                Late deductions follow the 3-tier minus-mark rule: every {3} accumulated Cat-1 marks triggers an INR {LATE_DEDUCTION} deduction
                 (Ihlamudheen per-session teachers only). Rows marked &ldquo;carried&rdquo; are late occurrences from an earlier month shown here for
                 context — they count toward the running total but were not deducted this month. &ldquo;Flagged&rdquo; events do not auto-deduct —
                 review them manually before payout.
@@ -1234,9 +1234,9 @@ export default function MonthlySalaryPage() {
                           ? `${previewPayslip.row.hours.toFixed(1)}h / 112h`
                           : previewPayslip.row.sessions > 0 ? `${previewPayslip.row.sessions} sessions`
                           : previewPayslip.row.hours > 0 ? `${previewPayslip.row.hours.toFixed(1)}h` : "—"],
-                      ["Gross Pay", `AED ${previewPayslip.row.grossPay.toLocaleString()}`],
-                      ["Deductions", previewPayslip.row.deductions > 0 ? `-AED ${previewPayslip.row.deductions.toLocaleString()}` : "—"],
-                      ["Net Salary", `AED ${previewPayslip.row.netPay.toLocaleString()}`],
+                      ["Gross Pay", `previewPayslip.row.grossPay.toLocaleString()}`],
+                      ["Deductions", previewPayslip.row.deductions > 0 ? `-previewPayslip.row.deductions.toLocaleString()}` : "—"],
+                      ["Net Salary", `previewPayslip.row.netPay.toLocaleString()}`],
                     ].map(([k, v], i) => (
                       <tr key={k} className={cn("border-b border-slate-100 dark:border-navy-700/50", i === 6 && "bg-emerald-50 dark:bg-emerald-900/20 font-bold")}>
                         <td className="px-4 py-2.5 text-slate-500 dark:text-slate-400 text-xs w-36">{k}</td>

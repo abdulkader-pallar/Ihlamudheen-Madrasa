@@ -62,7 +62,7 @@ import { computeToppers, resolveTopperPhotos, buildToppersSVG, svgToPngDataUrl, 
 // ───────────────────────────────────────────────────────────────────
 function formatDate(d?: string) {
   if (!d) return "—"
-  return new Date(d + "T00:00:00").toLocaleDateString("en-AE", {
+  return new Date(d + "T00:00:00").toLocaleDateString("en-IN", {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -1552,7 +1552,7 @@ function MarksEntryView({
     const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" })
 
     const fmtLong = (d: string) =>
-      new Date(d + "T00:00:00").toLocaleDateString("en-AE", { day: "numeric", month: "long", year: "numeric" })
+      new Date(d + "T00:00:00").toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })
 
     const maxTotalMarks = exam.subjects.reduce((s, sub) => s + sub.maxScore, 0)
     const classScores = activeStudents
@@ -1567,7 +1567,7 @@ function MarksEntryView({
       const contentY = await addReportHeader(
         doc,
         "",
-        `${cls.name} · ${fmtLong(exam.date)} · Generated: ${new Date().toLocaleString("en-AE")}`,
+        `${cls.name} · ${fmtLong(exam.date)} · Generated: ${new Date().toLocaleString("en-IN")}`,
       )
 
       // ── Centred highlighted title bar ──
@@ -2080,7 +2080,7 @@ function ReportCardView({
   const rank = classScores.findIndex((x) => x.id === student.id) + 1
 
   const fmtLong = (d: string) =>
-    new Date(d + "T00:00:00").toLocaleDateString("en-AE", { day: "numeric", month: "long", year: "numeric" })
+    new Date(d + "T00:00:00").toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })
 
   async function downloadReportCardPDF() {
     const { default: jsPDF } = await import("jspdf")
@@ -2090,7 +2090,7 @@ function ReportCardView({
     const contentY = await addReportHeader(
       doc,
       "",
-      `${cls.name} · ${fmtLong(exam.date)} · Generated: ${new Date().toLocaleString("en-AE")}`,
+      `${cls.name} · ${fmtLong(exam.date)} · Generated: ${new Date().toLocaleString("en-IN")}`,
     )
 
     // ── Centred highlighted title bar ──
@@ -2423,7 +2423,7 @@ function ReportCardView({
           {/* Print footer */}
           <div className="mt-6 pt-3 border-t border-[#e8edf4] text-center">
             <p className="text-[10px] text-[#8899b0] tracking-wider">
-              Ihlamudheen Madrasa · {new Date().toLocaleDateString("en-AE", { day: "numeric", month: "long", year: "numeric" })}
+              Ihlamudheen Madrasa · {new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}
             </p>
           </div>
         </div>
@@ -2452,7 +2452,7 @@ function CertificateView({
   const maxTotal = exam.subjects.reduce((s, sub) => s + sub.maxScore, 0)
   const pct = maxTotal ? Math.round((total / maxTotal) * 100) : 0
   const grade = getGrade(pct)
-  const today = new Date().toLocaleDateString("en-AE", { day: "numeric", month: "long", year: "numeric" })
+  const today = new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })
 
   return (
     <div className="space-y-4">
@@ -2700,7 +2700,7 @@ function FlipExamCard({
   }))
 
   const totalMax = exam.subjects.reduce((s, sub) => s + sub.maxScore, 0)
-  const dateLong = new Date(exam.date + "T00:00:00").toLocaleDateString("en-AE", {
+  const dateLong = new Date(exam.date + "T00:00:00").toLocaleDateString("en-IN", {
     day: "numeric",
     month: "long",
     year: "numeric",

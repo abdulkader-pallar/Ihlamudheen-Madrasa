@@ -1,5 +1,5 @@
 // ╔══════════════════════════════════════════════════════════════════╗
-// ║ Ihlamudheen Madrasa Fest — add a single student by hand                     ║
+// ║ Meelad Fest — add a single student by hand                     ║
 // ║                                                                    ║
 // ║ The bulk Excel importer (import-fest-apply.ts) is the fast path     ║
 // ║ when a section roster already exists as a spreadsheet. Many         ║

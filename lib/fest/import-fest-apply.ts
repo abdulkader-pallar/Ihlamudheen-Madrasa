@@ -1,5 +1,5 @@
 // ╔══════════════════════════════════════════════════════════════════╗
-// ║ Ihlamudheen Madrasa Fest — commit a parsed workbook into Supabase           ║
+// ║ Meelad Fest — commit a parsed workbook into Supabase           ║
 // ║                                                                    ║
 // ║ Runs as the signed-in admin/coordinator, so every write goes       ║
 // ║ through the fest RLS policies (no service key). Idempotent on       ║

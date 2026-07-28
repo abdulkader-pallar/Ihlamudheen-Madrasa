@@ -1,4 +1,4 @@
-// Shared types + fetch for the Ihlamudheen Madrasa Fest leaderboard (Phase 5).
+// Shared types + fetch for the Meelad Fest leaderboard (Phase 5).
 // The aggregation runs in the fest_leaderboard() SQL function so the same
 // numbers feed the staff leaderboard, the public view, and Stage Mode.
 

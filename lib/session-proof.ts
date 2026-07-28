@@ -147,7 +147,7 @@ export function classifySessionEvidence(input: EvidenceInput): EvidenceVerdict {
 }
 
 /**
- * Whole days between the class date and the proof upload timestamp (UAE-naive:
+ * Whole days between the class date and the proof upload timestamp (UIN-naive:
  * both sides compared as calendar dates). 0 = uploaded the same day.
  */
 export function uploadDelayDays(classDate: string, uploadedAtIso: string): number {

@@ -99,9 +99,9 @@ export function getMenuForRole(
     ],
   }
 
-  // Ihlamudheen Madrasa Fest (Ihlamudheen Madrasa arts fest) — shown to fest staff only.
+  // Meelad Fest (Ihlamudheen Madrasa arts fest) — shown to fest staff only.
   const meeladFest: NavCategory = {
-    title: "Ihlamudheen Madrasa Fest",
+    title: "Meelad Fest",
     items: [
       { href: "/fest", label: "Fest Home", icon: Trophy, color: "bg-gold-500" },
       { href: "/fest/registration", label: "Registration", icon: UserPlus, color: "bg-sky-500" },
@@ -138,7 +138,6 @@ export function getMenuForRole(
           { href: "/dashboard/employees", label: "Employees", icon: Users, color: "bg-blue-600" },
           { href: "/dashboard/leave", label: "Leave Mgmt", icon: CalendarOff, color: "bg-amber-500" },
           { href: "/dashboard/setup-teachers", label: "Setup Teachers", icon: UserPlus, color: "bg-indigo-500" },
-          { href: "/dashboard/edu-support", label: "EDU Support Hours", icon: Clock, color: "bg-emerald-600" },
         ],
       },
       {
@@ -163,8 +162,6 @@ export function getMenuForRole(
           { href: "/dashboard/schedule", label: "Schedule", icon: Calendar, color: "bg-emerald-500" },
           { href: "/dashboard/bell-timetable", label: "Bell Timetable", icon: Bell, color: "bg-amber-500" },
           { href: "/dashboard/period-timetable", label: "Period Timetable", icon: CalendarRange, color: "bg-violet-500" },
-          { href: "/dashboard/edu-timetable", label: "EDU Timetable", icon: CalendarRange, color: "bg-emerald-600" },
-          { href: "/dashboard/edu-timetable/assign", label: "EDU Subjects", icon: SlidersHorizontal, color: "bg-emerald-500" },
           { href: "/dashboard/album", label: "School Album", icon: Camera, color: "bg-fuchsia-500" },
           { href: "/dashboard/discipline", label: "Discipline", icon: Scale, color: "bg-red-400" },
         ],
@@ -230,7 +227,6 @@ export function getMenuForRole(
           { href: "/dashboard/staff-attendance", label: "Staff Attendance", icon: ClipboardList, color: "bg-teal-500" },
           { href: "/dashboard/employees", label: "Employees", icon: Users, color: "bg-blue-600" },
           { href: "/dashboard/leave", label: "Leave Mgmt", icon: CalendarOff, color: "bg-amber-500" },
-          { href: "/dashboard/edu-support", label: "EDU Support Hours", icon: Clock, color: "bg-emerald-600" },
         ],
       },
       {
@@ -279,7 +275,6 @@ export function getMenuForRole(
           { href: "/dashboard/recitation", label: "Quran Recitation", icon: BookOpenCheck, color: "bg-emerald-600" },
           { href: "/dashboard/lesson-plans", label: "Lesson Plans / PPT", icon: BookOpen, color: "bg-emerald-700" },
           { href: "/dashboard/lms", label: "LMS (Moodle)", icon: GraduationCap, color: "bg-rose-500" },
-          ...(isEduSupport ? [{ href: "/dashboard/edu-support", label: "EDU Support Hours", icon: Clock, color: "bg-emerald-600" }] : []),
         ],
       },
       meeladFest,

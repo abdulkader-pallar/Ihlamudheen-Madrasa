@@ -33,7 +33,6 @@ import {
   type CourseData,
   SATURDAY_CLASSES,
   SUNDAY_CLASSES,
-  ONLINE_DEFAULT_CLASSES,
 } from "@/data/courses"
 import { resolveTeacherId } from "@/lib/teacher-identity"
 import * as db from "@/lib/db"
@@ -96,20 +95,9 @@ export default function AttendancePage() {
   // every class meets on Google Meet, so the weekday-based default above is
   // wrong — default to ALL courses and ask the teacher to pick theirs instead.
   // A manual dropdown choice always wins (filterTouchedRef).
-  const [isOnlineMonth, setIsOnlineMonth] = useState(false)
+  // Ihlamudheen Madrasa has no online classes.
+  const isOnlineMonth = false
   const filterTouchedRef = useRef(false)
-  useEffect(() => {
-    db.fetchAppSetting("online_checkin_months").then((v) => {
-      try {
-        const months = JSON.parse(v ?? "[]")
-        const thisMonth = new Date().toISOString().slice(0, 7)
-        if (Array.isArray(months) && months.includes(thisMonth)) {
-          setIsOnlineMonth(true)
-          if (!filterTouchedRef.current) setAttFilter("all")
-        }
-      } catch { /* malformed setting — keep the weekday default */ }
-    })
-  }, [])
   const selectAttFilter = (f: AttFilter) => {
     filterTouchedRef.current = true
     setAttFilter(f)
@@ -530,7 +518,6 @@ export default function AttendancePage() {
       if (attFilter === "all") return true
       if (attFilter === "madrasa_saturday") return title === "Ihlamudheen Madrasa" && SATURDAY_CLASSES.includes(cid)
       if (attFilter === "madrasa_sunday") return title === "Ihlamudheen Madrasa" && SUNDAY_CLASSES.includes(cid)
-      if (attFilter === "madrasa_online") return title === "Ihlamudheen Madrasa" && ONLINE_DEFAULT_CLASSES.includes(cid)
       return title === attFilter
     }
     const allClasses = everyClass.filter(matches)
@@ -538,7 +525,6 @@ export default function AttendancePage() {
       if (attFilter === "all") return isOnlineMonth ? "Online — Choose Course" : "All Institutions"
       if (attFilter === "madrasa_saturday") return "Ihlamudheen — Saturday"
       if (attFilter === "madrasa_sunday") return "Ihlamudheen — Sunday"
-      if (attFilter === "madrasa_online") return "Ihlamudheen — Online"
       if (attFilter === "Ihlamudheen Madrasa") return "Ihlamudheen Madrasa"
       if (attFilter === "Ihlamudheen Madrasa") return "Ihlamudheen Madrasa"
       return "Ihlamudheen Madrasa"
@@ -628,7 +614,6 @@ export default function AttendancePage() {
                 {([
                   { key: "madrasa_saturday", label: "Saturday classes", ids: SATURDAY_CLASSES },
                   { key: "madrasa_sunday",   label: "Sunday classes",   ids: SUNDAY_CLASSES },
-                  { key: "madrasa_online",   label: "Online classes",   ids: ONLINE_DEFAULT_CLASSES },
                 ] as const).map((sub) => {
                   const count = everyClass.filter(
                     (c) => c.courseTitle.toUpperCase().trim() === "Ihlamudheen Madrasa" && sub.ids.includes(c.id),

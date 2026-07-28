@@ -1,5 +1,5 @@
 // ╔══════════════════════════════════════════════════════════════════╗
-// ║ Ihlamudheen Madrasa Fest — scheduling clash detection (§C)                  ║
+// ║ Meelad Fest — scheduling clash detection (§C)                  ║
 // ║                                                                    ║
 // ║ Pure, unit-tested. Given the scheduled items (each with a start    ║
 // ║ time, duration, stage, and the students/judges attached), it       ║

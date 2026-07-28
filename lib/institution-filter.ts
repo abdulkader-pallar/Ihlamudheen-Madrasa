@@ -8,7 +8,7 @@
 // ║   • a Ihlamudheen day-of-week sub-filter                               ║
 // ╚══════════════════════════════════════════════════════════════════╝
 
-import { SATURDAY_CLASSES, SUNDAY_CLASSES, ONLINE_DEFAULT_CLASSES } from "@/data/courses"
+import { SATURDAY_CLASSES, SUNDAY_CLASSES } from "@/data/courses"
 import type { CourseData } from "@/data/courses"
 
 // Institution keys are UPPER-CASE course titles (matchesFilter uppercases the
@@ -27,12 +27,10 @@ export type WidgetFilter =
   | InstitutionKey
   | "madrasa_saturday"
   | "madrasa_sunday"
-  | "madrasa_online"
 
 export const INST_SUB_FILTERS: Array<{ key: WidgetFilter; label: string; ids: readonly string[] }> = [
   { key: "madrasa_saturday", label: "Saturday classes", ids: SATURDAY_CLASSES },
   { key: "madrasa_sunday",   label: "Sunday classes",   ids: SUNDAY_CLASSES },
-  { key: "madrasa_online",   label: "Online classes",   ids: ONLINE_DEFAULT_CLASSES },
 ]
 
 /** Does this (classId, courseTitle) pair match the given filter? */
@@ -44,7 +42,6 @@ export function matchesFilter(
   if (f === "all") return true
   if (f === "madrasa_saturday") return title === "IHLAMUDHEEN MADRASA" && SATURDAY_CLASSES.includes(c.classId)
   if (f === "madrasa_sunday")   return title === "IHLAMUDHEEN MADRASA" && SUNDAY_CLASSES.includes(c.classId)
-  if (f === "madrasa_online")   return title === "IHLAMUDHEEN MADRASA" && ONLINE_DEFAULT_CLASSES.includes(c.classId)
   return title === f
 }
 
@@ -53,7 +50,6 @@ export function institutionLabel(f: WidgetFilter): string {
   if (f === "all")            return "All Institutions"
   if (f === "madrasa_saturday") return "Ihlamudheen — Saturday"
   if (f === "madrasa_sunday")   return "Ihlamudheen — Sunday"
-  if (f === "madrasa_online")   return "Ihlamudheen — Online"
   return INSTITUTIONS.find((i) => i.key === f)?.label ?? "Filter"
 }
 

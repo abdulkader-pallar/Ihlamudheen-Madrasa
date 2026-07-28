@@ -29,7 +29,7 @@ export default function PublicResultsPage({ params }: { params: Promise<{ editio
           <img src="/logo.png" alt="Ihlamudheen Madrasa" className="mx-auto mb-2 h-10 w-auto"
             onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none" }} />
           <h1 className="whitespace-nowrap text-xl font-extrabold text-navy-800 dark:text-white">Ihlamudheen Madrasa</h1>
-          <p className="text-xs text-navy-500">Ihlamudheen Madrasa Fest Results · {edition}</p>
+          <p className="text-xs text-navy-500">Meelad Fest Results · {edition}</p>
         </div>
 
         {!data ? (
@@ -62,7 +62,7 @@ export default function PublicResultsPage({ params }: { params: Promise<{ editio
         )}
 
         <div className="mt-8 text-center">
-          <Link href="/meelad" className="text-sm text-gold-600 hover:underline">← Ihlamudheen Madrasa Fest home</Link>
+          <Link href="/meelad" className="text-sm text-gold-600 hover:underline">← Meelad Fest home</Link>
         </div>
       </div>
     </main>

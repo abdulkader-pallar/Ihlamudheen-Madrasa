@@ -1,5 +1,5 @@
 // ╔══════════════════════════════════════════════════════════════════╗
-// ║ Ihlamudheen Madrasa Fest — .xlsx → matrix adapter                           ║
+// ║ Meelad Fest — .xlsx → matrix adapter                           ║
 // ║                                                                    ║
 // ║ Thin wrapper over SheetJS that turns an uploaded workbook into the ║
 // ║ 2-D matrix that parseFestWorkbook() consumes. Kept separate from   ║

@@ -24,7 +24,7 @@ export default function HallOfFamePage() {
     <main className="min-h-screen bg-gradient-to-b from-navy-950 to-black px-4 py-10 text-white">
       <div className="mx-auto max-w-4xl">
         <div className="mb-8 text-center">
-          <p className="text-xs uppercase tracking-[0.3em] text-gold-400">Ihlamudheen Madrasa Fest</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-gold-400">Meelad Fest</p>
           <h1 className="flex items-center justify-center gap-3 text-4xl font-black"><Trophy className="size-8 text-gold-400" /> Hall of Fame</h1>
           <p className="mt-2 text-sm text-white/50">Lifetime records across all published editions</p>
         </div>

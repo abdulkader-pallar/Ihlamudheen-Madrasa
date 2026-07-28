@@ -9,7 +9,7 @@ import { DashboardSkeleton } from "@/components/loading-skeleton"
 import { getUserRole, ROLE_LABELS, ROLE_BADGE_COLORS } from "@/lib/roles"
 import { cn } from "@/lib/utils"
 
-// Ihlamudheen Madrasa Fest module shell. Auth + role gating is enforced in middleware.ts and,
+// Meelad Fest module shell. Auth + role gating is enforced in middleware.ts and,
 // authoritatively, by the fest_* RLS policies; this layout just frames the UI.
 export default function FestLayout({ children }: { children: React.ReactNode }) {
   const { user, loading, signOut } = useAuth(true)
@@ -27,7 +27,7 @@ export default function FestLayout({ children }: { children: React.ReactNode }) 
           <Link href="/fest" className="flex items-center gap-2.5">
             <Image src="/logo.png" alt="Ihlamudheen Madrasa" width={120} height={32} className="h-8 w-auto rounded" />
             <div className="flex flex-col leading-none">
-              <span className="text-base font-bold text-navy-800 dark:text-white tracking-tight">Ihlamudheen Madrasa Fest</span>
+              <span className="text-base font-bold text-navy-800 dark:text-white tracking-tight">Meelad Fest</span>
               <span className="text-[9px] font-medium text-navy-500 dark:text-navy-400 tracking-wider">Ihlamudheen Madrasa PORTAL</span>
             </div>
           </Link>

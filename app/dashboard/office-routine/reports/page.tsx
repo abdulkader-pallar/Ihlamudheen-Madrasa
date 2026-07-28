@@ -202,7 +202,7 @@ export default function OfficeRoutineReportsPage() {
     const income = ledger.filter((f) => f.type === "income").reduce((s, f) => s + f.amount, 0)
     const expense = ledger.filter((f) => f.type === "expense").reduce((s, f) => s + f.amount, 0)
     autoTable(doc, {
-      startY: y, head: [["Finance — Type", "Amount (AED)", "Category", "Remarks", "Added by"]],
+      startY: y, head: [["Finance — Type", "Amount (", "Category", "Remarks", "Added by"]],
       body: [
         ...ledger.map((f) => [f.type, f.amount.toFixed(2), f.category || "—", f.remarks || "—", f.createdByName || "—"]),
         ["Income total", income.toFixed(2), "", "", ""],
@@ -391,7 +391,7 @@ function ReportDetail({ report, className }: { report: db.OfficeDailyReport; cla
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead><tr className="text-left text-navy-300"><th className="py-2 pr-3">Type</th><th className="pr-3">Amount (AED)</th><th className="pr-3">Category</th><th className="pr-3">Remarks</th><th className="pr-3">Added by</th></tr></thead>
+              <thead><tr className="text-left text-navy-300"><th className="py-2 pr-3">Type</th><th className="pr-3">Amount (</th><th className="pr-3">Category</th><th className="pr-3">Remarks</th><th className="pr-3">Added by</th></tr></thead>
               <tbody>
                 {ledger.map((f) => (
                   <tr key={f.id} className="border-t border-navy-700/40">

@@ -1,5 +1,5 @@
 // ╔══════════════════════════════════════════════════════════════════╗
-// ║ Ihlamudheen Madrasa Fest — default item catalog + scoring rubrics (§6B, §3) ║
+// ║ Meelad Fest — default item catalog + scoring rubrics (§6B, §3) ║
 // ║                                                                    ║
 // ║ The seed catalog an admin can drop into a fresh edition in one     ║
 // ║ click. Each item carries a default rubric (the per-criterion       ║

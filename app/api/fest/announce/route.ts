@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     }))
 
     const text = composeResultsAnnouncement({
-      editionName: (ed as { name: string } | null)?.name ?? "Ihlamudheen Madrasa Fest",
+      editionName: (ed as { name: string } | null)?.name ?? "Meelad Fest",
       winners,
     })
 
@@ -54,7 +54,7 @@ export async function POST(request: Request) {
       await transporter.sendMail({
         from: '"Ihlamudheen Madrasa" <' + gmailUser + ">",
         to,
-        subject: `Ihlamudheen Madrasa Fest Results`,
+        subject: `Meelad Fest Results`,
         text,
       })
       emailed = true

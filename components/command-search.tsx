@@ -81,7 +81,6 @@ function getItemsForRole(role: UserRole): NavItem[] {
       { href: "/dashboard/employees", label: "Employees", icon: Users, color: "bg-blue-600", category: "HRMS" },
       { href: "/dashboard/leave", label: "Leave Mgmt", icon: CalendarOff, color: "bg-amber-500", category: "HRMS" },
       { href: "/dashboard/setup-teachers", label: "Setup Teachers", icon: UserPlus, color: "bg-indigo-500", category: "HRMS" },
-      { href: "/dashboard/edu-support", label: "EDU Support Hours", icon: Clock, color: "bg-emerald-600", category: "HRMS" },
       // ERP & Finance
       { href: "/dashboard/fees/payments", label: "Finance", icon: Receipt, color: "bg-green-600", category: "ERP & Finance" },
       { href: "/dashboard/fees", label: "Fees Mgmt", icon: CreditCard, color: "bg-emerald-600", category: "ERP & Finance" },
@@ -126,7 +125,6 @@ function getItemsForRole(role: UserRole): NavItem[] {
       { href: "/dashboard/my-attendance", label: "My Attendance", icon: ClipboardList, color: "bg-teal-600", category: "HRMS" },
       { href: "/dashboard/employees", label: "Employees", icon: Users, color: "bg-blue-600", category: "HRMS" },
       { href: "/dashboard/leave", label: "Leave Mgmt", icon: CalendarOff, color: "bg-amber-500", category: "HRMS" },
-      { href: "/dashboard/edu-support", label: "EDU Support Hours", icon: Clock, color: "bg-emerald-600", category: "HRMS" },
       // Tools
       { href: "/dashboard/schedule", label: "Schedule", icon: Calendar, color: "bg-emerald-500", category: "Tools" },
       { href: "/dashboard/bell-timetable", label: "Bell Timetable", icon: Bell, color: "bg-amber-500", category: "Tools" },
@@ -151,7 +149,6 @@ function getItemsForRole(role: UserRole): NavItem[] {
       { href: "/dashboard/courses", label: "My Courses", icon: BookOpen, color: "bg-gold-500", category: "My Work" },
       { href: "/dashboard/assessment", label: "Grade Book", icon: GraduationCap, color: "bg-indigo-500", category: "My Work" },
       { href: "/dashboard/lms", label: "LMS (Moodle)", icon: MonitorPlay, color: "bg-rose-500", category: "My Work" },
-      { href: "/dashboard/edu-support", label: "EDU Support Hours", icon: Clock, color: "bg-emerald-600", category: "My Work" },
       // Tools
       { href: "/dashboard/schedule", label: "Schedule", icon: Calendar, color: "bg-emerald-500", category: "Tools" },
       { href: "/dashboard/communication", label: "Communication", icon: Radio, color: "bg-sky-600", category: "Tools" },

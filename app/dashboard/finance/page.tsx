@@ -55,7 +55,7 @@ export default function FinancePage() {
               </div>
               <div>
                 <p className="text-xs text-navy-500 dark:text-navy-400">Total Income</p>
-                <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">AED {totalIncome.toLocaleString()}</p>
+                <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">INR {totalIncome.toLocaleString()}</p>
               </div>
             </CardContent>
           </Card>
@@ -68,7 +68,7 @@ export default function FinancePage() {
               </div>
               <div>
                 <p className="text-xs text-navy-500 dark:text-navy-400">Total Expenses</p>
-                <p className="text-xl font-bold text-red-600 dark:text-red-400">AED {totalExpense.toLocaleString()}</p>
+                <p className="text-xl font-bold text-red-600 dark:text-red-400">INR {totalExpense.toLocaleString()}</p>
               </div>
             </CardContent>
           </Card>
@@ -82,7 +82,7 @@ export default function FinancePage() {
               <div>
                 <p className="text-xs text-navy-500 dark:text-navy-400">Net Balance</p>
                 <p className={cn("text-xl font-bold", balance >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400")}>
-                  AED {balance.toLocaleString()}
+                  INR {balance.toLocaleString()}
                 </p>
               </div>
             </CardContent>
@@ -120,7 +120,7 @@ export default function FinancePage() {
                   <th className="px-4 py-3 text-left font-medium text-navy-600 dark:text-navy-300">Description</th>
                   <th className="px-4 py-3 text-left font-medium text-navy-600 dark:text-navy-300">Category</th>
                   <th className="px-4 py-3 text-left font-medium text-navy-600 dark:text-navy-300">Reference</th>
-                  <th className="px-4 py-3 text-right font-medium text-navy-600 dark:text-navy-300">Amount (AED)</th>
+                  <th className="px-4 py-3 text-right font-medium text-navy-600 dark:text-navy-300">Amount (</th>
                 </tr>
               </thead>
               <tbody>

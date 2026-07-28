@@ -22,7 +22,7 @@ const FEE_STRUCTURE = [
     bgLight: "bg-emerald-50 dark:bg-emerald-500/10",
     border: "border-emerald-200 dark:border-emerald-500/30",
     tiers: [{ grade: "All Grades", fee: 125, unit: "per month" }],
-    note: "125 AED/month for all enrolled students.",
+    note: "125 INR/month for all enrolled students.",
     getFee: () => 125,
   },
   {
@@ -33,7 +33,7 @@ const FEE_STRUCTURE = [
     bgLight: "bg-sky-50 dark:bg-sky-500/10",
     border: "border-sky-200 dark:border-sky-500/30",
     tiers: [{ grade: "All Levels", fee: 150, unit: "per month" }],
-    note: "150 AED/month for all enrolled students.",
+    note: "150 INR/month for all enrolled students.",
     getFee: () => 150,
   },
   {
@@ -48,7 +48,7 @@ const FEE_STRUCTURE = [
       { grade: "Grade 3 & 4", fee: 350, unit: "per month" },
       { grade: "Grade 5 & 6", fee: 400, unit: "per month" },
     ],
-    note: "Fee varies by grade: 300 / 350 / 400 AED/month.",
+    note: "Fee varies by grade: 300 / 350 / 400 INR/month.",
     getFee: (className: string) => {
       const lower = className.toLowerCase()
       if (/grade\s+[12]\b/.test(lower) || /\bg[12]\b/.test(lower)) return 300
@@ -164,7 +164,7 @@ export default function FeesPage() {
             {loading ? <Loader2 className="size-5 animate-spin text-navy-400 mt-1" /> : (
               <>
                 <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
-                  AED {totalMonthly.toLocaleString()}
+                  INR {totalMonthly.toLocaleString()}
                 </p>
                 <p className="text-[11px] text-slate-400 mt-0.5">all programs combined</p>
               </>
@@ -206,7 +206,7 @@ export default function FeesPage() {
                   <div key={tier.grade} className="rounded-xl bg-white dark:bg-navy-800/60 border border-white/70 dark:border-navy-700/50 px-3 py-1.5 text-center">
                     <p className="text-[10px] text-slate-500">{tier.grade}</p>
                     <p className={cn("text-sm font-bold", prog.textColor)}>
-                      {tier.fee > 0 ? `AED ${tier.fee}` : "TBD"}
+                      {tier.fee > 0 ? `tier.fee}` : "TBD"}
                     </p>
                   </div>
                 ))}
@@ -219,7 +219,7 @@ export default function FeesPage() {
                   </p>
                   {prog.monthly > 0 && (
                     <p className="text-[11px] text-slate-500">
-                      AED {prog.monthly.toLocaleString()}/month
+                      INR {prog.monthly.toLocaleString()}/month
                     </p>
                   )}
                 </div>
@@ -250,10 +250,10 @@ export default function FeesPage() {
                           <td className="px-4 py-2 text-xs text-slate-500 dark:text-slate-400 hidden sm:table-cell">{cls.schedule || "—"}</td>
                           <td className="px-4 py-2 text-center font-semibold text-navy-900 dark:text-white">{cls.studentCount}</td>
                           <td className="px-4 py-2 text-center text-xs text-slate-600 dark:text-slate-300">
-                            {fee > 0 ? `AED ${fee}` : "TBD"}
+                            {fee > 0 ? `fee}` : "TBD"}
                           </td>
                           <td className="px-4 py-2 text-right font-semibold text-emerald-600 dark:text-emerald-400">
-                            {fee > 0 ? `AED ${(cls.studentCount * fee).toLocaleString()}` : "—"}
+                            {fee > 0 ? `(cls.studentCount * fee).toLocaleString()}` : "—"}
                           </td>
                         </tr>
                       )
@@ -265,7 +265,7 @@ export default function FeesPage() {
                       <td className="px-4 py-2 text-center text-navy-900 dark:text-white">{prog.students}</td>
                       <td />
                       <td className="px-4 py-2 text-right text-emerald-600 dark:text-emerald-400">
-                        {prog.monthly > 0 ? `AED ${prog.monthly.toLocaleString()}` : "—"}
+                        {prog.monthly > 0 ? `prog.monthly.toLocaleString()}` : "—"}
                       </td>
                     </tr>
                   </tfoot>
@@ -297,7 +297,7 @@ export default function FeesPage() {
               </div>
               <div className="text-center">
                 <p className="text-xs text-slate-500">Est. Monthly</p>
-                <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">AED {totalMonthly.toLocaleString()}</p>
+                <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">INR {totalMonthly.toLocaleString()}</p>
               </div>
             </div>
           </CardContent>

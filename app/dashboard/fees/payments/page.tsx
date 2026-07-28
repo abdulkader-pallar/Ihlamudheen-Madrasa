@@ -309,7 +309,7 @@ export default function FeePaymentsPage() {
         )
       }
 
-      toast.success(`Recorded AED ${amount} for ${selected.name}.`)
+      toast.success(`Recorded amount} for ${selected.name}.`)
       closeAdd()
       await load()
     } finally {
@@ -348,7 +348,7 @@ export default function FeePaymentsPage() {
       return
     }
     if (amount > lastPayment.amount) {
-      toast.error(`Cannot reverse more than the original AED ${lastPayment.amount}.`)
+      toast.error(`Cannot reverse more than the original lastPayment.amount}.`)
       return
     }
     if (adjustConfirm.trim() !== adjustStudent.rollNo) {
@@ -391,7 +391,7 @@ export default function FeePaymentsPage() {
         })
       }
 
-      toast.success(`Reversed AED ${amount} from ${adjustStudent.name}.`)
+      toast.success(`Reversed amount} from ${adjustStudent.name}.`)
       setAdjustOpen(false)
       await load()
     } finally {
@@ -467,7 +467,7 @@ export default function FeePaymentsPage() {
   async function exportCSV() {
     setExporting(true)
     try {
-      const headers = ["#", "Reg No.", "Student", "Class", "Program", "Monthly Fee (AED)", "Pending Fee (AED)", "Status", "Pending Months"]
+      const headers = ["#", "Reg No.", "Student", "Class", "Program", "Monthly Fee (", "Pending Fee (", "Status", "Pending Months"]
       const rows = filtered.map((s, i) => [
         i + 1,
         s.rollNo,
@@ -477,7 +477,7 @@ export default function FeePaymentsPage() {
         s.monthlyFee,
         s.summary.totalPending,
         s.monthlyFee === 0 ? "Manual" : s.summary.totalPending === 0 ? "Paid" : "Pending",
-        s.summary.breakdown.map(b => `${monthLabel(b.month)}: AED ${b.pending}`).join(" | "),
+        s.summary.breakdown.map(b => `${monthLabel(b.month)}: b.pending}`).join(" | "),
       ])
 
       const csv = [headers, ...rows]
@@ -511,8 +511,8 @@ export default function FeePaymentsPage() {
       const pageW = doc.internal.pageSize.getWidth()
       doc.setFontSize(8); doc.setFont("helvetica", "normal"); doc.setTextColor(80)
       const summaryLine = [
-        `Collected (lifetime): AED ${totalReceived.toLocaleString()}`,
-        `Outstanding: AED ${totalOutstanding.toLocaleString()}`,
+        `Collected (lifetime): totalReceived.toLocaleString()}`,
+        `Outstanding: totalOutstanding.toLocaleString()}`,
         `Paid: ${studentsPaid}`,
         `Pending: ${studentsPending}`,
         `Shown: ${filtered.length} students`,
@@ -529,14 +529,14 @@ export default function FeePaymentsPage() {
           s.name,
           s.className,
           PROGRAMS[s.courseId]?.label ?? "",
-          s.monthlyFee > 0 ? `AED ${s.monthlyFee}` : "TBD",
-          s.monthlyFee > 0 ? `AED ${s.summary.totalPending}` : "—",
+          s.monthlyFee > 0 ? `s.monthlyFee}` : "TBD",
+          s.monthlyFee > 0 ? `s.summary.totalPending}` : "—",
           s.monthlyFee === 0 ? "Manual" : s.summary.totalPending === 0 ? "Paid" : "Pending",
-          s.summary.breakdown.map(b => `${shortMonthLabel(b.month)} AED ${b.pending}`).join(", ") || "—",
+          s.summary.breakdown.map(b => `${shortMonthLabel(b.month)} b.pending}`).join(", ") || "—",
         ]),
         foot: [[
           "", "", `Total: ${filtered.length}`, "", "",
-          "", `AED ${totalOutstanding.toLocaleString()} pending`, "", "",
+          "", `totalOutstanding.toLocaleString()} pending`, "", "",
         ]],
         headStyles:  { fillColor: [30, 58, 95], fontSize: 7, fontStyle: "bold" },
         footStyles:  { fillColor: [240, 240, 240], fontSize: 7, fontStyle: "bold", textColor: [30, 58, 95] },
@@ -649,8 +649,8 @@ export default function FeePaymentsPage() {
       {/* Summary cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
-          { label: "Collected (lifetime)", value: `AED ${totalReceived.toLocaleString()}`,    icon: Banknote,     ring: "border-emerald-200 dark:border-emerald-500/30", iconClass: "text-emerald-500" },
-          { label: "Outstanding",          value: `AED ${totalOutstanding.toLocaleString()}`, icon: Clock,        ring: "border-amber-200 dark:border-amber-500/30",     iconClass: "text-amber-500"  },
+          { label: "Collected (lifetime)", value: `totalReceived.toLocaleString()}`,    icon: Banknote,     ring: "border-emerald-200 dark:border-emerald-500/30", iconClass: "text-emerald-500" },
+          { label: "Outstanding",          value: `totalOutstanding.toLocaleString()}`, icon: Clock,        ring: "border-amber-200 dark:border-amber-500/30",     iconClass: "text-amber-500"  },
           { label: "Students Paid",        value: `${studentsPaid}`,                          icon: CheckCircle2, ring: "border-emerald-200 dark:border-emerald-500/30", iconClass: "text-emerald-500" },
           { label: "Students Pending",     value: `${studentsPending}`,                       icon: Users,        ring: "border-amber-200 dark:border-amber-500/30",     iconClass: "text-amber-500"  },
         ].map((card, i) => (
@@ -741,7 +741,7 @@ export default function FeePaymentsPage() {
                         ) : (
                           <span className="inline-flex items-center gap-1.5">
                             <span className={cn("font-semibold", pending > 0 ? "text-amber-600 dark:text-amber-400" : "text-slate-500")}>
-                              AED {pending.toLocaleString()}
+                              INR {pending.toLocaleString()}
                             </span>
                             {s.summary.breakdown.length > 0 && (
                               <button
@@ -836,10 +836,10 @@ export default function FeePaymentsPage() {
                     Total ({filtered.length} students)
                   </td>
                   <td className="px-4 py-2.5 text-center text-amber-600 dark:text-amber-400 text-sm">
-                    AED {totalOutstanding.toLocaleString()}
+                    INR {totalOutstanding.toLocaleString()}
                   </td>
                   <td colSpan={2} className="px-4 py-2.5 text-right text-emerald-600 dark:text-emerald-400 text-sm">
-                    AED {totalReceived.toLocaleString()} collected
+                    INR {totalReceived.toLocaleString()} collected
                   </td>
                 </tr>
               </tfoot>
@@ -888,7 +888,7 @@ export default function FeePaymentsPage() {
                       <span className="text-xs text-slate-500">{s.className}</span>
                       <span className={cn("text-xs font-semibold",
                         s.summary.totalPending > 0 ? "text-amber-600" : "text-emerald-600")}>
-                        AED {s.summary.totalPending}
+                        INR {s.summary.totalPending}
                       </span>
                     </button>
                   ))}
@@ -910,14 +910,14 @@ export default function FeePaymentsPage() {
                   <Button size="sm" variant="ghost" className="h-6 text-[11px]" onClick={() => setSelected(null)}>Change</Button>
                 </div>
                 <div className="mt-2 flex items-center gap-3 text-xs">
-                  <span className="text-slate-500">Monthly fee: <strong className="text-navy-900 dark:text-white">AED {selected.monthlyFee}</strong></span>
-                  <span className="text-slate-500">Total pending: <strong className={selected.summary.totalPending > 0 ? "text-amber-600" : "text-emerald-600"}>AED {selected.summary.totalPending}</strong></span>
+                  <span className="text-slate-500">Monthly fee: <strong className="text-navy-900 dark:text-white">INR {selected.monthlyFee}</strong></span>
+                  <span className="text-slate-500">Total pending: <strong className={selected.summary.totalPending > 0 ? "text-amber-600" : "text-emerald-600"}>INR {selected.summary.totalPending}</strong></span>
                 </div>
                 {selected.summary.breakdown.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-1">
                     {selected.summary.breakdown.map(b => (
                       <Badge key={b.month} variant="outline" className="text-[10px] bg-amber-500/10 border-amber-300 text-amber-700 dark:text-amber-400">
-                        {shortMonthLabel(b.month)} · AED {b.pending}
+                        {shortMonthLabel(b.month)} · INR {b.pending}
                       </Badge>
                     ))}
                   </div>
@@ -926,7 +926,7 @@ export default function FeePaymentsPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-slate-500">Amount Received (AED)</label>
+                  <label className="text-xs font-medium text-slate-500">Amount Received (</label>
                   <Input
                     type="number"
                     inputMode="numeric"
@@ -980,11 +980,11 @@ export default function FeePaymentsPage() {
               </p>
               <div className="text-sm text-slate-700 dark:text-slate-300 space-y-1">
                 <p>Student: <strong>{selected.name}</strong> (Reg {selected.rollNo})</p>
-                <p>Amount: <strong className="text-emerald-700 dark:text-emerald-400">AED {Math.round(Number(amountInput)).toLocaleString()}</strong></p>
+                <p>Amount: <strong className="text-emerald-700 dark:text-emerald-400">INR {Math.round(Number(amountInput)).toLocaleString()}</strong></p>
                 <p>Method: <strong>{methodInput}</strong>{notesInput ? ` · ${notesInput}` : ""}</p>
                 {Number(amountInput) > selected.summary.totalPending && selected.summary.totalPending > 0 && (
                   <p className="text-amber-600 dark:text-amber-400 text-xs font-medium">
-                    Overpayment: AED {Math.round(Number(amountInput)) - selected.summary.totalPending} will be recorded as credit.
+                    Overpayment: INR {Math.round(Number(amountInput)) - selected.summary.totalPending} will be recorded as credit.
                   </p>
                 )}
               </div>
@@ -1040,7 +1040,7 @@ export default function FeePaymentsPage() {
                   if (!p) return null
                   return (
                     <p className="mt-2 text-xs text-slate-600 dark:text-slate-300">
-                      Reversing payment of <strong>AED {p.amount}</strong> recorded for <strong>{monthLabel(p.month)}</strong>
+                      Reversing payment of <strong>INR {p.amount}</strong> recorded for <strong>{monthLabel(p.month)}</strong>
                       {p.paid_at ? <> on {new Date(p.paid_at).toLocaleDateString("en-GB")}</> : null}.
                     </p>
                   )
@@ -1049,7 +1049,7 @@ export default function FeePaymentsPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-slate-500">Amount to Reverse (AED)</label>
+                  <label className="text-xs font-medium text-slate-500">Amount to Reverse (</label>
                   <Input
                     type="number"
                     inputMode="numeric"
@@ -1143,7 +1143,7 @@ export default function FeePaymentsPage() {
                   </div>
                   <div className="text-right shrink-0">
                     <p className="text-[11px] text-slate-500">Pending</p>
-                    <p className="font-bold text-amber-600 dark:text-amber-400">AED {memoStudent.summary.totalPending.toLocaleString()}</p>
+                    <p className="font-bold text-amber-600 dark:text-amber-400">INR {memoStudent.summary.totalPending.toLocaleString()}</p>
                   </div>
                 </div>
               ) : (
@@ -1270,7 +1270,7 @@ function HistoryPanel({ student, onClose }: { student: StudentRow; onClose: () =
                     <td className={cn("py-1.5 pr-4 text-right font-bold tabular-nums whitespace-nowrap",
                       isAdj ? "text-red-600 dark:text-red-400" : "text-emerald-700 dark:text-emerald-400"
                     )}>
-                      {isAdj ? "−" : "+"}AED {Math.abs(e.amount).toLocaleString()}
+                      {isAdj ? "−" : "+"}INR {Math.abs(e.amount).toLocaleString()}
                     </td>
                     <td className="py-1.5 text-slate-500 max-w-[200px] truncate">
                       {isAdj
@@ -1285,7 +1285,7 @@ function HistoryPanel({ student, onClose }: { student: StudentRow; onClose: () =
               <tr className="border-t border-slate-200 dark:border-navy-600">
                 <td colSpan={3} className="pt-1.5 text-[10px] text-slate-400 uppercase tracking-wide">Net received</td>
                 <td className="pt-1.5 pr-4 text-right font-bold text-sky-700 dark:text-sky-400 tabular-nums">
-                  AED {entries.reduce((n, e) => n + e.amount, 0).toLocaleString()}
+                  INR {entries.reduce((n, e) => n + e.amount, 0).toLocaleString()}
                 </td>
                 <td />
               </tr>
@@ -1317,9 +1317,9 @@ function BreakdownPanel({ student, onClose }: { student: StudentRow; onClose: ()
           {breakdown.map(b => (
             <div key={b.month} className="rounded-md border border-amber-200 dark:border-amber-500/30 bg-amber-50/50 dark:bg-amber-500/5 px-3 py-2">
               <p className="text-[11px] text-slate-500">{monthLabel(b.month)}</p>
-              <p className="text-sm font-bold text-amber-700 dark:text-amber-400">AED {b.pending}</p>
+              <p className="text-sm font-bold text-amber-700 dark:text-amber-400">INR {b.pending}</p>
               {b.received > 0 && (
-                <p className="text-[10px] text-slate-400">paid AED {b.received} / {b.due}</p>
+                <p className="text-[10px] text-slate-400">paid INR {b.received} / {b.due}</p>
               )}
             </div>
           ))}
@@ -1333,7 +1333,7 @@ function BreakdownPanel({ student, onClose }: { student: StudentRow; onClose: ()
             </span>
           )}
           {totalCredit > 0 && (
-            <span className="text-sky-600 dark:text-sky-400">· Credit balance: AED {totalCredit}</span>
+            <span className="text-sky-600 dark:text-sky-400">· Credit balance: INR {totalCredit}</span>
           )}
         </div>
       )}

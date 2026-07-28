@@ -1,5 +1,5 @@
 // ╔══════════════════════════════════════════════════════════════════╗
-// ║ Ihlamudheen Madrasa Fest — scoring math (§3 defaults, per-edition configurable) ║
+// ║ Meelad Fest — scoring math (§3 defaults, per-edition configurable) ║
 // ║                                                                    ║
 // ║ Pure + unit-tested. The judging UI uses these to show a live grade  ║
 // ║ as marks are entered; the DB function fest_recompute_results()      ║

@@ -200,7 +200,7 @@ export default function AttendanceReportPage() {
 
   const monthLongLabel = (() => {
     const [y, m] = month.split("-").map(Number)
-    return new Date(y, m - 1, 1).toLocaleDateString("en-AE", { month: "long", year: "numeric" })
+    return new Date(y, m - 1, 1).toLocaleDateString("en-IN", { month: "long", year: "numeric" })
   })()
 
   const pctTone = (pct: number) => pct >= 85 ? "text-emerald-500" : pct >= 60 ? "text-amber-500" : "text-red-500"
@@ -599,7 +599,7 @@ export default function AttendanceReportPage() {
                         const dt = new Date(d + "T00:00:00")
                         return (
                           <th key={d} className="text-center px-2 py-2 font-semibold text-navy-500 border-b border-l border-border whitespace-nowrap">
-                            <div className="text-[10px] text-navy-400">{dt.toLocaleDateString("en-AE", { weekday: "short" })}</div>
+                            <div className="text-[10px] text-navy-400">{dt.toLocaleDateString("en-IN", { weekday: "short" })}</div>
                             <div>{dt.getDate()}</div>
                           </th>
                         )

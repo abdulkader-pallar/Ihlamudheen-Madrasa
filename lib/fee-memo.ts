@@ -36,9 +36,9 @@ export interface FeeMemoOptions {
 const BRAND_NAME = "Ihlamudheen Madrasa"
 const BRAND_SUBLINE = "Ihlamudheen Madrasa · Malappuram, Kerala"
 
-function fmtAED(n: number): string {
-  // Fees are whole AED; round defensively so float drift never shows.
-  return `AED ${Math.round(n).toLocaleString("en-US")}`
+function fmtINR(n: number): string {
+  // Fees are whole INR; round defensively so float drift never shows.
+  return `Math.round(n).toLocaleString("en-US")}`
 }
 
 function fmtDate(iso: string): string {
@@ -105,7 +105,7 @@ function renderMemoBody(
   doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(90)
   doc.text("Total amount due:", left + 3, y + 3.5)
   doc.setFontSize(13); doc.setTextColor(180, 83, 9)
-  doc.text(fmtAED(s.totalPending), left + 42, y + 3.5)
+  doc.text(fmtINR(s.totalPending), left + 42, y + 3.5)
   doc.setTextColor(0); doc.setDrawColor(0)
   line(16)
 
@@ -127,7 +127,7 @@ function renderMemoBody(
     doc.text("Pending breakdown:", left, y); line(5.5)
     doc.setFont("helvetica", "normal"); doc.setFontSize(9.5); doc.setTextColor(40)
     for (const b of s.breakdown) {
-      doc.text(`•  ${monthLabel(b.month)} — ${fmtAED(b.pending)}`, left + 4, y)
+      doc.text(`•  ${monthLabel(b.month)} — ${fmtINR(b.pending)}`, left + 4, y)
       line(5)
     }
     line(2)

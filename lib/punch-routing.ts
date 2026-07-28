@@ -17,11 +17,11 @@
 //    weekday incl. Friday for pure EDU staff; dual-role EDU+English teachers use
 //    the Friday English/CIBIS evening windows for any 14:00+ punch) ──
 //
-// ── English Madrasa (Friday only, flat 150 AED/day) ──────────────────
+// ── English Madrasa (Friday only, flat 150 INR/day) ──────────────────
 //   IN  : 14:00–17:00  (on-time ≤14:55 / Cat1 14:56–15:19 / Cat2 15:20–17:00)
 //   OUT : 17:01–22:30  (on-time ≥19:30 / Cat1 early 19:00–19:29 / Cat2 early 17:01–18:59)
 //   Dual-role (the dual-role teacher EDU+English): morning EDU punch counts as day-present;
-//     she needs ≥1 punch after 14:00 to qualify for 150 AED English.
+//     she needs ≥1 punch after 14:00 to qualify for 150 INR English.
 //
 // ── CIBIS (Friday only, 17:00–22:00, first=IN second=OUT, no late cat) ──
 //   Thursday evening punches → blocked with reason.
@@ -31,7 +31,7 @@
 //   Fri:     S1 before 13:00 (1st=IN, 2nd=OUT)     | S2 IN 13:01–18:00, S2 OUT 18:01–23:59
 //   Sat/Sun: S1 IN 06:00–10:00, S1 OUT 10:01–16:00 | S2 16:01–23:59
 //   S2 late IN: ≥17:30 (Mon–Thu/Sat/Sun) · ≥14:30 (Fri) | S2 early OUT: <22:00 (Mon–Thu/Sat/Sun) · <21:30 (Fri)
-//   No late/early for session 1. All Cat-1, no AED deduction (fixed salary).
+//   No late/early for session 1. All Cat-1, no INR deduction (fixed salary).
 //
 // ── Cleaning – the cleaning staff (any day/time, first=IN last=OUT) ──────────────
 // ── Driver – the driver (any day, first punch=present, 2nd=dual highlight) ─

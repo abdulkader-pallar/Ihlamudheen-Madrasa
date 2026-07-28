@@ -1521,7 +1521,7 @@ export default function MadrasaTeacherPage() {
                       </div>
                       <p className="text-xs font-mono text-navy-500 dark:text-navy-400">Reg No {s.rollNo}</p>
                       <p className="text-[11px] text-navy-400">
-                        Removed{s.disenrolledAt ? ` ${new Date(s.disenrolledAt).toLocaleDateString("en-AE")}` : ""}{s.reason ? ` · ${s.reason}` : ""}
+                        Removed{s.disenrolledAt ? ` ${new Date(s.disenrolledAt).toLocaleDateString("en-IN")}` : ""}{s.reason ? ` · ${s.reason}` : ""}
                       </p>
                       {canManageRoster && (
                         <Button size="sm" variant="outline" className="mt-1 border-emerald-400/60 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20" onClick={() => handleRestoreStudent(s)}>

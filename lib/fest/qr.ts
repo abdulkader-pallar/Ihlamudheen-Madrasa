@@ -1,5 +1,5 @@
 // ╔══════════════════════════════════════════════════════════════════╗
-// ║ Ihlamudheen Madrasa Fest — QR payloads (§7 cross-cutting QR system)         ║
+// ║ Meelad Fest — QR payloads (§7 cross-cutting QR system)         ║
 // ║                                                                    ║
 // ║ Every student gets a QR encoding their stable reg number + the     ║
 // ║ edition, used for event check-in/attendance, participation         ║
@@ -10,7 +10,7 @@
 // ╚══════════════════════════════════════════════════════════════════╝
 
 /** Magic prefix so a scanner can tell our codes apart from arbitrary QRs. */
-export const FEST_QR_PREFIX = "RPMF1" // Ihlamudheen Madrasa Fest, v1
+export const FEST_QR_PREFIX = "RPMF1" // Meelad Fest, v1
 
 export interface StudentQr {
   editionSlug: string

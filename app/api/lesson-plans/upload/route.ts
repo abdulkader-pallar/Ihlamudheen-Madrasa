@@ -19,6 +19,7 @@ import {
   uploadToDrive,
   isDriveConfigured,
   DEFAULT_LESSON_PLANS_FOLDER_ID,
+  isDriveFolderConfigured,
 } from "@/lib/google-drive"
 import { getOAuthConnection, uploadToDriveOAuth } from "@/lib/google-oauth"
 
@@ -79,7 +80,8 @@ export async function POST(request: Request) {
     // Prefer OAuth (uploads as the institute's own Google account, which works
     // on a personal account); fall back to the service account if configured.
     const oauth = await getOAuthConnection()
-    const driveEnabled = oauth.connected || isDriveConfigured()
+    // Drive mirroring also needs a target folder id, not just credentials.
+    const driveEnabled = (oauth.connected || isDriveConfigured()) && isDriveFolderConfigured()
     const putToDrive = oauth.connected ? uploadToDriveOAuth : uploadToDrive
 
     // File everything under Course / Class / Week-Date so the Drive folder

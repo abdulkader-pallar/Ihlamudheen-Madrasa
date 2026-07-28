@@ -4,7 +4,7 @@
 //
 // SECURITY: credentials are read ONLY from the environment, never hard-coded.
 //   • GOOGLE_SERVICE_ACCOUNT_JSON  — the full service-account JSON (as a string)
-//   • GOOGLE_DRIVE_LESSON_PLANS_FOLDER_ID — target folder id (defaults below)
+//   • GOOGLE_DRIVE_LESSON_PLANS_FOLDER_ID — target Drive folder id (REQUIRED)
 //
 // Implemented with Node's built-in crypto (RS256 JWT → OAuth2 token) + the Drive
 // REST API, so it adds no new npm dependency. Must run on the Node.js runtime.
@@ -16,9 +16,16 @@ const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive"
 const UPLOAD_URL =
   "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&supportsAllDrives=true&fields=id,name,webViewLink"
 
-// The folder the institute shared for lesson plans / PPTs.
+// The Drive folder the institute uses for lesson plans / PPTs.
+// Set GOOGLE_DRIVE_LESSON_PLANS_FOLDER_ID to the folder's id — the part of the
+// folder URL after /folders/ :
+//   https://drive.google.com/drive/folders/THIS_IS_THE_ID
+// There is deliberately no default: uploading into someone else's folder would
+// silently fail (or leak files), so an unset value is reported clearly instead.
 export const DEFAULT_LESSON_PLANS_FOLDER_ID =
-  process.env.GOOGLE_DRIVE_LESSON_PLANS_FOLDER_ID || "1rrDKrQl6rbYW2embU1Zovvua4_tHIlZk"
+  process.env.GOOGLE_DRIVE_LESSON_PLANS_FOLDER_ID || ""
+
+export const isDriveFolderConfigured = () => DEFAULT_LESSON_PLANS_FOLDER_ID.length > 0
 
 interface ServiceAccount {
   client_email: string

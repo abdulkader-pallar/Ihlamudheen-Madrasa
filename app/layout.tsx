@@ -24,7 +24,14 @@ const JSON_LD = {
   "@context": "https://schema.org",
   "@type": "EducationalOrganization",
   name: "Ihlamudheen Madrasa",
-  alternateName: ["Ilamudheen Madrasa", "Ilamuddeen Madrasa", "Pallar Madrasa", "مدرسة إعلام الدين"],
+  // Every spelling people actually search for, so the school is found however
+  // the name is transliterated.
+  alternateName: [
+    "Ihlamudheen", "Ihlaamudheen Madrasa", "Ilamudheen Madrasa", "Ilamuddeen Madrasa",
+    "Ihlamudeen Madrasa", "Ihlamudheen Madrassa", "Ehlamudheen Madrasa",
+    "Ihlamudheen Madrasa Pallar", "Pallar Madrasa", "North Pallar Madrasa",
+    "مدرسة إعلام الدين",
+  ],
   url: SITE_URL,
   logo: `${SITE_URL}/Logo of Ihlamudheen Madrasa light-bg removed.png`,
   foundingDate: "1954",
@@ -54,11 +61,21 @@ export const metadata: Metadata = {
   },
   description: SITE_DESC,
   keywords: [
-    "Ihlamudheen Madrasa", "Ilamudheen Madrasa", "Ilamuddeen Madrasa",
-    "Pallar Madrasa", "Pallar Islamic school", "Vairamkode Madrasa",
-    "Malappuram Madrasa", "Kerala Madrasa", "Islamic education Kerala",
-    "Quran school Pallar", "hifz Pallar", "madrasa Pallar 676301",
-    "مدرسة إعلام الدين", "pallar", "vairamkode", "malappuram",
+    // Name + every common transliteration / misspelling
+    "Ihlamudheen", "Ihlamudheen Madrasa", "Ihlaamudheen Madrasa",
+    "Ihlamudeen", "Ihlamudeen Madrasa", "Ilamudheen Madrasa",
+    "Ilamuddeen Madrasa", "Ihlamudheen Madrassa", "Ehlamudheen Madrasa",
+    // Name + place (how people actually search)
+    "Ihlamudheen Madrasa Pallar", "Ihlamudheen Pallar",
+    "Ihlamudheen Madrasa Malappuram", "Ihlamudheen Madrasa Kerala",
+    // Place
+    "Pallar", "North Pallar", "Pallar Madrasa", "North Pallar Madrasa",
+    "Pallar Islamic school", "Vairamkode", "Vairamkode Madrasa",
+    "Malappuram Madrasa", "Kerala Madrasa", "madrasa Pallar 676301",
+    // What it offers
+    "Islamic education Kerala", "Quran school Pallar", "hifz Pallar",
+    "madrasa admission Pallar", "Arabic classes Malappuram",
+    "مدرسة إعلام الدين",
   ],
   openGraph: {
     title: "Ihlamudheen Madrasa — Pallar, Malappuram, Kerala",

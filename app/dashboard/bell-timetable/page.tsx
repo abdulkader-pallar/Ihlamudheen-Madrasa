@@ -202,7 +202,7 @@ function LiveBanner({
     )
   }
 
-  const clock = now.toLocaleTimeString("en-AE", { hour: "numeric", minute: "2-digit", hour12: true })
+  const clock = now.toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit", hour12: true })
 
   let headline: string
   let detail: string
@@ -321,7 +321,7 @@ async function exportTimetablePdf(tt: BellTimetable) {
   const contentY = await addReportHeader(
     doc,
     "Bell Timetable",
-    `${tt.program} · ${tt.days.join(" & ")} · Generated ${new Date().toLocaleString("en-AE")}`,
+    `${tt.program} · ${tt.days.join(" & ")} · Generated ${new Date().toLocaleString("en-IN")}`,
   )
 
   const body: (string | number)[][] = []

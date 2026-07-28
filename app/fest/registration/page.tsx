@@ -164,7 +164,7 @@ export default function FestRegistrationPage() {
           ?? (autotable as unknown as { autoTable: (doc: unknown, opts: unknown) => void }).autoTable
         const doc = new JsPDF({ unit: "mm", format: "a4" })
         const courseName = courseOpts.find((c) => c.id === courseId)?.title ?? "Fest"
-        const startY = await addReportHeader(doc, "Ihlamudheen Madrasa Fest — Participants", `${courseName} · ${academicYear} · ${label} (${rows.length})`)
+        const startY = await addReportHeader(doc, "Meelad Fest — Participants", `${courseName} · ${academicYear} · ${label} (${rows.length})`)
         autoTable(doc, {
           startY,
           head: [["#", "Reg / Code", "Name", "Section", "Programs"]],

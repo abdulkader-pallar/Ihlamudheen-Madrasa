@@ -8,7 +8,7 @@ import { fetchLeaderboard, type Leaderboard } from "@/lib/fest/leaderboard"
 
 interface Edition { id: string; name: string; slug: string; theme: string | null; status: string }
 
-// Public Ihlamudheen Madrasa Fest hub (§9 public landing) — no auth, lives outside /fest.
+// Public Meelad Fest hub (§9 public landing) — no auth, lives outside /fest.
 export default function MeeladPublicPage() {
   const [edition, setEdition] = useState<Edition | null>(null)
   const [lb, setLb] = useState<Leaderboard>({ houses: [], sections: [], individuals: [] })
@@ -39,7 +39,7 @@ export default function MeeladPublicPage() {
         <img src="/logo.png" alt="Ihlamudheen Madrasa" className="mx-auto mb-4 h-12 w-auto"
           onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none" }} />
         <p className="text-xs uppercase tracking-[0.3em] text-gold-400">Ihlamudheen Madrasa</p>
-        <h1 className="mt-2 text-4xl font-black sm:text-5xl">{edition?.name ?? "Ihlamudheen Madrasa Fest"}</h1>
+        <h1 className="mt-2 text-4xl font-black sm:text-5xl">{edition?.name ?? "Meelad Fest"}</h1>
         {edition?.theme && <p className="mt-2 text-lg italic text-white/70">&ldquo;{edition.theme}&rdquo;</p>}
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           {edition && (
