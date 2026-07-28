@@ -186,9 +186,19 @@ export default function Home() {
         <div className="mx-auto grid max-w-[1180px] items-center gap-9 px-5 sm:px-10 lg:grid-cols-[1.05fr_.95fr] lg:gap-16">
           <div ref={colRef} className="reveal">
             <span className="inline-flex items-center gap-2 text-[12.5px] font-bold uppercase tracking-[0.16em] text-brand before:h-0.5 before:w-6 before:rounded before:bg-accent">Serving the Community Since 1954</span>
-            <h1 ref={titleRef} className="mt-5 whitespace-nowrap font-display font-semibold text-ink">Nurturing <em className="not-italic italic text-brand">faith</em>, character &amp; knowledge.</h1>
+            {/* The H1 carries the institute name + location: it is the single
+                strongest on-page signal for what this site is about. */}
+            <h1 ref={titleRef} className="mt-5 font-display font-semibold text-ink">Ihlamudheen Madrasa — <em className="not-italic italic text-brand">Pallar</em></h1>
+            <p className="mt-2 text-[15px] font-semibold text-muted">Nurturing faith, character &amp; knowledge · North Pallar, Vairamkode, Malappuram, Kerala</p>
             <p className="mt-3.5 font-ar text-2xl font-bold text-accent sm:text-3xl" dir="rtl">مدرسة إعلام الدين</p>
             <p className="mt-5 max-w-[46ch] text-[17px] text-muted sm:text-lg">Ihlamudheen Madrasa is a place where the Qur'an, sound belief and noble character are taught with love — grounding every student in the light of the Deen while preparing them for a purposeful life.</p>
+            {/* Visible spelling variants. Google ignores meta keywords entirely,
+                but does read on-page text — this is what lets the school be
+                found however its name is transliterated. */}
+            <p className="mt-4 max-w-[52ch] text-[13px] text-muted">
+              Also known as Ihlaamudheen Madrasa, Ihlamudeen Madrasa, Ilamudheen Madrasa,
+              Ilamuddeen Madrasa or Pallar Madrasa — serving Pallar and North Pallar since 1954.
+            </p>
             <div className="mt-8 flex flex-wrap gap-3.5">
               <a href="#admissions" className={btn({ variant: "primary", size: "lg" })}>Begin Admission <ArrowRight size={16} /></a>
               <a href="#programs" className={btn({ variant: "ghost", size: "lg" })}>Explore Programs</a>
