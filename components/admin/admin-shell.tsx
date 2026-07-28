@@ -174,7 +174,10 @@ function AppsMenu({ role, email, onClose, onSignOut }: { role: Role; email?: str
   // Finance, Tools, Reports…) shown alongside the accounting apps. Accounting
   // roles viewer/pending fall back to the student menu.
   const erpRole: UserRole = role === "admin" ? "admin" : role === "accountant" ? "accountant" : "student";
-  const erpCategories = getMenuForRole(erpRole, { isSuperadmin: superadmin });
+  // Drop the shared menu's own "Accounts" section — this menu already lists the
+  // accounting apps above, so showing it again would duplicate the heading.
+  const erpCategories = getMenuForRole(erpRole, { isSuperadmin: superadmin })
+    .filter((c) => c.title !== "Accounts");
 
   return (
     <>

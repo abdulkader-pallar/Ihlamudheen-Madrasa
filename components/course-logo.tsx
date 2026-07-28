@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import { cn } from "@/lib/utils"
-import { COURSE_LOGOS } from "@/lib/course-logos"
+import { courseLogo } from "@/lib/course-logos"
 
 interface CourseLogoProps {
   /** Course id ("1"–"4") matching COURSE_LOGOS. */
@@ -27,8 +27,9 @@ export function CourseLogo({
   width = 96,
   height = 96,
 }: CourseLogoProps) {
-  const entry = COURSE_LOGOS[id]
-  if (!entry) return null
+  // Always resolves — unknown courses fall back to the institute mark rather
+  // than rendering nothing (or a broken image).
+  const entry = courseLogo(id)
   const alt = title ?? entry.alt
 
   return (

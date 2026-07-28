@@ -718,9 +718,6 @@ export default function GradeBookPage() {
           >
             <option value="">Select Course</option>
             <option value="1">Ihlamudheen Madrasa</option>
-            <option value="2">Ihlamudheen Madrasa</option>
-            <option value="4">Ihlamudheen Madrasa</option>
-            <option value="3">CBIS</option>
           </select>
         </div>
 

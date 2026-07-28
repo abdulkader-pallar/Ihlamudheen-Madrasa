@@ -23,7 +23,7 @@ type LinkIconInfo = {
 }
 
 const linkIcon = (t: db.LmsLinkType): LinkIconInfo => {
-  if (t === "youtube") return { image: "/madrasa-book.jpg", color: "", bg: "bg-slate-100 dark:bg-slate-700/40" }
+  if (t === "youtube") return { image: "/logo-icon.png", color: "", bg: "bg-slate-100 dark:bg-slate-700/40" }
   if (t === "drive") return { Icon: HardDrive, color: "text-emerald-600", bg: "bg-emerald-50 dark:bg-emerald-500/10" }
   if (t === "doc") return { Icon: FileText, color: "text-blue-600", bg: "bg-blue-50 dark:bg-blue-500/10" }
   return { Icon: Link2, color: "text-slate-600", bg: "bg-slate-100 dark:bg-slate-700/40" }
@@ -83,7 +83,7 @@ export default function PublicLmsClassPage() {
         <div className="mx-auto max-w-3xl px-4 py-4 flex items-center gap-3">
           <div className="flex size-10 items-center justify-center rounded-xl overflow-hidden shadow-sm">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/madrasa-book.jpg" alt="Ihlamudheen" className="size-full object-cover" />
+            <img src="/logo-icon.png" alt="Ihlamudheen" className="size-full object-cover" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-[11px] font-semibold uppercase tracking-wider text-rose-500">Class Notes</p>

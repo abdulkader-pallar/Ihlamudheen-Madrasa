@@ -121,10 +121,7 @@ export default function AttendancePage() {
   //   • admin/accountant or unknown → null → full course picker
   const INSTITUTION_KEYS = useMemo(
     () => [
-      "Ihlamudheen Madrasa",
-      "Ihlamudheen Madrasa",
-      "Ihlamudheen Madrasa",
-      "CIBIS CERTIFICATION",
+      "IHLAMUDHEEN MADRASA",
     ] as const,
     [],
   )
@@ -544,7 +541,6 @@ export default function AttendancePage() {
       if (attFilter === "madrasa_online") return "Ihlamudheen — Online"
       if (attFilter === "Ihlamudheen Madrasa") return "Ihlamudheen Madrasa"
       if (attFilter === "Ihlamudheen Madrasa") return "Ihlamudheen Madrasa"
-      if (attFilter === "CIBIS CERTIFICATION") return "CBIS"
       return "Ihlamudheen Madrasa"
     })()
 
@@ -610,10 +606,7 @@ export default function AttendancePage() {
 
                 <div className="px-2 pt-2 pb-1 text-[9.5px] font-bold uppercase tracking-wider text-navy-400">By Institution</div>
                 {([
-                  { key: "Ihlamudheen Madrasa",             label: "Ihlamudheen Madrasa",             dot: "bg-emerald-500" },
-                  { key: "Ihlamudheen Madrasa", label: "Ihlamudheen Madrasa", dot: "bg-blue-500" },
-                  { key: "Ihlamudheen Madrasa",     label: "Ihlamudheen Madrasa",     dot: "bg-violet-500" },
-                  { key: "CIBIS CERTIFICATION",        label: "CBIS",                      dot: "bg-amber-500" },
+                  { key: "IHLAMUDHEEN MADRASA",             label: "Ihlamudheen Madrasa",             dot: "bg-emerald-500" },
                 ] as const).map((inst) => {
                   const count = everyClass.filter((c) => c.courseTitle.toUpperCase().trim() === inst.key).length
                   return (
@@ -761,10 +754,7 @@ export default function AttendancePage() {
         {isOnlineMonth && attFilter === "all" ? (
           <div className="grid gap-3 sm:grid-cols-2">
             {([
-              { key: "Ihlamudheen Madrasa", label: "Ihlamudheen Madrasa", dot: "bg-emerald-500" },
-              { key: "Ihlamudheen Madrasa",   label: "Ihlamudheen Madrasa",   dot: "bg-blue-500" },
-              { key: "Ihlamudheen Madrasa",       label: "Ihlamudheen Madrasa",       dot: "bg-violet-500" },
-              { key: "CIBIS CERTIFICATION",         label: "CBIS",                        dot: "bg-amber-500" },
+              { key: "IHLAMUDHEEN MADRASA", label: "Ihlamudheen Madrasa", dot: "bg-emerald-500" },
             ] as const)
               .map((inst) => {
                 const instClasses = everyClass.filter((c) => c.courseTitle.toUpperCase().trim() === inst.key)

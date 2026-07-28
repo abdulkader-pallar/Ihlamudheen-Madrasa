@@ -153,7 +153,7 @@ export default function LmsPage() {
     if (type === "youtube") return (
       // eslint-disable-next-line @next/next/no-img-element
       <img
-        src="/madrasa-book.jpg"
+        src="/logo-icon.png"
         alt="Ihlamudheen Book"
         className="size-full object-cover rounded-md"
       />
@@ -170,7 +170,7 @@ export default function LmsPage() {
         <div>
           <h1 className="text-2xl font-bold text-navy-900 dark:text-white flex items-center gap-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/madrasa-book.jpg" alt="" className="size-8 rounded-md object-cover shadow-sm" />
+            <img src="/logo-icon.png" alt="" className="size-8 rounded-md object-contain shadow-sm" />
             LMS — Class Notes
           </h1>
           <p className="mt-1 text-sm text-navy-500 dark:text-navy-400">
@@ -186,7 +186,7 @@ export default function LmsPage() {
           <Card>
             <CardContent className="flex flex-col items-center py-16 text-center">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/madrasa-book.jpg" alt="" className="size-16 rounded-lg object-cover mb-3 opacity-80" />
+              <img src="/logo-icon.png" alt="" className="size-16 rounded-lg object-contain mb-3 opacity-80" />
               <p className="text-navy-500 dark:text-navy-400">No classes yet.</p>
             </CardContent>
           </Card>
