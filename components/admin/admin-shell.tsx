@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { BarChart3, Fingerprint, Globe, LayoutDashboard, LayoutGrid, ListOrdered, LogOut, Menu, SlidersHorizontal, Users } from "lucide-react";
+import { BarChart3, Fingerprint, Globe, LayoutDashboard, ListOrdered, LogOut, Menu, SlidersHorizontal, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -130,7 +130,12 @@ export function AdminShell({ profile, children }: { profile: Profile; children: 
                     appsOpen ? "border-brand text-brand" : "border-line"
                   )}
                 >
-                  <LayoutGrid size={19} />
+                  {/* Nine-dot app grid — same launcher icon as the school ERP. */}
+                  <span className="grid grid-cols-3 gap-[3px]">
+                    {Array.from({ length: 9 }).map((_, i) => (
+                      <span key={i} className="block size-[4px] rounded-full bg-current" />
+                    ))}
+                  </span>
                 </button>
                 {appsOpen && <AppsMenu role={profile.role} email={profile.email} onClose={() => setAppsOpen(false)} onSignOut={signOut} />}
               </div>

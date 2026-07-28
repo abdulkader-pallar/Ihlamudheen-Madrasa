@@ -46,6 +46,7 @@ import {
   Bell,
   CalendarRange,
   SlidersHorizontal,
+  ListOrdered,
   Trophy,
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
@@ -73,6 +74,19 @@ export function getMenuForRole(
   // The Accounts (accounting) module is super-admin only — see lib/types.ts and
   // supabase/lock-accounting-to-superadmins.sql.
   const isSuperadmin = options?.isSuperadmin ?? false
+  // Accounts (accounting) portal — super-admins only, pinned at the very top so
+  // it is always one click away from anywhere in the school ERP.
+  const accounts: NavCategory[] = isSuperadmin
+    ? [{
+        title: "Accounts",
+        items: [
+          { href: "/admin", label: "Accounts", icon: Shield, color: "bg-red-500" },
+          { href: "/admin/transactions", label: "Transactions", icon: ListOrdered, color: "bg-blue-500" },
+          { href: "/admin/reports", label: "Reports", icon: FileBarChart, color: "bg-gold-500" },
+        ],
+      }]
+    : []
+
   const common: NavCategory = {
     title: "Dashboard",
     items: [
@@ -98,6 +112,7 @@ export function getMenuForRole(
 
   if (role === "admin") {
     return [
+      ...accounts,
       common,
       {
         title: "Academics",
@@ -111,7 +126,7 @@ export function getMenuForRole(
           { href: "/dashboard/add-student", label: "Add Student", icon: UserPlus, color: "bg-sky-500" },
           { href: "/dashboard/promote", label: "Promote Students", icon: ArrowUpCircle, color: "bg-indigo-600" },
           { href: "/dashboard/performance", label: "Performance", icon: BarChart3, color: "bg-orange-500" },
-          { href: "/dashboard/lms", label: "LMS (Moodle)", icon: MonitorPlay, color: "bg-rose-500", image: "/madrasa-book.jpg" },
+          { href: "/dashboard/lms", label: "LMS (Moodle)", icon: GraduationCap, color: "bg-rose-500" },
         ],
       },
       meeladFest,
@@ -165,10 +180,6 @@ export function getMenuForRole(
       {
         title: "Administration",
         items: [
-          // Accounts module — visible only to the institute super-admins.
-          ...(isSuperadmin
-            ? [{ href: "/admin", label: "Accounts", icon: Shield, color: "bg-red-500" }]
-            : []),
           { href: "/dashboard/user-mgmt", label: "User Mgmt", icon: UserCog, color: "bg-navy-500" },
           { href: "/dashboard/system-setup", label: "System Setup", icon: Wrench, color: "bg-gray-500" },
           { href: "/dashboard/access", label: "Access Control", icon: Lock, color: "bg-stone-500" },
@@ -182,6 +193,7 @@ export function getMenuForRole(
     // Accountants get the full finance suite PLUS everything a teacher can do
     // (Academics, Quran Recitation, Grade Book, timetables, …) — a superset.
     return [
+      ...accounts,
       common,
       {
         title: "My Work",
@@ -208,7 +220,7 @@ export function getMenuForRole(
           { href: "/dashboard/lesson-plans", label: "Lesson Plans / PPT", icon: BookOpen, color: "bg-emerald-700" },
           { href: "/dashboard/teachers", label: "Teachers", icon: UserCheck, color: "bg-teal-500" },
           { href: "/dashboard/add-student", label: "Add Student", icon: UserPlus, color: "bg-sky-500" },
-          { href: "/dashboard/lms", label: "LMS (Moodle)", icon: MonitorPlay, color: "bg-rose-500", image: "/madrasa-book.jpg" },
+          { href: "/dashboard/lms", label: "LMS (Moodle)", icon: GraduationCap, color: "bg-rose-500" },
         ],
       },
       meeladFest,
@@ -254,6 +266,7 @@ export function getMenuForRole(
 
   if (role === "teacher") {
     return [
+      ...accounts,
       common,
       {
         title: "My Work",
@@ -265,7 +278,7 @@ export function getMenuForRole(
           { href: "/dashboard/assessment", label: "Grade Book", icon: GraduationCap, color: "bg-indigo-500" },
           { href: "/dashboard/recitation", label: "Quran Recitation", icon: BookOpenCheck, color: "bg-emerald-600" },
           { href: "/dashboard/lesson-plans", label: "Lesson Plans / PPT", icon: BookOpen, color: "bg-emerald-700" },
-          { href: "/dashboard/lms", label: "LMS (Moodle)", icon: MonitorPlay, color: "bg-rose-500", image: "/madrasa-book.jpg" },
+          { href: "/dashboard/lms", label: "LMS (Moodle)", icon: GraduationCap, color: "bg-rose-500" },
           ...(isEduSupport ? [{ href: "/dashboard/edu-support", label: "EDU Support Hours", icon: Clock, color: "bg-emerald-600" }] : []),
         ],
       },
@@ -284,6 +297,7 @@ export function getMenuForRole(
   }
 
   return [
+    ...accounts,
     common,
     {
       title: "Learning",

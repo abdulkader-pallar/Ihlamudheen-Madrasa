@@ -15,8 +15,7 @@ import type { CourseData } from "@/data/courses"
 // title before comparing). These are placeholder default programs — rename them
 // to your own programs (and keep them in sync with your course titles).
 export const INSTITUTIONS = [
-  { key: "IHLAMUDHEEN MADRASA",             label: "Ihlamudheen Madrasa",            dotColor: "bg-emerald-500" },
-  { key: "KAMMU MUSLIYAR MEMORIAL SCHOOL",  label: "Kammu Musliyar Memorial School", dotColor: "bg-blue-500" },
+  { key: "IHLAMUDHEEN MADRASA", label: "Ihlamudheen Madrasa", dotColor: "bg-emerald-500" },
 ] as const
 
 // Loosened to `string` so pages can compare against configurable program

@@ -49,7 +49,7 @@ export default function DashboardLayout({
         <div className="mx-auto flex h-14 max-w-full items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* Logo */}
           <Link href="/dashboard" className="flex items-center gap-2.5 dark:bg-white dark:rounded-lg dark:px-3 dark:py-1.5 flex-shrink-0 dark:border dark:border-transparent">
-            <Image src="/logo.png" alt="Ihlamudheen" width={120} height={32} className="h-8 w-auto rounded" />
+            <Image src="/logo-icon.png" alt="Ihlamudheen Madrasa" width={40} height={40} className="size-9 w-auto object-contain" />
             <div className="hidden sm:flex flex-col leading-none">
               <span className="text-base font-bold text-navy-800 tracking-tight">Ihlamudheen</span>
               <span className="text-[9px] font-medium text-navy-500 tracking-wider"></span>

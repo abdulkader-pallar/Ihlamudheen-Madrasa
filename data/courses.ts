@@ -106,9 +106,17 @@ export function normalizeClassName(rawName: string, existing: Array<{ name: stri
 }
 
 // ── Course / Class / Student seed data ─────────────────────
-// Intentionally EMPTY — real courses, classes, students and staff live in the
-// database (or are entered through the app). Do NOT hardcode real people here.
-export const initialCourses: CourseData[] = []
+// The institute's programme. Classes and students are NOT hardcoded — add them
+// through the app so they live in the database.
+export const initialCourses: CourseData[] = [
+  {
+    id: "1",
+    title: "Ihlamudheen Madrasa",
+    logo: "/logo.png",
+    logoClass: "h-20 w-auto object-contain",
+    classes: [],
+  },
+]
 
 // ── Teacher Pay Types ─────────────────────────────────────
 // Configure the amounts in the rate constants below to match your institute.

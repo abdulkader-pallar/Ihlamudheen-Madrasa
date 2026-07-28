@@ -85,9 +85,7 @@ import { EduSupportWidget } from "@/components/edu-support-widget"
 // `key` MUST match course.title.toUpperCase() exactly (see src/data/courses.ts);
 // `label` is the brand-friendly version shown in the UI.
 const INSTITUTIONS = [
-  { key: "Ihlamudheen Madrasa",             label: "Ihlamudheen Madrasa",                   borderColor: "border-emerald-500/20" },
-  { key: "Ihlamudheen Madrasa", label: "Ihlamudheen Madrasa", borderColor: "border-blue-500/20" },
-  { key: "Ihlamudheen Madrasa", label: "Ihlamudheen Madrasa", borderColor: "border-violet-500/20" },
+  { key: "Ihlamudheen Madrasa", label: "Ihlamudheen Madrasa", borderColor: "border-emerald-500/20" },
 ] as const
 
 type InstitutionCounts = { present: number; absent: number; late: number; notMarked: number; total: number }
