@@ -48,12 +48,18 @@ export default function DashboardLayout({
         <div className="mx-auto flex h-14 max-w-full items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* Logo */}
           <Link href="/dashboard" className="flex flex-shrink-0 items-center gap-2.5">
-            {/* Theme-aware logo — no backing plate; .logo-light / .logo-dark
-                swap with the active theme (see app/globals.css). */}
+            {/* One transparent mark that reads on both themes, fetched with
+                high priority — rendering a light AND a dark copy made every
+                page load download two images. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className="logo-light size-9 w-auto object-contain" src="/Logo of Ihlamudheen Madrasa light-bg removed.png" alt="Ihlamudheen Madrasa" />
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className="logo-dark size-9 w-auto object-contain" src="/Logo of Ihlamudheen Madrasa dark-bg removed.png" alt="Ihlamudheen Madrasa" />
+            <img
+              className="size-9 w-auto object-contain"
+              src="/logo-icon.png"
+              alt="Ihlamudheen Madrasa"
+              width={36}
+              height={36}
+              fetchPriority="high"
+            />
             <div className="hidden sm:flex flex-col leading-none">
               <span className="text-base font-bold text-navy-800 dark:text-white tracking-tight">Ihlamudheen</span>
             </div>

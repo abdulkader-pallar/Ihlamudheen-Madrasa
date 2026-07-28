@@ -551,15 +551,18 @@ export default function DashboardPage() {
   const [supabaseReady, setSupabaseReady] = useState(false)
 
   const refreshAttendance = useCallback(async () => {
-    const ready = await db.checkSupabase()
-    if (!ready) return
-    setSupabaseReady(true)
-
     const todayStr = getLocalDateStr()
     const month = todayStr.slice(0, 7)
 
-    // Fetch full course structure from DB (seeds if empty)
-    const dbCourses = await db.fetchCoursesFromDB()
+    // The readiness probe and the course fetch are independent, so run them
+    // together — waiting for the probe first added a whole round-trip to every
+    // page load before anything could render.
+    const [ready, dbCourses] = await Promise.all([
+      db.checkSupabase(),
+      db.fetchCoursesFromDB(),
+    ])
+    if (!ready) return
+    setSupabaseReady(true)
 
     // ── FIX: One batched query for ALL classes instead of N separate queries ──
     const allClassIds = dbCourses.flatMap((c) => c.classes.map((cl) => cl.id))
