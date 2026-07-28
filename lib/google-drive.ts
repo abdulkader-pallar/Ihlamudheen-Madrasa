@@ -16,14 +16,15 @@ const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive"
 const UPLOAD_URL =
   "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&supportsAllDrives=true&fields=id,name,webViewLink"
 
-// The Drive folder the institute uses for lesson plans / PPTs.
-// Set GOOGLE_DRIVE_LESSON_PLANS_FOLDER_ID to the folder's id — the part of the
-// folder URL after /folders/ :
+// The institute's Drive folder for lesson plans / PPTs. A folder id is not a
+// secret — access is governed by who the folder is shared with — so the
+// institute's own folder is the default here, and
+// GOOGLE_DRIVE_LESSON_PLANS_FOLDER_ID overrides it if the folder ever changes.
+// The id is the part of the folder URL after /folders/ :
 //   https://drive.google.com/drive/folders/THIS_IS_THE_ID
-// There is deliberately no default: uploading into someone else's folder would
-// silently fail (or leak files), so an unset value is reported clearly instead.
 export const DEFAULT_LESSON_PLANS_FOLDER_ID =
-  process.env.GOOGLE_DRIVE_LESSON_PLANS_FOLDER_ID || ""
+  process.env.GOOGLE_DRIVE_LESSON_PLANS_FOLDER_ID ||
+  "1_V7jKvkhqSr76hPyu9ZIxXHS-qPNqtfU"
 
 export const isDriveFolderConfigured = () => DEFAULT_LESSON_PLANS_FOLDER_ID.length > 0
 
