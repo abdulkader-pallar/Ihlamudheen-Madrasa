@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import Image from "next/image"
 import { ClipboardCheck, LogOut, PanelLeft } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { AppLauncher, NavMenuBody, getMenuForRole } from "@/components/app-launcher"
@@ -48,11 +47,15 @@ export default function DashboardLayout({
       <header className="sticky top-0 z-40 w-full border-b border-gray-200 bg-white dark:border-navy-700 dark:bg-navy-900 header-3d">
         <div className="mx-auto flex h-14 max-w-full items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* Logo */}
-          <Link href="/dashboard" className="flex items-center gap-2.5 dark:bg-white dark:rounded-lg dark:px-3 dark:py-1.5 flex-shrink-0 dark:border dark:border-transparent">
-            <Image src="/logo-icon.png" alt="Ihlamudheen Madrasa" width={40} height={40} className="size-9 w-auto object-contain" />
+          <Link href="/dashboard" className="flex flex-shrink-0 items-center gap-2.5">
+            {/* Theme-aware logo — no backing plate; .logo-light / .logo-dark
+                swap with the active theme (see app/globals.css). */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className="logo-light size-9 w-auto object-contain" src="/Logo of Ihlamudheen Madrasa light.png" alt="Ihlamudheen Madrasa" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className="logo-dark size-9 w-auto object-contain" src="/Logo of Ihlamudheen Madrasa dark.png" alt="Ihlamudheen Madrasa" />
             <div className="hidden sm:flex flex-col leading-none">
-              <span className="text-base font-bold text-navy-800 tracking-tight">Ihlamudheen</span>
-              <span className="text-[9px] font-medium text-navy-500 tracking-wider"></span>
+              <span className="text-base font-bold text-navy-800 dark:text-white tracking-tight">Ihlamudheen</span>
             </div>
           </Link>
 
