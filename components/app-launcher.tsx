@@ -83,6 +83,8 @@ export function getMenuForRole(
           { href: "/admin", label: "Accounts", icon: Shield, color: "bg-red-500" },
           { href: "/admin/transactions", label: "Transactions", icon: ListOrdered, color: "bg-blue-500" },
           { href: "/admin/reports", label: "Reports", icon: FileBarChart, color: "bg-gold-500" },
+          // Standalone Meelad program book — separate table, separate totals.
+          { href: "/fest/accounts", label: "Meelad Accounts", icon: Wallet, color: "bg-emerald-600" },
         ],
       }]
     : []

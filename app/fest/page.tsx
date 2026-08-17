@@ -1,9 +1,11 @@
 "use client"
 
 import Link from "next/link"
-import { Upload, CalendarDays, Trophy, Users, ClipboardList, Gavel, Medal, Award, FileBarChart, Image as ImageIcon, BookMarked, Globe } from "lucide-react"
+import { Upload, CalendarDays, Trophy, Users, ClipboardList, Gavel, Medal, Award, FileBarChart, Image as ImageIcon, BookMarked, Globe, Wallet } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { useAuth } from "@/hooks/use-auth"
+import { isSuperadmin } from "@/lib/types"
 
 // Phase 1 landing for the Meelad Fest module. Cards for later phases are shown
 // as "coming soon" so the build order (§13) is visible but only Import is live.
@@ -34,7 +36,20 @@ const TILES = [
   { href: "/meelad", title: "Public Site", desc: "The public-facing landing, live leaderboard, gallery, and results portal.", icon: Globe, live: true },
 ]
 
+// Super-admins only (mirrors the RLS on meelad_accounts_entries), so it is kept
+// out of the shared TILES list and appended per-user.
+const ACCOUNTS_TILE = {
+  href: "/fest/accounts",
+  title: "Meelad Accounts",
+  desc: "Standalone income & expenditure book for the Meelad ul Nabi program, by year. Separate from institute accounting.",
+  icon: Wallet,
+  live: true,
+}
+
 export default function FestHome() {
+  const { user } = useAuth(true)
+  const tiles = isSuperadmin(user?.email) ? [...TILES, ACCOUNTS_TILE] : TILES
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-3">
@@ -49,7 +64,7 @@ export default function FestHome() {
       </p>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {TILES.map((t) => {
+        {tiles.map((t) => {
           const Icon = t.icon
           const card = (
             <Card className={t.live ? "transition hover:border-gold-400 hover:shadow-md" : "opacity-60"}>
