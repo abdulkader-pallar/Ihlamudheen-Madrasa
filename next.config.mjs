@@ -18,6 +18,13 @@ const csp = [
 const nextConfig = {
   // ESLint is optional locally; type-checking still runs and guards the build.
   eslint: { ignoreDuringBuilds: true },
+  async redirects() {
+    return [
+      // The Meelad accounts book moved into the Accounts shell so it keeps the
+      // sidebar. Anyone holding the old link still lands in the right place.
+      { source: "/fest/accounts", destination: "/admin/meelad", permanent: false },
+    ];
+  },
   async headers() {
     return [
       {

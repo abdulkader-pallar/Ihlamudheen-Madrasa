@@ -84,7 +84,7 @@ export function getMenuForRole(
           { href: "/admin/transactions", label: "Transactions", icon: ListOrdered, color: "bg-blue-500" },
           { href: "/admin/reports", label: "Reports", icon: FileBarChart, color: "bg-gold-500" },
           // Standalone Meelad program book — separate table, separate totals.
-          { href: "/fest/accounts", label: "Meelad Accounts", icon: Wallet, color: "bg-emerald-600" },
+          { href: "/admin/meelad", label: "Meelad Accounts", icon: Wallet, color: "bg-emerald-600" },
         ],
       }]
     : []
@@ -327,9 +327,12 @@ export function NavMenuBody({ categories, onItemClick, onLogout }: NavMenuBodyPr
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({})
   const pathname = usePathname()
 
+  // Every section starts expanded, so the launcher opens as a full grid of apps
+  // rather than a stack of collapsed headings you have to hunt through. The
+  // chevrons still work if someone wants to fold a section away.
   useEffect(() => {
     const defaults: Record<string, boolean> = {}
-    categories.slice(0, 2).forEach((c) => { defaults[c.title] = true })
+    categories.forEach((c) => { defaults[c.title] = true })
     setExpandedSections(defaults)
   }, [categories])
 
@@ -338,7 +341,9 @@ export function NavMenuBody({ categories, onItemClick, onLogout }: NavMenuBodyPr
       {/* Scrollable menu */}
       <div className="flex-1 overflow-y-auto p-2 scrollbar-thin">
         {categories.map((category, catIdx) => {
-          const isExpanded = expandedSections[category.title] ?? false
+          // Default true so the first paint is already the full grid, with no
+          // flash of collapsed headings before the effect above lands.
+          const isExpanded = expandedSections[category.title] ?? true
           return (
             <div key={category.title}>
               {catIdx > 0 && (

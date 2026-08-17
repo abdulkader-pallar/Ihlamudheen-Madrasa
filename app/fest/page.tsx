@@ -39,7 +39,7 @@ const TILES = [
 // Super-admins only (mirrors the RLS on meelad_accounts_entries), so it is kept
 // out of the shared TILES list and appended per-user.
 const ACCOUNTS_TILE = {
-  href: "/fest/accounts",
+  href: "/admin/meelad",
   title: "Meelad Accounts",
   desc: "Standalone income & expenditure book for the Meelad ul Nabi program, by year. Separate from institute accounting.",
   icon: Wallet,

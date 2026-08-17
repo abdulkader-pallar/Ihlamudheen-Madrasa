@@ -1,11 +1,10 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useState } from "react"
-import Link from "next/link"
 import { motion } from "framer-motion"
 import {
   Wallet, TrendingUp, TrendingDown, Plus, Search, Trash2, Pencil, X, Check,
-  Download, Printer, Lock, ListOrdered, RefreshCw, ArrowLeft,
+  Download, Printer, ListOrdered, RefreshCw,
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -13,7 +12,6 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { useAuth } from "@/hooks/use-auth"
 import { DashboardSkeleton } from "@/components/loading-skeleton"
-import { isSuperadmin } from "@/lib/types"
 import { fmt, fmtDate, todayISO } from "@/lib/format"
 import { downloadCSV } from "@/lib/csv"
 import { cn } from "@/lib/utils"
@@ -64,8 +62,6 @@ export default function MeeladAccountsPage() {
   const [search, setSearch] = useState("")
   const [filter, setFilter] = useState<"all" | MeeladEntryType>("all")
 
-  const allowed = isSuperadmin(user?.email)
-
   const load = useCallback(async (y: number) => {
     setLoading(true)
     setError(undefined)
@@ -80,9 +76,8 @@ export default function MeeladAccountsPage() {
   }, [])
 
   useEffect(() => {
-    if (!allowed) { setLoading(false); return }
     void load(year)
-  }, [allowed, year, load])
+  }, [year, load])
 
   // Balance after each entry, in date order — the running total a paper book
   // would carry down the page. Keyed by id so it survives filtering.
@@ -207,22 +202,11 @@ export default function MeeladAccountsPage() {
     ])
   }
 
+  // No super-admin check here: app/admin/layout.tsx already redirects anyone
+  // else away on the server before this renders, the same way /admin/users
+  // works, and the RLS policies are the real boundary either way.
   if (authLoading) return <DashboardSkeleton />
   if (!user) return null
-
-  if (!allowed) {
-    return (
-      <Card>
-        <CardContent className="flex flex-col items-center justify-center gap-2 py-16 text-center">
-          <Lock className="size-10 text-navy-300 dark:text-navy-600" />
-          <p className="font-semibold text-navy-900 dark:text-white">Super-admins only</p>
-          <p className="max-w-sm text-sm text-navy-500 dark:text-navy-400">
-            The Meelad program accounts book is restricted to the two institute super-admins.
-          </p>
-        </CardContent>
-      </Card>
-    )
-  }
 
   return (
     <div className="space-y-6">
@@ -233,14 +217,6 @@ export default function MeeladAccountsPage() {
         className="flex flex-wrap items-start justify-between gap-3 print:hidden"
       >
         <div>
-          {/* This page sits under /fest but belongs to Accounts, so it carries an
-              explicit way back rather than relying on the browser's back button. */}
-          <Link
-            href="/admin"
-            className="mb-1.5 inline-flex items-center gap-1 text-xs font-semibold text-navy-500 transition hover:text-navy-800 dark:text-navy-400 dark:hover:text-white"
-          >
-            <ArrowLeft className="size-3.5" /> Back to Accounts Dashboard
-          </Link>
           <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight text-navy-800 dark:text-white">
             <Wallet className="size-7 text-gold-500" />
             Meelad ul Nabi Accounts
