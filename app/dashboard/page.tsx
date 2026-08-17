@@ -54,6 +54,7 @@ import type { CourseData, AttendanceRecord } from "@/data/courses"
 import { formatTime12h, formatMinutesLate, computeLateness } from "@/lib/late-policy"
 import { fetchDisabledTeacherIds } from "@/lib/teacher-status"
 import { cn, toTitleCase } from "@/lib/utils"
+import { gridCols } from "@/components/ui/layout"
 import {
   Card,
   CardContent,
@@ -1019,7 +1020,7 @@ export default function DashboardPage() {
   const userRole = getUserRole(user)
 
   return (
-    <div className="relative space-y-8">
+    <div className="relative space-y-6">
       {/* Breathing background orbs */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden -z-10">
         <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-gold-500/5 animate-breathe" />
@@ -1592,7 +1593,7 @@ export default function DashboardPage() {
           if (visible.length === 0) visible = [...INSTITUTIONS]
         }
         return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className={cn("grid gap-4", gridCols(visible.length, 3))}>
         {visible.map((inst, instIdx) => {
           const counts = institutionCounts[inst.key] ?? { present: 0, absent: 0, late: 0, notMarked: 0, total: 0 }
           const isAbsentOpen = expandedAbsentInst === inst.key
@@ -2037,8 +2038,9 @@ export default function DashboardPage() {
         </motion.div>
       )}
 
-      {/* Two Column: Courses + Schedule */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      {/* Two Column: Courses + Schedule. items-start so a short Courses card
+          hugs its content instead of stretching to match the tall schedule. */}
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
         {/* My Courses */}
         <motion.div
           initial="hidden"
@@ -2055,7 +2057,7 @@ export default function DashboardPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4">
-              <div className="grid grid-cols-2 gap-3">
+              <div className={cn("grid gap-3", gridCols(recentCourses.length, 2))}>
                 {recentCourses.map((course, idx) => (
                   <motion.div
                     key={course.id}
