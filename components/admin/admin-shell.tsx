@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { BarChart3, Fingerprint, Globe, LayoutDashboard, ListOrdered, LogOut, Menu, SlidersHorizontal, Users } from "lucide-react";
+import { BarChart3, Fingerprint, Globe, LayoutDashboard, ListOrdered, LogOut, Menu, SlidersHorizontal, Users, Wallet } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -21,6 +21,9 @@ const NAV: { href: string; label: string; icon: LucideIcon; exact?: boolean; edi
   { href: "/admin/attendance", label: "Staff Attendance", icon: Fingerprint },
   { href: "/admin/manage", label: "Categories & Funds", icon: SlidersHorizontal, editor: true },
   { href: "/admin/users", label: "Users & Roles", icon: Users, superadmin: true },
+  // Lives under /fest but belongs to Accounts, so it is reachable from this
+  // sidebar rather than only from the app launcher.
+  { href: "/fest/accounts", label: "Meelad Accounts", icon: Wallet, superadmin: true },
 ];
 
 const TITLES: Record<string, string> = {
@@ -161,6 +164,9 @@ function AppsMenu({ role, email, onClose, onSignOut }: { role: Role; email?: str
     { label: "Attendance", href: "/admin/attendance", icon: Fingerprint, color: "#0ea5e9" },
     ...(editor ? [{ label: "Categories", href: "/admin/manage", icon: SlidersHorizontal, color: "var(--good)" }] : []),
     ...(superadmin ? [{ label: "Users", href: "/admin/users", icon: Users, color: "#8b5cf6" }] : []),
+    // Listed here as well as in the sidebar: the shared menu's "Accounts"
+    // section is filtered out below, so this is the only place it would appear.
+    ...(superadmin ? [{ label: "Meelad Accounts", href: "/fest/accounts", icon: Wallet, color: "#059669" }] : []),
   ];
 
   const tileCls = "flex flex-col items-center gap-2 rounded-xl p-3 text-center transition hover:bg-surface-2";

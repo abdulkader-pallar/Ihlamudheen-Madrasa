@@ -1,10 +1,11 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useState } from "react"
+import Link from "next/link"
 import { motion } from "framer-motion"
 import {
   Wallet, TrendingUp, TrendingDown, Plus, Search, Trash2, Pencil, X, Check,
-  Download, Printer, Lock, ListOrdered, RefreshCw,
+  Download, Printer, Lock, ListOrdered, RefreshCw, ArrowLeft,
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -232,6 +233,14 @@ export default function MeeladAccountsPage() {
         className="flex flex-wrap items-start justify-between gap-3 print:hidden"
       >
         <div>
+          {/* This page sits under /fest but belongs to Accounts, so it carries an
+              explicit way back rather than relying on the browser's back button. */}
+          <Link
+            href="/admin"
+            className="mb-1.5 inline-flex items-center gap-1 text-xs font-semibold text-navy-500 transition hover:text-navy-800 dark:text-navy-400 dark:hover:text-white"
+          >
+            <ArrowLeft className="size-3.5" /> Back to Accounts Dashboard
+          </Link>
           <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight text-navy-800 dark:text-white">
             <Wallet className="size-7 text-gold-500" />
             Meelad ul Nabi Accounts

@@ -7,6 +7,7 @@ import { ThemeToggle } from "@/components/theme-toggle"
 import { useAuth } from "@/hooks/use-auth"
 import { DashboardSkeleton } from "@/components/loading-skeleton"
 import { getUserRole, ROLE_LABELS, ROLE_BADGE_COLORS } from "@/lib/roles"
+import { isSuperadmin } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 // Meelad Fest module shell. Auth + role gating is enforced in middleware.ts and,
@@ -19,6 +20,10 @@ export default function FestLayout({ children }: { children: React.ReactNode }) 
 
   const userName = user.user_metadata?.full_name || user.email || "Staff"
   const userRole = getUserRole(user)
+  // Without this the launcher hides the whole Accounts group, which is the only
+  // way back to /admin from inside the fest module — a super-admin who came here
+  // would be stranded with no route out but signing out.
+  const superadmin = isSuperadmin(user.email)
 
   return (
     <div className="flex min-h-screen flex-col bg-navy-50/30 dark:bg-navy-950">
@@ -38,7 +43,7 @@ export default function FestLayout({ children }: { children: React.ReactNode }) 
             </span>
             <span className="hidden sm:block text-sm font-medium text-navy-700 dark:text-navy-200 max-w-[140px] truncate">{userName}</span>
             <ThemeToggle />
-            <AppLauncher role={userRole} onLogout={signOut} />
+            <AppLauncher role={userRole} isSuperadmin={superadmin} onLogout={signOut} />
           </div>
         </div>
       </header>
