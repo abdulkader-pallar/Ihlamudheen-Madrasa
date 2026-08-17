@@ -48,6 +48,7 @@ import {
   SlidersHorizontal,
   ListOrdered,
   Trophy,
+  Fingerprint,
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
@@ -79,10 +80,15 @@ export function getMenuForRole(
   const accounts: NavCategory[] = isSuperadmin
     ? [{
         title: "Accounts",
+        // The full accounting module, so this one list is the single source of
+        // truth for the Accounts section wherever the launcher is rendered.
         items: [
           { href: "/admin", label: "Accounts", icon: Shield, color: "bg-red-500" },
           { href: "/admin/transactions", label: "Transactions", icon: ListOrdered, color: "bg-blue-500" },
           { href: "/admin/reports", label: "Reports", icon: FileBarChart, color: "bg-gold-500" },
+          { href: "/admin/attendance", label: "Staff Attendance", icon: Fingerprint, color: "bg-sky-500" },
+          { href: "/admin/manage", label: "Categories & Funds", icon: SlidersHorizontal, color: "bg-emerald-500" },
+          { href: "/admin/users", label: "Users & Roles", icon: Users, color: "bg-violet-500" },
           // Standalone Meelad program book — separate table, separate totals.
           { href: "/admin/meelad", label: "Meelad Accounts", icon: Wallet, color: "bg-emerald-600" },
         ],

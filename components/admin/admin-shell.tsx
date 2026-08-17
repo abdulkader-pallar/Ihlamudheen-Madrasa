@@ -9,7 +9,7 @@ import { createClient } from "@/lib/supabase/client";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Toaster } from "@/components/ui/toast";
 import { DataProvider } from "./data-context";
-import { getMenuForRole } from "@/components/app-launcher";
+import { getMenuForRole, NavMenuBody } from "@/components/app-launcher";
 import type { UserRole } from "@/lib/roles";
 import { isEditor, isSuperadmin, type Profile, type Role } from "@/lib/types";
 import { cx } from "@/lib/ui";
@@ -154,82 +154,31 @@ export function AdminShell({ profile, children }: { profile: Profile; children: 
 }
 
 function AppsMenu({ role, email, onClose, onSignOut }: { role: Role; email?: string | null; onClose: () => void; onSignOut: () => void }) {
-  const editor = isEditor(role);
   const superadmin = isSuperadmin(email);
-  const apps: { label: string; href: string; icon: LucideIcon; color: string }[] = [
-    { label: "Dashboard", href: "/admin", icon: LayoutDashboard, color: "var(--brand)" },
-    { label: "Transactions", href: "/admin/transactions", icon: ListOrdered, color: "#3b82f6" },
-    { label: "Reports", href: "/admin/reports", icon: BarChart3, color: "var(--accent)" },
-    { label: "Attendance", href: "/admin/attendance", icon: Fingerprint, color: "#0ea5e9" },
-    ...(editor ? [{ label: "Categories", href: "/admin/manage", icon: SlidersHorizontal, color: "var(--good)" }] : []),
-    ...(superadmin ? [{ label: "Users", href: "/admin/users", icon: Users, color: "#8b5cf6" }] : []),
-    // Also in the sidebar, but the shared menu's "Accounts" section is filtered
-    // out below, so without this the grid would not list it at all.
-    ...(superadmin ? [{ label: "Meelad Accounts", href: "/admin/meelad", icon: Wallet, color: "#059669" }] : []),
-  ];
 
-  const tileCls = "flex flex-col items-center gap-2 rounded-xl p-3 text-center transition hover:bg-surface-2";
-  const Icon = ({ icon: I, color }: { icon: LucideIcon; color: string }) => (
-    <span className="grid h-11 w-11 place-items-center rounded-2xl text-white" style={{ background: color }}>
-      <I size={20} />
-    </span>
-  );
-
-  // Full school-ERP module menu (Academics, Teachers, Grade Book, Fest, HRMS,
-  // Finance, Tools, Reports…) shown alongside the accounting apps. Accounting
-  // roles viewer/pending fall back to the student menu.
+  // Accounting roles viewer/pending fall back to the student menu. In practice
+  // only super-admins ever reach this shell — app/admin/layout.tsx redirects
+  // everyone else — so the Accounts section is always present here.
   const erpRole: UserRole = role === "admin" ? "admin" : role === "accountant" ? "accountant" : "student";
-  // Drop the shared menu's own "Accounts" section — this menu already lists the
-  // accounting apps above, so showing it again would duplicate the heading.
-  const erpCategories = getMenuForRole(erpRole, { isSuperadmin: superadmin })
-    .filter((c) => c.title !== "Accounts");
+
+  // The same launcher the school ERP uses, so there is one apps menu across the
+  // whole portal instead of two that drift apart. getMenuForRole already carries
+  // the full Accounts section, so the only thing added by hand is the
+  // public-site link the old bespoke menu kept in its footer.
+  const categories = [
+    ...getMenuForRole(erpRole, { isSuperadmin: superadmin }),
+    { title: "Site", items: [{ href: "/", label: "Website", icon: Globe, color: "bg-violet-500" }] },
+  ];
 
   return (
     <>
       <div className="fixed inset-0 z-40" onClick={onClose} />
-      <div className="absolute right-0 top-12 z-50 max-h-[80vh] w-[320px] overflow-y-auto rounded-2xl border border-line bg-surface p-4 shadow-card">
-        <div className="mb-2 px-1 text-[11px] font-bold uppercase tracking-wider text-muted">Accounts</div>
-        <div className="grid grid-cols-3 gap-1">
-          {apps.map((a) => (
-            <Link key={a.href} href={a.href} onClick={onClose} className={tileCls}>
-              <Icon icon={a.icon} color={a.color} />
-              <span className="text-[11.5px] font-semibold leading-tight">{a.label}</span>
-            </Link>
-          ))}
-        </div>
-
-        {/* School ERP modules */}
-        {erpCategories.map((cat) => (
-          <div key={cat.title}>
-            <div className="my-3 border-t border-line" />
-            <div className="mb-2 px-1 text-[11px] font-bold uppercase tracking-wider text-muted">{cat.title}</div>
-            <div className="grid grid-cols-3 gap-1">
-              {cat.items.map((it) => {
-                const ItIcon = it.icon;
-                return (
-                  <Link key={it.href} href={it.href} onClick={onClose} className={tileCls}>
-                    <span className={cx("grid h-11 w-11 place-items-center rounded-2xl text-white", it.color)}>
-                      <ItIcon className="size-5" />
-                    </span>
-                    <span className="text-[11.5px] font-semibold leading-tight">{it.label}</span>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        ))}
-
-        <div className="my-3 border-t border-line" />
-        <div className="grid grid-cols-3 gap-1">
-          <Link href="/" onClick={onClose} className={tileCls}>
-            <Icon icon={Globe} color="#8b5cf6" />
-            <span className="text-[11.5px] font-semibold leading-tight">Website</span>
-          </Link>
-          <button onClick={onSignOut} className={tileCls}>
-            <Icon icon={LogOut} color="var(--bad)" />
-            <span className="text-[11.5px] font-semibold leading-tight">Sign out</span>
-          </button>
-        </div>
+      <div className="absolute right-0 top-12 z-50 flex max-h-[80vh] w-[320px] flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-card dark:bg-navy-800">
+        <NavMenuBody
+          categories={categories}
+          onItemClick={onClose}
+          onLogout={() => { onClose(); onSignOut(); }}
+        />
       </div>
     </>
   );
