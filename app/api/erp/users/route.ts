@@ -11,8 +11,10 @@ function adminClient() {
   )
 }
 
-function resolveRole(user: { app_metadata?: Record<string, unknown>; user_metadata?: Record<string, unknown> }): UserRole {
-  const r = user.app_metadata?.role ?? user.user_metadata?.role
+// app_metadata ONLY — a self-escalated user_metadata.role must not show up as
+// a real role badge in User Management.
+function resolveRole(user: { app_metadata?: Record<string, unknown> }): UserRole {
+  const r = user.app_metadata?.role
   if (r === "admin" || r === "accountant" || r === "teacher" || r === "student") return r
   return "student"
 }

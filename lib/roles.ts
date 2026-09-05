@@ -39,17 +39,17 @@ const VALID_ROLES: readonly UserRole[] = [
 ]
 
 /**
- * Reads role from app_metadata first (service-role-only, not user-writable).
- * Falls back to user_metadata for backwards compat during migration.
- * app_metadata takes priority to prevent self-escalation via
- * supabase.auth.updateUser({ data: { role: 'admin' } }).
+ * Reads the role from app_metadata ONLY — it is settable solely by the service
+ * role / admin API. There is deliberately no user_metadata fallback: that field
+ * is writable by the account holder via
+ * supabase.auth.updateUser({ data: { role: 'admin' } }), so honouring it would
+ * let anyone paint themselves an admin UI. Every provisioning path
+ * (verify-user, add-staff, setup-teachers, erp/users) stamps app_metadata.
  * Unknown / missing role -> "pending" (no access until an admin assigns one).
  */
 export function getUserRole(user?: UserLike | null): UserRole {
   const appRole = user?.app_metadata?.role as string | undefined
   if (appRole && (VALID_ROLES as readonly string[]).includes(appRole)) return appRole as UserRole
-  const userRole = user?.user_metadata?.role as string | undefined
-  if (userRole && (VALID_ROLES as readonly string[]).includes(userRole)) return userRole as UserRole
   return "pending"
 }
 

@@ -52,12 +52,27 @@ already creates a `profiles` row with role `pending`). The ERP tables don't need
 them — their RLS policies check the role inline. Do NOT run these as-is; port only
 anything you specifically need, by hand.
 
-## ⚠️ Role source — verify on staging
-The ERP table policies grant WRITE via `auth.jwt() -> 'user_metadata' ->> 'role'`
-(`admin`/`teacher`), but your sign-in flow (`/api/auth/verify-user`) stamps the role
-into **`app_metadata.role`**. So a user may be able to READ ERP data but not WRITE
-it until their role is also in `user_metadata`, OR the policies are changed to read
-`app_metadata`. Decide one approach and apply it consistently while testing on staging.
+## ⚠️ Role source — `app_metadata` only, never `user_metadata`
+Every role-gated policy reads `public.app_role()`, which returns
+`auth.jwt() -> 'app_metadata' ->> 'role'`. `app_metadata` is writable only by the
+service role / admin API; `user_metadata` is writable by the account holder via
+`supabase.auth.updateUser({ data: { role: 'admin' } })`, so **a policy must never
+read a role out of `user_metadata`** — Supabase Advisor flags it CRITICAL
+("RLS references user metadata") and it is a real self-escalation path for any
+signed-in account that has no `app_metadata.role` yet.
+
+`/api/auth/verify-user` stamps `app_metadata.role` from its allow-list, so keep
+that list current. After changing a user's role, their JWT only picks it up on
+refresh — sign out and back in, or wait ~1h.
+
+To check for regressions:
+
+```sql
+SELECT schemaname, tablename, policyname
+FROM pg_policies
+WHERE qual ILIKE '%user_metadata%' OR with_check ILIKE '%user_metadata%'
+ORDER BY tablename, policyname;
+```
 
 ## Procedure
 1. In the Supabase dashboard, create a **branch / staging project** (or a DB copy).

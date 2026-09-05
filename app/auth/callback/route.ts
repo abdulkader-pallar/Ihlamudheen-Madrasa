@@ -23,9 +23,9 @@ export async function GET(request: Request) {
   // School-ERP staff and students authorise via their auth metadata role, not
   // the accounting profile. Let them through to the dashboard rather than
   // signing them out (only the accounting portal needs an accounting role).
-  const erpRole =
-    (user?.app_metadata?.role as string | undefined) ??
-    (user?.user_metadata?.role as string | undefined);
+  // app_metadata ONLY — user_metadata.role is self-writable, and honouring it
+  // here would let any signed-in account skip the profiles check below.
+  const erpRole = user?.app_metadata?.role as string | undefined;
   if (erpRole && ["admin", "accountant", "teacher", "student"].includes(erpRole)) {
     return NextResponse.redirect(`${origin}${next === "/admin" ? "/dashboard" : next}`);
   }

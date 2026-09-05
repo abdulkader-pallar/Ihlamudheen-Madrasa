@@ -5,8 +5,10 @@
 -- ============================================================================
 create or replace function public.erp_role()
 returns text language sql stable as $do$
-  select coalesce(auth.jwt() -> 'app_metadata'  ->> 'role',
-                  auth.jwt() -> 'user_metadata' ->> 'role');
+  -- app_metadata ONLY. user_metadata is user-writable
+  -- (supabase.auth.updateUser({ data: { role: 'admin' } })) so a fallback to it
+  -- lets any signed-in account grant itself admin.
+  select auth.jwt() -> 'app_metadata' ->> 'role';
 $do$;
 create or replace function public.is_admin() returns boolean language sql stable as $do$
   select coalesce(public.erp_role() = 'admin', false); $do$;
@@ -44,7 +46,7 @@ CREATE POLICY "Anyone authenticated can read classes" ON public.classes FOR SELE
 DROP POLICY IF EXISTS "Admins and teachers can manage classes" ON public.classes;
 CREATE POLICY "Admins and teachers can manage classes" ON public.classes FOR ALL TO authenticated
   USING (
-    (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher')
+    public.erp_role() IN ('admin', 'teacher')
   );
 
 -- 2. STUDENTS table
@@ -65,7 +67,7 @@ CREATE POLICY "Anyone authenticated can read students" ON public.students FOR SE
 DROP POLICY IF EXISTS "Admins and teachers can manage students" ON public.students;
 CREATE POLICY "Admins and teachers can manage students" ON public.students FOR ALL TO authenticated
   USING (
-    (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher')
+    public.erp_role() IN ('admin', 'teacher')
   );
 
 -- 3. ATTENDANCE table (one row per student per date)
@@ -88,7 +90,7 @@ CREATE POLICY "Anyone authenticated can read attendance" ON public.student_atten
 DROP POLICY IF EXISTS "Admins and teachers can manage attendance" ON public.student_attendance;
 CREATE POLICY "Admins and teachers can manage attendance" ON public.student_attendance FOR ALL TO authenticated
   USING (
-    (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher')
+    public.erp_role() IN ('admin', 'teacher')
   );
 
 -- 4. EXAMS table (one row per exam)
@@ -109,7 +111,7 @@ CREATE POLICY "Anyone authenticated can read exams" ON public.exams FOR SELECT T
 DROP POLICY IF EXISTS "Admins and teachers can manage exams" ON public.exams;
 CREATE POLICY "Admins and teachers can manage exams" ON public.exams FOR ALL TO authenticated
   USING (
-    (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher')
+    public.erp_role() IN ('admin', 'teacher')
   );
 
 -- 5. EXAM_SUBJECTS table (subjects per exam)
@@ -128,7 +130,7 @@ CREATE POLICY "Anyone authenticated can read exam subjects" ON public.exam_subje
 DROP POLICY IF EXISTS "Admins and teachers can manage exam subjects" ON public.exam_subjects;
 CREATE POLICY "Admins and teachers can manage exam subjects" ON public.exam_subjects FOR ALL TO authenticated
   USING (
-    (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher')
+    public.erp_role() IN ('admin', 'teacher')
   );
 
 -- 6. EXAM_SCORES table (one row per student per subject per exam)
@@ -150,7 +152,7 @@ CREATE POLICY "Anyone authenticated can read exam scores" ON public.exam_scores 
 DROP POLICY IF EXISTS "Admins and teachers can manage exam scores" ON public.exam_scores;
 CREATE POLICY "Admins and teachers can manage exam scores" ON public.exam_scores FOR ALL TO authenticated
   USING (
-    (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher')
+    public.erp_role() IN ('admin', 'teacher')
   );
 
 
@@ -174,7 +176,7 @@ DROP POLICY IF EXISTS "Anyone authenticated can read teachers" ON public.teacher
 CREATE POLICY "Anyone authenticated can read teachers" ON public.teachers FOR SELECT TO authenticated USING (true);
 DROP POLICY IF EXISTS "Admins can manage teachers" ON public.teachers;
 CREATE POLICY "Admins can manage teachers" ON public.teachers FOR ALL TO authenticated
-  USING ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin'));
+  USING (public.erp_role() IN ('admin'));
 
 -- 2. TEACHER_ASSIGNMENTS (which teacher teaches which class)
 CREATE TABLE IF NOT EXISTS public.teacher_assignments (
@@ -189,7 +191,7 @@ DROP POLICY IF EXISTS "Anyone authenticated can read assignments" ON public.teac
 CREATE POLICY "Anyone authenticated can read assignments" ON public.teacher_assignments FOR SELECT TO authenticated USING (true);
 DROP POLICY IF EXISTS "Admins can manage assignments" ON public.teacher_assignments;
 CREATE POLICY "Admins can manage assignments" ON public.teacher_assignments FOR ALL TO authenticated
-  USING ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin'));
+  USING (public.erp_role() IN ('admin'));
 
 -- 3. STAFF_ATTENDANCE (one row per teacher per date per session)
 CREATE TABLE IF NOT EXISTS public.staff_attendance (
@@ -213,7 +215,7 @@ DROP POLICY IF EXISTS "Anyone authenticated can read staff attendance" ON public
 CREATE POLICY "Anyone authenticated can read staff attendance" ON public.staff_attendance FOR SELECT TO authenticated USING (true);
 DROP POLICY IF EXISTS "Admin and accountant can manage staff attendance" ON public.staff_attendance;
 CREATE POLICY "Admin and accountant can manage staff attendance" ON public.staff_attendance FOR ALL TO authenticated
-  USING ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'accountant'));
+  USING (public.erp_role() IN ('admin', 'accountant'));
 
 -- 4. PAYMENTS table
 CREATE TABLE IF NOT EXISTS public.payments (
@@ -240,10 +242,10 @@ ALTER TABLE public.payments ADD COLUMN IF NOT EXISTS ta_paid_date DATE;
 ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Admin and accountant can read payments" ON public.payments;
 CREATE POLICY "Admin and accountant can read payments" ON public.payments FOR SELECT TO authenticated
-  USING ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'accountant'));
+  USING (public.erp_role() IN ('admin', 'accountant'));
 DROP POLICY IF EXISTS "Admin and accountant can manage payments" ON public.payments;
 CREATE POLICY "Admin and accountant can manage payments" ON public.payments FOR ALL TO authenticated
-  USING ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'accountant'));
+  USING (public.erp_role() IN ('admin', 'accountant'));
 
 
 -- ══════════════════════════════════════════════════════════
@@ -477,12 +479,12 @@ DROP POLICY IF EXISTS "Admin/accountant write salaries" ON public.monthly_salari
 
 DROP POLICY IF EXISTS "Admin/accountant read salaries" ON public.monthly_salaries;
 CREATE POLICY "Admin/accountant read salaries" ON public.monthly_salaries FOR SELECT TO authenticated
-  USING ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'accountant'));
+  USING (public.erp_role() IN ('admin', 'accountant'));
 
 DROP POLICY IF EXISTS "Admin/accountant write salaries" ON public.monthly_salaries;
 CREATE POLICY "Admin/accountant write salaries" ON public.monthly_salaries FOR ALL TO authenticated
-  USING ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'accountant'))
-  WITH CHECK ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'accountant'));
+  USING (public.erp_role() IN ('admin', 'accountant'))
+  WITH CHECK (public.erp_role() IN ('admin', 'accountant'));
 
 -- ── Enable realtime ──────────────────────────────────────
 ALTER PUBLICATION supabase_realtime ADD TABLE public.monthly_salaries;
@@ -1089,7 +1091,7 @@ CREATE POLICY "auth users read fee_payments" ON public.fee_payments FOR SELECT T
 
 DROP POLICY IF EXISTS "admins manage fee_payments" ON public.fee_payments;
 CREATE POLICY "admins manage fee_payments" ON public.fee_payments FOR ALL TO authenticated
-  USING ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher'));
+  USING (public.erp_role() IN ('admin', 'teacher'));
 
 
 -- ==================== migrations/20260518000000_student_avatars_bucket.sql ====================
@@ -1302,7 +1304,7 @@ DROP POLICY IF EXISTS "exam_scores_select" ON public.exam_scores;
 CREATE POLICY "exam_scores_select" ON public.exam_scores
   FOR SELECT TO authenticated
   USING (
-    (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher')
+    public.erp_role() IN ('admin', 'teacher')
     OR student_id = (auth.jwt() -> 'user_metadata' ->> 'student_id')
     OR student_id = auth.uid()::text
   );
@@ -1333,8 +1335,8 @@ CREATE POLICY "settings_select" ON public.app_settings
 DROP POLICY IF EXISTS "settings_admin_write" ON public.app_settings;
 CREATE POLICY "settings_admin_write" ON public.app_settings
   FOR ALL TO authenticated
-  USING   ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) = 'admin')
-  WITH CHECK ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) = 'admin');
+  USING   (public.erp_role() = 'admin')
+  WITH CHECK (public.erp_role() = 'admin');
 
 -- Seed defaults (idempotent)
 INSERT INTO public.app_settings (key, value)
@@ -1447,7 +1449,7 @@ CREATE POLICY "auth read fee_payment_audit" ON public.fee_payment_audit FOR SELE
 
 DROP POLICY IF EXISTS "admin insert fee_payment_audit" ON public.fee_payment_audit;
 CREATE POLICY "admin insert fee_payment_audit" ON public.fee_payment_audit FOR INSERT TO authenticated
-  WITH CHECK ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'accountant'));
+  WITH CHECK (public.erp_role() IN ('admin', 'accountant'));
 
 -- 9. Tighten fee_payments policy: writes restricted to admin/accountant,
 --    and rows can never be UPDATE'd or DELETE'd from the client. Corrections
@@ -1462,7 +1464,7 @@ CREATE POLICY "auth read fee_payments" ON public.fee_payments FOR SELECT TO auth
 
 DROP POLICY IF EXISTS "admin insert fee_payments" ON public.fee_payments;
 CREATE POLICY "admin insert fee_payments" ON public.fee_payments FOR INSERT TO authenticated
-  WITH CHECK ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'accountant'));
+  WITH CHECK (public.erp_role() IN ('admin', 'accountant'));
 
 -- Note: deliberately NO update/delete policy — ledger entries are immutable.
 
@@ -1503,10 +1505,10 @@ DROP POLICY IF EXISTS "exam_scores: staff write" ON public.exam_scores;
 CREATE POLICY "exam_scores: staff write" ON public.exam_scores
   FOR ALL TO authenticated
   USING (
-    (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher')
+    public.erp_role() IN ('admin', 'teacher')
   )
   WITH CHECK (
-    (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher')
+    public.erp_role() IN ('admin', 'teacher')
   );
 
 -- Same fix for exam_subjects (same pattern, same potential issue)
@@ -1518,10 +1520,10 @@ DROP POLICY IF EXISTS "exam_subjects: staff write" ON public.exam_subjects;
 CREATE POLICY "exam_subjects: staff write" ON public.exam_subjects
   FOR ALL TO authenticated
   USING (
-    (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher')
+    public.erp_role() IN ('admin', 'teacher')
   )
   WITH CHECK (
-    (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher')
+    public.erp_role() IN ('admin', 'teacher')
   );
 
 -- Same fix for exams table
@@ -1533,10 +1535,10 @@ DROP POLICY IF EXISTS "exams: staff write" ON public.exams;
 CREATE POLICY "exams: staff write" ON public.exams
   FOR ALL TO authenticated
   USING (
-    (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher')
+    public.erp_role() IN ('admin', 'teacher')
   )
   WITH CHECK (
-    (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher')
+    public.erp_role() IN ('admin', 'teacher')
   );
 
 
@@ -1565,7 +1567,7 @@ ALTER TABLE public.exam_scores
 -- SECURITY: move all role-based RLS off user-writable `user_metadata`.
 --
 -- PROBLEM (audit C3): every financial/grade policy keyed on
---   (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role'))
+--   public.erp_role()
 -- but `user_metadata` is writable by the user via
 --   supabase.auth.updateUser({ data: { role: 'admin' } })
 -- so any authenticated user could self-escalate and read/write payroll, fees,
@@ -3481,8 +3483,8 @@ DO $$ BEGIN
     DROP POLICY IF EXISTS "settings_admin_write" ON public.app_settings;
     CREATE POLICY "settings_admin_write" ON public.app_settings
       FOR ALL TO authenticated
-      USING   ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) = 'admin')
-      WITH CHECK ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) = 'admin');
+      USING   (public.erp_role() = 'admin')
+      WITH CHECK (public.erp_role() = 'admin');
   END IF;
 END $$;
 

@@ -22,4 +22,4 @@ CREATE POLICY "auth users read fee_payments"
 
 CREATE POLICY "admins manage fee_payments"
   ON public.fee_payments FOR ALL TO authenticated
-  USING ((coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher'));
+  USING (public.app_role() IN ('admin', 'teacher'));

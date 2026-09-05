@@ -7,6 +7,17 @@
 -- Run this in Supabase SQL Editor to create all data tables
 -- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
+-- Authoritative role claim. app_metadata is settable only by the service role
+-- / admin API, so it cannot be forged by the account holder. Never read the
+-- role from user_metadata — that IS user-writable
+-- (supabase.auth.updateUser({ data: { role: 'admin' } })) and would let any
+-- signed-in account grant itself admin. See
+-- migrations/20260905120000_rls_drop_user_metadata_fallback.sql.
+CREATE OR REPLACE FUNCTION public.app_role()
+RETURNS text
+LANGUAGE sql STABLE
+AS $$ SELECT auth.jwt() -> 'app_metadata' ->> 'role' $$;
+
 -- 1. CLASSES table
 CREATE TABLE IF NOT EXISTS public.classes (
   id TEXT PRIMARY KEY,
@@ -20,7 +31,7 @@ ALTER TABLE public.classes ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Anyone authenticated can read classes" ON public.classes FOR SELECT TO authenticated USING (true);
 CREATE POLICY "Admins and teachers can manage classes" ON public.classes FOR ALL TO authenticated
   USING (
-    (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher')
+    public.app_role() IN ('admin', 'teacher')
   );
 
 -- 2. STUDENTS table
@@ -39,7 +50,7 @@ ALTER TABLE public.students ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Anyone authenticated can read students" ON public.students FOR SELECT TO authenticated USING (true);
 CREATE POLICY "Admins and teachers can manage students" ON public.students FOR ALL TO authenticated
   USING (
-    (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher')
+    public.app_role() IN ('admin', 'teacher')
   );
 
 -- 3. ATTENDANCE table (one row per student per date)
@@ -60,7 +71,7 @@ ALTER TABLE public.student_attendance ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Anyone authenticated can read attendance" ON public.student_attendance FOR SELECT TO authenticated USING (true);
 CREATE POLICY "Admins and teachers can manage attendance" ON public.student_attendance FOR ALL TO authenticated
   USING (
-    (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher')
+    public.app_role() IN ('admin', 'teacher')
   );
 
 -- 4. EXAMS table (one row per exam)
@@ -79,7 +90,7 @@ ALTER TABLE public.exams ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Anyone authenticated can read exams" ON public.exams FOR SELECT TO authenticated USING (true);
 CREATE POLICY "Admins and teachers can manage exams" ON public.exams FOR ALL TO authenticated
   USING (
-    (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher')
+    public.app_role() IN ('admin', 'teacher')
   );
 
 -- 5. EXAM_SUBJECTS table (subjects per exam)
@@ -96,7 +107,7 @@ ALTER TABLE public.exam_subjects ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Anyone authenticated can read exam subjects" ON public.exam_subjects FOR SELECT TO authenticated USING (true);
 CREATE POLICY "Admins and teachers can manage exam subjects" ON public.exam_subjects FOR ALL TO authenticated
   USING (
-    (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher')
+    public.app_role() IN ('admin', 'teacher')
   );
 
 -- 6. EXAM_SCORES table (one row per student per subject per exam)
@@ -116,6 +127,6 @@ ALTER TABLE public.exam_scores ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Anyone authenticated can read exam scores" ON public.exam_scores FOR SELECT TO authenticated USING (true);
 CREATE POLICY "Admins and teachers can manage exam scores" ON public.exam_scores FOR ALL TO authenticated
   USING (
-    (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', auth.jwt() -> 'user_metadata' ->> 'role')) IN ('admin', 'teacher')
+    public.app_role() IN ('admin', 'teacher')
   );
 
