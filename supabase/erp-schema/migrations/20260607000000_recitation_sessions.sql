@@ -83,7 +83,6 @@ CREATE POLICY "recitation_select"
   ON public.recitation_sessions FOR SELECT TO authenticated
   USING (
     public.app_role() IN ('admin', 'teacher')
-    OR student_id = (auth.jwt() -> 'user_metadata' ->> 'student_id')  -- self-read identifier, not a privilege
     OR student_id = auth.uid()::text
   );
 

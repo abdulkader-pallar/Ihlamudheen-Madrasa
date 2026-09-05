@@ -101,7 +101,6 @@ DO $$ BEGIN
       ON public.exam_scores FOR SELECT TO authenticated
       USING (
         public.app_role() IN ('admin', 'teacher')
-        OR student_id = (auth.jwt() -> 'user_metadata' ->> 'student_id')  -- self-read identifier, not a privilege
         OR student_id = auth.uid()::text
       );
 

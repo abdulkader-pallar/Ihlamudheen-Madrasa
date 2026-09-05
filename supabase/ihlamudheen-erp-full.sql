@@ -1305,7 +1305,6 @@ CREATE POLICY "exam_scores_select" ON public.exam_scores
   FOR SELECT TO authenticated
   USING (
     public.erp_role() IN ('admin', 'teacher')
-    OR student_id = (auth.jwt() -> 'user_metadata' ->> 'student_id')
     OR student_id = auth.uid()::text
   );
 
@@ -1666,7 +1665,6 @@ DO $$ BEGIN
     CREATE POLICY "exam_scores_select" ON public.exam_scores FOR SELECT TO authenticated
       USING (
         public.app_role() IN ('admin', 'teacher')
-        OR student_id = (auth.jwt() -> 'user_metadata' ->> 'student_id')  -- self-read identifier, not a privilege
         OR student_id = auth.uid()::text
       );
 
@@ -1890,7 +1888,6 @@ DROP POLICY IF EXISTS "recitation_select" ON public.recitation_sessions;
 CREATE POLICY "recitation_select" ON public.recitation_sessions FOR SELECT TO authenticated
   USING (
     public.app_role() IN ('admin', 'teacher')
-    OR student_id = (auth.jwt() -> 'user_metadata' ->> 'student_id')  -- self-read identifier, not a privilege
     OR student_id = auth.uid()::text
   );
 
@@ -2123,7 +2120,6 @@ DO $$ BEGIN
     CREATE POLICY "recitation_select" ON public.recitation_sessions FOR SELECT TO authenticated
       USING (
         public.app_role() IN ('admin', 'accountant', 'teacher')
-        OR student_id = (auth.jwt() -> 'user_metadata' ->> 'student_id')  -- self-read identifier, not a privilege
         OR student_id = auth.uid()::text
       );
 
@@ -2145,7 +2141,6 @@ DO $$ BEGIN
     CREATE POLICY "exam_scores_select" ON public.exam_scores FOR SELECT TO authenticated
       USING (
         public.app_role() IN ('admin', 'accountant', 'teacher')
-        OR student_id = (auth.jwt() -> 'user_metadata' ->> 'student_id')  -- self-read identifier, not a privilege
         OR student_id = auth.uid()::text
       );
 

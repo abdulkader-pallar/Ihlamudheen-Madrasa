@@ -146,7 +146,8 @@ export default function ReportCardPage() {
         return
       }
 
-      const studentId = (user!.user_metadata?.student_id as string) || user!.id
+      // user.id only — user_metadata is browser-writable, so it is not an identity source.
+      const studentId = user!.id
       const result = await db.fetchStudentReportCard(studentId)
 
       if (result.error) {

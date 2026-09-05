@@ -13,7 +13,6 @@ CREATE POLICY "exam_scores_select"
   FOR SELECT TO authenticated
   USING (
     public.app_role() IN ('admin', 'teacher')
-    OR student_id = (auth.jwt() -> 'user_metadata' ->> 'student_id')
     OR student_id = auth.uid()::text
   );
 

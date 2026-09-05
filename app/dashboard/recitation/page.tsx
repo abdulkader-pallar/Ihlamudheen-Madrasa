@@ -422,7 +422,8 @@ export default function RecitationPage() {
   }
 
   if (!canManage) {
-    const studentId = (user.user_metadata?.student_id as string) || user.id
+    // user.id only — user_metadata is browser-writable, so it is not an identity source.
+    const studentId = user.id
     const studentName = (user.user_metadata?.full_name as string) || "Your child"
     return <StudentRecitationView studentId={studentId} fallbackName={studentName} />
   }

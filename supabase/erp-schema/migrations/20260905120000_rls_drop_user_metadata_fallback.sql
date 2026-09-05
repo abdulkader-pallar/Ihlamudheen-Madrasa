@@ -131,15 +131,11 @@ DO $$ BEGIN
 END $$;
 
 -- ──────────────────────────────────────────────────────────────────────────────
--- STILL OPEN (deliberately not changed — needs a product decision):
---   `exam_scores_select` and `recitation_select` match a student's own rows with
---     student_id = (auth.jwt() -> 'user_metadata' ->> 'student_id')
---   That claim is also user-writable, so a signed-in account can set its own
---   student_id to someone else's and READ that student's marks/recitations.
---   No write escalation, but it is a read leak. Fixing it means moving
---   student_id into app_metadata (stamp it in /api/auth/verify-user) and
---   switching those policies to app_metadata — do that as its own change so the
---   student portal can be retested.
+-- FOLLOW-UP (now done, see 20260905140000):
+--   `exam_scores_select` and `recitation_select` also matched a student's own
+--   rows via user_metadata ->> 'student_id'. That claim turned out to be written
+--   by nothing in the codebase — the clause never matched for a real user and was
+--   pure attack surface, so it was deleted rather than migrated.
 --
 -- VERIFY AFTER APPLYING:
 --   SELECT schemaname, tablename, policyname
