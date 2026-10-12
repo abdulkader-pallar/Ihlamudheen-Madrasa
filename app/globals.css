@@ -18,6 +18,8 @@
   --brand: var(--teal);
   --brand-600: var(--teal-600);
   --accent: var(--gold);
+  /* Dashboard welcome heading (Accounts portal) — per institution below. */
+  --grad-welcome: linear-gradient(110deg, #16807f 0%, #1a9694 45%, #d18f1c 100%);
 
   --good: #12805c;
   --bad: #c0392b;
@@ -34,6 +36,7 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #0a1524;
+    --grad-welcome: linear-gradient(110deg, #3fc1bf 0%, #5fd3c9 45%, #f5b544 100%);
     --surface: #101f33;
     --surface-2: #16273e;
     --ink: #eaf1f8;
@@ -50,6 +53,7 @@
 }
 :root[data-theme="dark"] {
   --bg: #0a1524;
+  --grad-welcome: linear-gradient(110deg, #3fc1bf 0%, #5fd3c9 45%, #f5b544 100%);
   --surface: #101f33;
   --surface-2: #16273e;
   --ink: #eaf1f8;
@@ -796,6 +800,7 @@ body {
 
 /* PMSA — matches pmsa-kattilangadi: orange → rose → fuchsia on deep plum. */
 :root[data-site="pmsa"] {
+  --grad-welcome: linear-gradient(120deg, #ff8a3d 0%, #f43f7e 52%, #c026d3 100%);
   --navy: #2a1150;
   --brand: #f97316;
   --brand-600: #ea580c;
@@ -825,6 +830,7 @@ body {
 
 /* Grace Valley — from its crest: forest green with the gold of the pen nib. */
 :root[data-site="gracevalley"] {
+  --grad-welcome: linear-gradient(110deg, #1b7f3b 0%, #2f9e55 50%, #c9962a 100%);
   --navy: #0f3d24;
   --brand: #1b7f3b;
   --brand-600: #22964a;
@@ -840,14 +846,25 @@ body {
   --good: #12805c; --bad: #c0392b; --good-bg: #e2f3ec; --bad-bg: #fbe9e7;
 }
 :root[data-site="gracevalley"][data-theme="dark"] {
+  --grad-welcome: linear-gradient(110deg, #3ccf74 0%, #7ad99a 50%, #f0c24e 100%);
   --bg: #08150e; --surface: #0f2118; --surface-2: #152c20;
   --ink: #e9f4ed; --muted: #9db8a7; --line: #20392b;
   --good: #3ddc97; --bad: #ff6b5e; --good-bg: #0f2e22; --bad-bg: #2e1512;
 }
 @media (prefers-color-scheme: dark) {
   :root[data-site="gracevalley"]:not([data-theme="light"]) {
+    --grad-welcome: linear-gradient(110deg, #3ccf74 0%, #7ad99a 50%, #f0c24e 100%);
     --bg: #08150e; --surface: #0f2118; --surface-2: #152c20;
     --ink: #e9f4ed; --muted: #9db8a7; --line: #20392b;
     --good: #3ddc97; --bad: #ff6b5e; --good-bg: #0f2e22; --bad-bg: #2e1512;
   }
+}
+
+/* Gradient text for the Accounts dashboard welcome heading. */
+.text-grad-welcome {
+  background: var(--grad-welcome);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
 }
