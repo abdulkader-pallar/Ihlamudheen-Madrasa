@@ -18,9 +18,6 @@ type DataCtx = {
   funds: Fund[];
   transactions: Transaction[];
   staff: Staff[];
-  /** Login accounts of a remote institution (empty for Ihlamudheen, which
-   *  uses the full user-management tool instead). */
-  users: Profile[];
   loading: boolean;
   error: string | null;
   reload: () => Promise<void>;
@@ -48,7 +45,6 @@ export function DataProvider({ profile, children }: { profile: Profile; children
   const [funds, setFunds] = useState<Fund[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [staff, setStaff] = useState<Staff[]>([]);
-  const [users, setUsers] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const site = getSite(siteId);
@@ -81,7 +77,7 @@ export function DataProvider({ profile, children }: { profile: Profile; children
   const reload = useCallback(async () => {
     const my = ++gen.current;
     setError(null);
-    const [c, f, t, s, u] = await Promise.all([
+    const [c, f, t, s] = await Promise.all([
       supabase.from("categories").select("*").order("kind").order("name"),
       supabase.from("funds").select("*").order("name"),
       supabase
@@ -90,20 +86,16 @@ export function DataProvider({ profile, children }: { profile: Profile; children
         .order("occurred_on", { ascending: false })
         .order("created_at", { ascending: false }),
       supabase.from("staff").select("*").order("name"),
-      site.local
-        ? Promise.resolve({ data: [], error: null })
-        : supabase.from("profiles").select("id, full_name, role").order("full_name"),
     ]);
     if (my !== gen.current) return;
-    const failed = [c, f, t, s, u].find((r) => r.error)?.error;
+    const failed = [c, f, t, s].find((r) => r.error)?.error;
     if (failed) setError(failed.message);
     setCategories((c.data as Category[]) || []);
     setFunds((f.data as Fund[]) || []);
     setTransactions((t.data as Transaction[]) || []);
     setStaff((s.data as Staff[]) || []);
-    setUsers((u.data as Profile[]) || []);
     setLoading(false);
-  }, [supabase, site]);
+  }, [supabase]);
 
   const loadAttendance = useCallback(async (date: string): Promise<Attendance[]> => {
     const { data, error } = await supabase
@@ -122,7 +114,6 @@ export function DataProvider({ profile, children }: { profile: Profile; children
     setFunds([]);
     setTransactions([]);
     setStaff([]);
-    setUsers([]);
     reload();
   }, [reload]);
 
@@ -130,7 +121,7 @@ export function DataProvider({ profile, children }: { profile: Profile; children
 
   return (
     <Ctx.Provider
-      value={{ profile, site, setSite, canEdit, categories, funds, transactions, staff, users, loading, error, reload, reloadStaff, loadAttendance, supabase }}
+      value={{ profile, site, setSite, canEdit, categories, funds, transactions, staff, loading, error, reload, reloadStaff, loadAttendance, supabase }}
     >
       {children}
     </Ctx.Provider>

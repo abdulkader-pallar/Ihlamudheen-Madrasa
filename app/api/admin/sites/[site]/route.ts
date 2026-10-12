@@ -1,29 +1,18 @@
 import { NextResponse } from "next/server";
-import { createClient as createSupabase } from "@supabase/supabase-js";
-import { createClient } from "@/lib/supabase/server";
-import { isSuperadmin } from "@/lib/types";
+import { authorizeRemote } from "@/lib/remote-sites";
 import type { RemoteQuery } from "@/lib/remote-db";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// The other institutions' Supabase projects (see lib/sites.ts). The secret keys
-// are SERVER-ONLY env vars — never NEXT_PUBLIC — and bypass RLS, so every
-// request is checked against the super-admin list first.
-const REMOTES: Record<string, { url?: string; key?: string }> = {
-  gracevalley: { url: process.env.GRACEVALLEY_SUPABASE_URL, key: process.env.GRACEVALLEY_SUPABASE_SECRET_KEY },
-  pmsa: { url: process.env.PMSA_SUPABASE_URL, key: process.env.PMSA_SUPABASE_SECRET_KEY },
-};
-
-// What the Accounts pages may do on a remote database. Login accounts
-// (profiles) are read-only here.
+// What the Accounts pages may do on a remote database. Login accounts are
+// managed by ./users/route.ts instead.
 const ALLOWED: Record<string, RemoteQuery["op"][]> = {
   categories: ["select", "insert", "update", "delete"],
   funds: ["select", "insert", "update", "delete"],
   transactions: ["select", "insert", "update", "delete"],
   staff: ["select", "insert", "update", "delete"],
   attendance: ["select", "insert", "update", "delete"],
-  profiles: ["select"],
 };
 const IDENT = /^[a-z_][a-z0-9_]*$/;
 const PAGE = 1000; // Supabase max rows per request
@@ -32,15 +21,9 @@ const PAGE = 1000; // Supabase max rows per request
 export async function POST(request: Request, { params }: { params: Promise<{ site: string }> }) {
   const { site } = await params;
 
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
-  if (!isSuperadmin(user.email)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-
-  const remote = REMOTES[site];
-  if (!remote) return NextResponse.json({ error: "Unknown site" }, { status: 404 });
-  if (!remote.url || !remote.key)
-    return NextResponse.json({ error: `Database for ${site} is not configured on the server` }, { status: 500 });
+  const auth = await authorizeRemote(site);
+  if (auth.error !== undefined) return NextResponse.json({ error: auth.error }, { status: auth.status });
+  const db = auth.db;
 
   const q = (await request.json().catch(() => null)) as RemoteQuery | null;
   if (!q || !ALLOWED[q.table]?.includes(q.op))
@@ -52,8 +35,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ sit
   // Never update or delete a whole table by accident.
   if ((q.op === "update" || q.op === "delete") && !filters.some((f) => f.op === "eq"))
     return NextResponse.json({ error: "update/delete need an eq filter" }, { status: 400 });
-
-  const db = createSupabase(remote.url, remote.key, { auth: { persistSession: false, autoRefreshToken: false } });
 
   const build = () => {
     const t = db.from(q.table);
