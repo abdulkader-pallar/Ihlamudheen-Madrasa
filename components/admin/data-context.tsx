@@ -88,7 +88,10 @@ export function DataProvider({ profile, children }: { profile: Profile; children
       supabase.from("staff").select("*").order("name"),
     ]);
     if (my !== gen.current) return;
-    const failed = [c, f, t, s].find((r) => r.error)?.error;
+    // Only the core books block the page. Staff is optional: a site that never
+    // ran supabase/staff-attendance.sql has no staff table and just shows
+    // "No staff added yet", as before.
+    const failed = [c, f, t].find((r) => r.error)?.error;
     if (failed) setError(failed.message);
     setCategories((c.data as Category[]) || []);
     setFunds((f.data as Fund[]) || []);
