@@ -2,26 +2,29 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
-import { BarChart3, Fingerprint, Globe, LayoutDashboard, ListOrdered, LogOut, Menu, SlidersHorizontal, Users, Wallet } from "lucide-react";
+import { useEffect, useState } from "react";
+import { BarChart3, Eye, Fingerprint, Globe, LayoutDashboard, ListOrdered, LogOut, Menu, SlidersHorizontal, Users, Wallet } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Toaster } from "@/components/ui/toast";
-import { DataProvider } from "./data-context";
+import { DataProvider, useData } from "./data-context";
+import { SITES } from "@/lib/sites";
 import { getMenuForRole, NavMenuBody } from "@/components/app-launcher";
 import type { UserRole } from "@/lib/roles";
-import { isEditor, isSuperadmin, type Profile, type Role } from "@/lib/types";
+import { isSuperadmin, type Profile, type Role } from "@/lib/types";
 import { cx } from "@/lib/ui";
 
-const NAV: { href: string; label: string; icon: LucideIcon; exact?: boolean; editor?: boolean; admin?: boolean; superadmin?: boolean }[] = [
+// `local` = only for this site's own database, hidden for the read-only
+// remote institutions.
+const NAV: { href: string; label: string; icon: LucideIcon; exact?: boolean; editor?: boolean; admin?: boolean; superadmin?: boolean; local?: boolean }[] = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { href: "/admin/transactions", label: "Transactions", icon: ListOrdered },
   { href: "/admin/reports", label: "Reports", icon: BarChart3 },
   { href: "/admin/attendance", label: "Staff Attendance", icon: Fingerprint },
-  { href: "/admin/manage", label: "Categories & Funds", icon: SlidersHorizontal, editor: true },
-  { href: "/admin/users", label: "Users & Roles", icon: Users, superadmin: true },
-  { href: "/admin/meelad", label: "Meelad Accounts", icon: Wallet, superadmin: true },
+  { href: "/admin/manage", label: "Categories & Funds", icon: SlidersHorizontal, editor: true, local: true },
+  { href: "/admin/users", label: "Users & Roles", icon: Users, superadmin: true, local: true },
+  { href: "/admin/meelad", label: "Meelad Accounts", icon: Wallet, superadmin: true, local: true },
 ];
 
 const TITLES: Record<string, string> = {
@@ -35,14 +38,33 @@ const TITLES: Record<string, string> = {
 };
 
 export function AdminShell({ profile, children }: { profile: Profile; children: React.ReactNode }) {
+  return (
+    <DataProvider profile={profile}>
+      <Shell profile={profile}>{children}</Shell>
+      <Toaster />
+    </DataProvider>
+  );
+}
+
+function Shell({ profile, children }: { profile: Profile; children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { site, setSite, canEdit, error } = useData();
   const [open, setOpen] = useState(false);
   const [appsOpen, setAppsOpen] = useState(false);
-  const editor = isEditor(profile.role);
   const admin = profile.role === "admin";
   const superadmin = isSuperadmin(profile.email);
   const name = profile.full_name || "Staff";
+
+  const nav = NAV.filter((n) =>
+    (n.superadmin ? superadmin : n.admin ? admin : !n.editor || canEdit) && (!n.local || site.local)
+  );
+
+  // Switching to a remote institution while on a page it doesn't have
+  // (e.g. Users & Roles) → back to its dashboard.
+  useEffect(() => {
+    if (!site.local && NAV.some((n) => n.local && pathname.startsWith(n.href))) router.replace("/admin");
+  }, [site, pathname, router]);
 
   const signOut = async () => {
     await createClient().auth.signOut();
@@ -51,7 +73,7 @@ export function AdminShell({ profile, children }: { profile: Profile; children: 
   };
 
   return (
-    <DataProvider profile={profile}>
+    <>
       <div className="admin-grid grid min-h-screen md:grid-cols-[238px_1fr]">
         {/* Sidebar */}
         <aside
@@ -61,16 +83,36 @@ export function AdminShell({ profile, children }: { profile: Profile; children: 
           )}
           style={{ background: "var(--navy)" }}
         >
-          <div className="flex items-center gap-3 px-2 pb-5 pt-1.5">
-            <img className="h-10" src="/Logo of Ihlamudheen Madrasa dark-bg removed.png" alt="" />
+          <div className="flex items-center gap-3 px-2 pb-4 pt-1.5">
+            <img className="h-10 w-auto max-w-[48px] object-contain" src={site.logo} alt="" />
             <div className="leading-tight">
-              <b className="font-display text-base font-semibold text-white">Ihlamudheen</b>
+              <b className="font-display text-base font-semibold text-white">{site.name}</b>
               <br />
               <span className="text-[11.5px] text-[#8fa6bf]">Accounts</span>
             </div>
           </div>
 
-          {NAV.filter((n) => (n.superadmin ? superadmin : n.admin ? admin : !n.editor || editor)).map((n) => {
+          {/* Institution switcher — super-admins see every institution's books. */}
+          {superadmin && (
+            <div className="mb-4 grid grid-cols-3 gap-1 rounded-xl bg-black/25 p-1" role="tablist" aria-label="Institution">
+              {SITES.map((s) => (
+                <button
+                  key={s.id}
+                  role="tab"
+                  aria-selected={s.id === site.id}
+                  onClick={() => { setSite(s.id); setOpen(false); }}
+                  className={cx(
+                    "truncate rounded-lg px-1.5 py-2 text-[12.5px] font-bold transition",
+                    s.id === site.id ? "bg-white text-navy shadow-sm" : "text-[#cfe0f2] hover:bg-white/10"
+                  )}
+                >
+                  {s.tab}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {nav.map((n) => {
             const active = n.exact ? pathname === n.href : pathname.startsWith(n.href);
             const Icon = n.icon;
             return (
@@ -145,11 +187,24 @@ export function AdminShell({ profile, children }: { profile: Profile; children: 
             </div>
           </header>
 
-          <main className="p-4 sm:p-7">{children}</main>
+          <main className="p-4 sm:p-7">
+            {!site.local && (
+              <div className="no-print mb-5 flex items-center gap-2.5 rounded-xl border border-line bg-surface px-4 py-2.5 text-[13.5px] text-muted">
+                <Eye size={16} className="shrink-0 text-brand" />
+                <span>
+                  Viewing <b className="text-ink">{site.name}</b> accounts — read-only. Make changes on the {site.name} site itself.
+                </span>
+              </div>
+            )}
+            {error ? (
+              <div className="rounded-xl border border-bad bg-bad-bg px-4 py-3 text-[14px] font-semibold text-bad">{error}</div>
+            ) : (
+              children
+            )}
+          </main>
         </div>
       </div>
-      <Toaster />
-    </DataProvider>
+    </>
   );
 }
 

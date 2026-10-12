@@ -8,17 +8,17 @@ import { TxDialog } from "@/components/admin/tx-dialog";
 import { toast } from "@/components/ui/toast";
 import { fmt, fmtDate, round2 } from "@/lib/format";
 import { downloadCSV } from "@/lib/csv";
-import { isEditor, type Transaction } from "@/lib/types";
+import type { Transaction } from "@/lib/types";
 import { btn, cx, inputClass } from "@/lib/ui";
 
 const empty = { search: "", type: "", category: "", fund: "", from: "", to: "" };
 
 export default function TransactionsPage() {
-  const { transactions, categories, funds, loading, profile, supabase, reload } = useData();
+  const { transactions, categories, funds, loading, canEdit, supabase, reload, site } = useData();
   const [f, setF] = useState(empty);
   const [editing, setEditing] = useState<Transaction | null | undefined>(undefined);
   const [delTarget, setDelTarget] = useState<Transaction | null>(null);
-  const editor = isEditor(profile.role);
+  const editor = canEdit;
 
   const catName = useMemo(() => Object.fromEntries(categories.map((c) => [c.id, c.name])), [categories]);
   const fundName = useMemo(() => Object.fromEntries(funds.map((x) => [x.id, x.name])), [funds]);
@@ -56,7 +56,7 @@ export default function TransactionsPage() {
   const exportCSV = () => {
     const rows: (string | number)[][] = [["Date", "Type", "Category", "Fund", "Description", "Reference", "Amount"]];
     list.forEach((t) => rows.push([t.occurred_on, t.type, catName[t.category_id ?? ""] || "", fundName[t.fund_id ?? ""] || "", t.description || "", t.reference || "", t.amount]));
-    downloadCSV("transactions", rows);
+    downloadCSV(`${site.id}-transactions`, rows);
     toast("CSV downloaded");
   };
 

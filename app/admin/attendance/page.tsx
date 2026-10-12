@@ -5,7 +5,7 @@ import { CalendarDays, Clock, Fingerprint, LogIn, LogOut, Pencil, Plus, UserRoun
 import { useData } from "@/components/admin/data-context";
 import { EmptyState, Modal, Panel, Spinner, StatCard } from "@/components/admin/ui";
 import { toast } from "@/components/ui/toast";
-import { isEditor, type Attendance, type Staff } from "@/lib/types";
+import type { Attendance, Staff } from "@/lib/types";
 import { btn, cx, inputClass, labelClass } from "@/lib/ui";
 
 const todayStr = () => new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD, local
@@ -13,8 +13,7 @@ const nowTime = () => new Date().toTimeString().slice(0, 5); // HH:MM, local
 const hhmm = (t: string | null) => (t ? t.slice(0, 5) : "");
 
 export default function AttendancePage() {
-  const { staff, reloadStaff, supabase, profile, loading } = useData();
-  const editor = isEditor(profile.role);
+  const { staff, reloadStaff, supabase, canEdit: editor, loading, loadAttendance } = useData();
   const [date, setDate] = useState(todayStr());
   const [rows, setRows] = useState<Attendance[] | null>(null);
   const [editStaff, setEditStaff] = useState<Staff | "new" | null>(null);
@@ -22,17 +21,13 @@ export default function AttendancePage() {
 
   const load = useCallback(async () => {
     setRows(null);
-    const { data, error } = await supabase
-      .from("attendance")
-      .select("id, staff_id, work_date, check_in, check_out, source, remarks")
-      .eq("work_date", date);
-    if (error) {
-      toast(error.message, true);
+    try {
+      setRows(await loadAttendance(date));
+    } catch (e) {
+      toast((e as Error).message, true);
       setRows([]);
-      return;
     }
-    setRows((data as Attendance[]) || []);
-  }, [supabase, date]);
+  }, [loadAttendance, date]);
 
   useEffect(() => { load(); }, [load]);
 

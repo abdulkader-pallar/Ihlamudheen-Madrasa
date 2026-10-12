@@ -9,11 +9,10 @@ import type { Attendance } from "@/lib/types";
 import { CategoryDonut, MonthlyChart } from "@/components/admin/charts";
 import { TxDialog } from "@/components/admin/tx-dialog";
 import { fmt, fmtDate, monthKey, monthLabel, round2 } from "@/lib/format";
-import { isEditor } from "@/lib/types";
 import { btn } from "@/lib/ui";
 
 export default function DashboardPage() {
-  const { transactions, categories, loading, profile } = useData();
+  const { transactions, categories, loading, profile, canEdit } = useData();
   const [adding, setAdding] = useState(false);
 
   const catName = useMemo(() => Object.fromEntries(categories.map((c) => [c.id, c.name])), [categories]);
@@ -81,7 +80,7 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
-        {isEditor(profile.role) && (
+        {canEdit && (
           <button onClick={() => setAdding(true)} className={btn({ variant: "primary" })}>
             <Plus size={16} /> New entry
           </button>
@@ -147,19 +146,18 @@ export default function DashboardPage() {
 }
 
 function TodayAttendancePanel() {
-  const { staff, supabase } = useData();
+  const { staff, loadAttendance } = useData();
   const [rows, setRows] = useState<Attendance[] | null>(null);
   const today = new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD, local
 
   useEffect(() => {
     let cancelled = false;
-    supabase
-      .from("attendance")
-      .select("id, staff_id, work_date, check_in, check_out, source, remarks")
-      .eq("work_date", today)
-      .then(({ data }) => { if (!cancelled) setRows((data as Attendance[]) || []); });
+    setRows(null);
+    loadAttendance(today)
+      .then((data) => { if (!cancelled) setRows(data); })
+      .catch(() => { if (!cancelled) setRows([]); });
     return () => { cancelled = true; };
-  }, [supabase, today]);
+  }, [loadAttendance, today]);
 
   const active = useMemo(() => staff.filter((s) => s.active), [staff]);
   const byStaff = useMemo(() => Object.fromEntries((rows || []).map((r) => [r.staff_id, r])), [rows]);

@@ -12,7 +12,7 @@ import { btn, cx, inputClass } from "@/lib/ui";
 type Group = "category" | "month" | "fund";
 
 export default function ReportsPage() {
-  const { transactions, categories, funds, loading } = useData();
+  const { transactions, categories, funds, loading, site } = useData();
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [group, setGroup] = useState<Group>("category");
@@ -42,7 +42,7 @@ export default function ReportsPage() {
     const out: (string | number)[][] = [[head, "Income", "Expense", "Net"]];
     rows.forEach(([k, v]) => out.push([k, v.income, v.expense, v.income - v.expense]));
     out.push(["Total", totals.income, totals.expense, totals.balance]);
-    downloadCSV("report", out);
+    downloadCSV(`${site.id}-report`, out);
     toast("CSV downloaded");
   };
 
@@ -73,7 +73,7 @@ export default function ReportsPage() {
 
       <div className="mb-4 rounded-2xl border border-line bg-surface p-5 shadow-soft">
         <h3 className="font-display text-lg font-semibold">Income &amp; Expenditure Statement</h3>
-        <p className="mt-0.5 text-[13.5px] text-muted">Ihlamudheen Madrasa · {rangeText} · grouped by {group}</p>
+        <p className="mt-0.5 text-[13.5px] text-muted">{site.local ? "Ihlamudheen Madrasa" : site.name} · {rangeText} · grouped by {group}</p>
       </div>
 
       <div className="mb-4 grid gap-4 sm:grid-cols-3">

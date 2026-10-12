@@ -5,17 +5,17 @@ import { Plus, X } from "lucide-react";
 import { useData } from "@/components/admin/data-context";
 import { EmptyState, Modal, Panel, Spinner } from "@/components/admin/ui";
 import { toast } from "@/components/ui/toast";
-import { isEditor, type TxType } from "@/lib/types";
+import type { TxType } from "@/lib/types";
 import { btn, cx, inputClass, labelClass } from "@/lib/ui";
 
 type DelTarget = { table: "categories" | "funds"; id: string; label: string } | null;
 
 export default function ManagePage() {
-  const { categories, funds, loading, profile, supabase, reload } = useData();
+  const { categories, funds, loading, canEdit, supabase, reload } = useData();
   const [addCat, setAddCat] = useState(false);
   const [addFund, setAddFund] = useState(false);
   const [del, setDel] = useState<DelTarget>(null);
-  const editor = isEditor(profile.role);
+  const editor = canEdit;
 
   const doDelete = async () => {
     if (!del) return;
