@@ -12,12 +12,14 @@ export interface Site {
   /** Name shown beside the logo in the sidebar. */
   name: string;
   logo: string;
+  /** Enlarges the sidebar logo to offset empty space inside the image. */
+  logoScale?: number;
   /** true = this site's own database; false = another institution's. */
   local: boolean;
 }
 
 export const SITES: Site[] = [
-  { id: "ihlamudheen", tab: "Ihlamudheen", name: "Ihlamudheen", logo: "/Logo of Ihlamudheen Madrasa dark-bg removed.png", local: true },
+  { id: "ihlamudheen", tab: "Ihlamudheen", name: "Ihlamudheen", logo: "/Logo of Ihlamudheen Madrasa dark-bg removed.png", logoScale: 1.3, local: true },
   { id: "gracevalley", tab: "Grace Valley", name: "Grace Valley", logo: "/sites/grace-valley.png", local: false },
   { id: "pmsa", tab: "PMSA", name: "PMSA", logo: "/sites/pmsa.png", local: false },
 ];

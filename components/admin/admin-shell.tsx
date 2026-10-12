@@ -92,12 +92,17 @@ function Shell({ profile, children }: { profile: Profile; children: React.ReactN
           )}
           style={{ background: "var(--sidebar, var(--navy))" }}
         >
-          <div className="flex items-center gap-3 px-2 pb-4 pt-1.5">
-            <img className="h-10 w-auto max-w-[48px] object-contain" src={site.logo} alt="" />
-            <div className="leading-tight">
-              <b className="font-display text-base font-semibold text-white">{site.name}</b>
+          <div className="flex items-center gap-3 px-1 pb-4 pt-1">
+            <img
+              className="h-16 w-16 shrink-0 object-contain drop-shadow-md"
+              style={site.logoScale ? { transform: `scale(${site.logoScale})` } : undefined}
+              src={site.logo}
+              alt=""
+            />
+            <div className="min-w-0 leading-tight">
+              <b className="font-display text-[18px] font-semibold text-white">{site.name}</b>
               <br />
-              <span className="text-[11.5px] text-[var(--sidebar-muted,#8fa6bf)]">Accounts</span>
+              <span className="text-[12px] text-[var(--sidebar-muted,#8fa6bf)]">Accounts</span>
             </div>
           </div>
 
