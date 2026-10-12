@@ -1,23 +1,22 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CalendarDays, Clock, Fingerprint, LogIn, LogOut, Pencil, Plus, UserRound } from "lucide-react";
+import Link from "next/link";
+import { CalendarDays, Fingerprint, LogIn, LogOut, UserRound, Users } from "lucide-react";
 import { useData } from "@/components/admin/data-context";
-import { EmptyState, Modal, Panel, Spinner, StatCard } from "@/components/admin/ui";
+import { EmptyState, Panel, Spinner, StatCard } from "@/components/admin/ui";
 import { toast } from "@/components/ui/toast";
-import type { Attendance, Staff } from "@/lib/types";
-import { btn, cx, inputClass, labelClass } from "@/lib/ui";
+import type { Attendance } from "@/lib/types";
+import { btn, cx, inputClass } from "@/lib/ui";
 
 const todayStr = () => new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD, local
 const nowTime = () => new Date().toTimeString().slice(0, 5); // HH:MM, local
 const hhmm = (t: string | null) => (t ? t.slice(0, 5) : "");
 
 export default function AttendancePage() {
-  const { staff, reloadStaff, supabase, canEdit: editor, loading, loadAttendance } = useData();
+  const { staff, supabase, canEdit: editor, loading, loadAttendance } = useData();
   const [date, setDate] = useState(todayStr());
   const [rows, setRows] = useState<Attendance[] | null>(null);
-  const [editStaff, setEditStaff] = useState<Staff | "new" | null>(null);
-  const [showManage, setShowManage] = useState(false);
 
   const load = useCallback(async () => {
     setRows(null);
@@ -80,45 +79,12 @@ export default function AttendancePage() {
               className={cx(inputClass, "w-auto py-2")} />
           </label>
           {editor && (
-            <button onClick={() => setShowManage((v) => !v)} className={btn({ variant: "ghost", size: "sm" })}>
-              <Clock size={15} /> Manage staff
-            </button>
+            <Link href="/admin/staff" className={btn({ variant: "ghost", size: "sm" })}>
+              <Users size={15} /> Manage staff
+            </Link>
           )}
         </Panel>
       </div>
-
-      {/* Manage staff */}
-      {editor && showManage && (
-        <Panel
-          title={`Staff (${staff.length})`}
-          action={<button onClick={() => setEditStaff("new")} className={btn({ variant: "primary", size: "sm" })}><Plus size={15} /> Add staff</button>}
-        >
-          {staff.length === 0 ? (
-            <EmptyState>No staff yet. Add your teachers &amp; employees, then set each one&apos;s device user id.</EmptyState>
-          ) : (
-            <div className="grid gap-2">
-              {staff.map((s) => (
-                <div key={s.id} className="flex flex-wrap items-center gap-3 rounded-xl border border-line bg-surface-2 px-4 py-2.5">
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-[14px] font-bold">
-                      {s.name}
-                      {!s.active && <span className="ml-2 rounded-full bg-muted/20 px-2 py-0.5 text-[10.5px] font-bold text-muted">Inactive</span>}
-                    </div>
-                    <div className="text-[12px] text-muted">
-                      {s.designation || "Staff"}
-                      {s.device_user_id != null ? ` · device #${s.device_user_id}` : " · no device id"}
-                      {s.phone ? ` · ${s.phone}` : ""}
-                    </div>
-                  </div>
-                  <button onClick={() => setEditStaff(s)} className={btn({ variant: "ghost", size: "sm" })} aria-label={`Edit ${s.name}`}>
-                    <Pencil size={14} /> Edit
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </Panel>
-      )}
 
       {/* Attendance board */}
       <Panel title="Attendance">
@@ -166,13 +132,6 @@ export default function AttendancePage() {
         )}
       </Panel>
 
-      {editStaff && (
-        <StaffDialog
-          staff={editStaff === "new" ? null : editStaff}
-          onClose={() => setEditStaff(null)}
-          onSaved={async () => { setEditStaff(null); await reloadStaff(); }}
-        />
-      )}
     </div>
   );
 }
@@ -204,68 +163,5 @@ function TimeCell({
         </button>
       )}
     </span>
-  );
-}
-
-function StaffDialog({ staff, onClose, onSaved }: { staff: Staff | null; onClose: () => void; onSaved: () => void }) {
-  const { supabase } = useData();
-  const [name, setName] = useState(staff?.name || "");
-  const [designation, setDesignation] = useState(staff?.designation || "");
-  const [deviceId, setDeviceId] = useState(staff?.device_user_id != null ? String(staff.device_user_id) : "");
-  const [phone, setPhone] = useState(staff?.phone || "");
-  const [active, setActive] = useState(staff?.active ?? true);
-  const [busy, setBusy] = useState(false);
-
-  const save = async () => {
-    if (!name.trim()) { toast("Name is required.", true); return; }
-    const device_user_id = deviceId.trim() === "" ? null : Number(deviceId.trim());
-    if (device_user_id !== null && (!Number.isInteger(device_user_id) || device_user_id < 0)) {
-      toast("Device user id must be a whole number.", true); return;
-    }
-    setBusy(true);
-    const payload = { name: name.trim(), designation: designation.trim() || null, device_user_id, phone: phone.trim() || null, active };
-    const { error } = staff
-      ? await supabase.from("staff").update(payload).eq("id", staff.id)
-      : await supabase.from("staff").insert(payload);
-    setBusy(false);
-    if (error) {
-      toast(/duplicate|unique/i.test(error.message) ? "That device user id is already assigned to another staff member." : error.message, true);
-      return;
-    }
-    toast(staff ? "Staff updated." : "Staff added.");
-    onSaved();
-  };
-
-  return (
-    <Modal title={staff ? "Edit staff" : "Add staff"} onClose={onClose}>
-      <div className="grid gap-3.5">
-        <div>
-          <label className={labelClass}>Full name</label>
-          <input value={name} onChange={(e) => setName(e.target.value)} className={inputClass} placeholder="e.g. Abdul Rahim" />
-        </div>
-        <div className="grid grid-cols-2 gap-3.5">
-          <div>
-            <label className={labelClass}>Designation</label>
-            <input value={designation} onChange={(e) => setDesignation(e.target.value)} className={inputClass} placeholder="Teacher" />
-          </div>
-          <div>
-            <label className={labelClass}>Device user id</label>
-            <input value={deviceId} onChange={(e) => setDeviceId(e.target.value)} inputMode="numeric" className={inputClass} placeholder="e.g. 12" />
-          </div>
-        </div>
-        <div>
-          <label className={labelClass}>Phone (optional)</label>
-          <input value={phone} onChange={(e) => setPhone(e.target.value)} className={inputClass} placeholder="+91…" />
-        </div>
-        <label className="flex items-center gap-2.5 text-[14px] font-semibold">
-          <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} className="h-4 w-4 accent-[var(--brand)]" />
-          Active (tracked in attendance)
-        </label>
-        <div className="mt-1 flex justify-end gap-2.5">
-          <button onClick={onClose} className={btn({ variant: "ghost" })}>Cancel</button>
-          <button onClick={save} disabled={busy} className={btn({ variant: "primary" })}>{busy ? "Saving…" : "Save"}</button>
-        </div>
-      </div>
-    </Modal>
   );
 }
