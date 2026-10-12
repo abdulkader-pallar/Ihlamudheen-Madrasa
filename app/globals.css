@@ -785,3 +785,69 @@ body {
   from { stroke-dashoffset: 100; }
   to   { stroke-dashoffset: 0; }
 }
+
+/* ============================================================================
+   Accounts portal — per-institution themes. The admin shell sets
+   <html data-site="ihlamudheen | gracevalley | pmsa"> for the selected tab
+   (components/admin/admin-shell.tsx). Ihlamudheen keeps the defaults above.
+   Brand colours apply in both modes; surfaces get a light and a dark set.
+   These rules sit last so they win over the base light/dark tokens.
+   ========================================================================== */
+
+/* PMSA — matches pmsa-kattilangadi: orange → rose → fuchsia on deep plum. */
+:root[data-site="pmsa"] {
+  --navy: #2a1150;
+  --brand: #f97316;
+  --brand-600: #ea580c;
+  --accent: #ec4899;
+  --sidebar: linear-gradient(168deg, #3d0e56 0%, #241150 46%, #14203f 100%);
+  --sidebar-ink: #f3e3f2;
+  --sidebar-link: #e7cfe6;
+  --sidebar-muted: #b79ec4;
+}
+:root[data-site="pmsa"]:not([data-theme="dark"]) {
+  --bg: #fbf7fb; --surface: #ffffff; --surface-2: #fbf1f4;
+  --ink: #241026; --muted: #6c5a6e; --line: #f0e2ea;
+  --good: #12805c; --bad: #c0392b; --good-bg: #e2f3ec; --bad-bg: #fbe9e7;
+}
+:root[data-site="pmsa"][data-theme="dark"] {
+  --bg: #140a1c; --surface: #1f1329; --surface-2: #2a1a34;
+  --ink: #f5eaf3; --muted: #b6a1ba; --line: #382742;
+  --good: #3ddc97; --bad: #ff6b5e; --good-bg: #14261f; --bad-bg: #2e1512;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-site="pmsa"]:not([data-theme="light"]) {
+    --bg: #140a1c; --surface: #1f1329; --surface-2: #2a1a34;
+    --ink: #f5eaf3; --muted: #b6a1ba; --line: #382742;
+    --good: #3ddc97; --bad: #ff6b5e; --good-bg: #14261f; --bad-bg: #2e1512;
+  }
+}
+
+/* Grace Valley — from its crest: forest green with the gold of the pen nib. */
+:root[data-site="gracevalley"] {
+  --navy: #0f3d24;
+  --brand: #1b7f3b;
+  --brand-600: #22964a;
+  --accent: #e3b23c;
+  --sidebar: linear-gradient(168deg, #135a33 0%, #0e3f25 48%, #0a2819 100%);
+  --sidebar-ink: #e3f4e9;
+  --sidebar-link: #cfe8d8;
+  --sidebar-muted: #93bba2;
+}
+:root[data-site="gracevalley"]:not([data-theme="dark"]) {
+  --bg: #f6faf7; --surface: #ffffff; --surface-2: #eef5f0;
+  --ink: #10261a; --muted: #56695d; --line: #dfeae2;
+  --good: #12805c; --bad: #c0392b; --good-bg: #e2f3ec; --bad-bg: #fbe9e7;
+}
+:root[data-site="gracevalley"][data-theme="dark"] {
+  --bg: #08150e; --surface: #0f2118; --surface-2: #152c20;
+  --ink: #e9f4ed; --muted: #9db8a7; --line: #20392b;
+  --good: #3ddc97; --bad: #ff6b5e; --good-bg: #0f2e22; --bad-bg: #2e1512;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-site="gracevalley"]:not([data-theme="light"]) {
+    --bg: #08150e; --surface: #0f2118; --surface-2: #152c20;
+    --ink: #e9f4ed; --muted: #9db8a7; --line: #20392b;
+    --good: #3ddc97; --bad: #ff6b5e; --good-bg: #0f2e22; --bad-bg: #2e1512;
+  }
+}

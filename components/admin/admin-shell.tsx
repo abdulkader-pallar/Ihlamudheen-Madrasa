@@ -62,6 +62,13 @@ function Shell({ profile, children }: { profile: Profile; children: React.ReactN
     (n.superadmin ? superadmin : n.admin ? admin : !n.editor || canEdit) && (!n.local || site.local)
   );
 
+  // Each institution has its own colour theme (app/globals.css, [data-site]).
+  // Set on <html> so dialogs, toasts and the page background follow it too.
+  useEffect(() => {
+    document.documentElement.dataset.site = site.id;
+    return () => { delete document.documentElement.dataset.site; };
+  }, [site]);
+
   // Switching to a remote institution while on a page it doesn't have
   // (e.g. Users & Roles) → back to its dashboard.
   useEffect(() => {
@@ -80,17 +87,17 @@ function Shell({ profile, children }: { profile: Profile; children: React.ReactN
         {/* Sidebar */}
         <aside
           className={cx(
-            "no-print fixed inset-y-0 left-0 z-50 flex w-[238px] flex-col p-4 text-[#dbe6f2] transition-transform md:static md:translate-x-0",
+            "no-print fixed inset-y-0 left-0 z-50 flex w-[238px] flex-col p-4 text-[var(--sidebar-ink,#dbe6f2)] transition-transform md:static md:translate-x-0",
             open ? "translate-x-0" : "-translate-x-full"
           )}
-          style={{ background: "var(--navy)" }}
+          style={{ background: "var(--sidebar, var(--navy))" }}
         >
           <div className="flex items-center gap-3 px-2 pb-4 pt-1.5">
             <img className="h-10 w-auto max-w-[48px] object-contain" src={site.logo} alt="" />
             <div className="leading-tight">
               <b className="font-display text-base font-semibold text-white">{site.name}</b>
               <br />
-              <span className="text-[11.5px] text-[#8fa6bf]">Accounts</span>
+              <span className="text-[11.5px] text-[var(--sidebar-muted,#8fa6bf)]">Accounts</span>
             </div>
           </div>
 
@@ -107,7 +114,7 @@ function Shell({ profile, children }: { profile: Profile; children: React.ReactN
                   onClick={() => { setSite(s.id); setOpen(false); }}
                   className={cx(
                     "grid min-h-[40px] flex-auto place-items-center rounded-lg px-2 py-1.5 text-center text-[10.5px] font-extrabold uppercase leading-[1.15] tracking-[0.06em] transition",
-                    s.id === site.id ? "bg-white text-navy shadow-sm" : "text-[#cfe0f2] hover:bg-white/10"
+                    s.id === site.id ? "bg-white text-navy shadow-sm" : "text-[var(--sidebar-link,#cfe0f2)] hover:bg-white/10"
                   )}
                 >
                   {s.tab}
@@ -126,7 +133,7 @@ function Shell({ profile, children }: { profile: Profile; children: React.ReactN
                 onClick={() => setOpen(false)}
                 className={cx(
                   "flex items-center gap-3 rounded-[10px] px-3 py-2.5 text-[14.5px] font-semibold transition",
-                  active ? "bg-brand text-white" : "text-[#cfe0f2] hover:bg-white/10"
+                  active ? "bg-brand text-white" : "text-[var(--sidebar-link,#cfe0f2)] hover:bg-white/10"
                 )}
               >
                 <Icon size={19} className="opacity-90" />
@@ -142,12 +149,12 @@ function Shell({ profile, children }: { profile: Profile; children: React.ReactN
               </div>
               <div className="min-w-0">
                 <div className="truncate text-[13.5px] font-bold text-white">{name}</div>
-                <div className="text-[11.5px] capitalize text-[#8fa6bf]">{profile.role}</div>
+                <div className="text-[11.5px] capitalize text-[var(--sidebar-muted,#8fa6bf)]">{profile.role}</div>
               </div>
             </div>
             <button
               onClick={signOut}
-              className="mt-1.5 flex w-full items-center gap-3 rounded-[10px] px-3 py-2.5 text-[14.5px] font-semibold text-[#cfe0f2] transition hover:bg-white/10"
+              className="mt-1.5 flex w-full items-center gap-3 rounded-[10px] px-3 py-2.5 text-[14.5px] font-semibold text-[var(--sidebar-link,#cfe0f2)] transition hover:bg-white/10"
             >
               <LogOut size={19} className="opacity-90" /> Sign out
             </button>
