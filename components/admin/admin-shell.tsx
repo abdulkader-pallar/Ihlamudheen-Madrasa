@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { BarChart3, Eye, Fingerprint, Globe, LayoutDashboard, ListOrdered, LogOut, Menu, SlidersHorizontal, Users, Wallet } from "lucide-react";
+import { BarChart3, Fingerprint, Globe, LayoutDashboard, ListOrdered, LogOut, Menu, SlidersHorizontal, Users, Wallet } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -15,8 +15,8 @@ import type { UserRole } from "@/lib/roles";
 import { isSuperadmin, type Profile, type Role } from "@/lib/types";
 import { cx } from "@/lib/ui";
 
-// `local` = only for this site's own database, hidden for the read-only
-// remote institutions.
+// `local` = Ihlamudheen-only pages (Meelad book), hidden on the other
+// institutions' tabs.
 const NAV: { href: string; label: string; icon: LucideIcon; exact?: boolean; editor?: boolean; admin?: boolean; superadmin?: boolean; local?: boolean }[] = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { href: "/admin/transactions", label: "Transactions", icon: ListOrdered },
@@ -190,14 +190,6 @@ function Shell({ profile, children }: { profile: Profile; children: React.ReactN
           </header>
 
           <main className="p-4 sm:p-7">
-            {!site.local && (
-              <div className="no-print mb-5 flex items-center gap-2.5 rounded-xl border border-line bg-surface px-4 py-2.5 text-[13.5px] text-muted">
-                <Eye size={16} className="shrink-0 text-brand" />
-                <span>
-                  Viewing <b className="text-ink">{site.name}</b> accounts — read-only. Make changes on the {site.name} site itself.
-                </span>
-              </div>
-            )}
             {error ? (
               <div className="rounded-xl border border-bad bg-bad-bg px-4 py-3 text-[14px] font-semibold text-bad">{error}</div>
             ) : (

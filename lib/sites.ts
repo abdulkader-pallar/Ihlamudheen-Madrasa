@@ -1,8 +1,8 @@
 // The institutions shown in the Accounts portal. Ihlamudheen is this site's own
-// Supabase database (read/write). The others are separate deployments of the
-// same accounting app; their data is pulled read-only through each site's
-// GET /api/export endpoint via app/api/admin/sites/[site]/route.ts, so their
-// API keys never reach the browser. This file is safe to import client-side.
+// Supabase database. The others are separate deployments of the same
+// accounting app with their own Supabase projects; they are read and edited
+// through app/api/admin/sites/[site]/route.ts (see lib/remote-db.ts), so their
+// secret keys never reach the browser. This file is safe to import client-side.
 export type SiteId = "ihlamudheen" | "gracevalley" | "pmsa";
 
 export interface Site {
@@ -12,7 +12,7 @@ export interface Site {
   /** Name shown beside the logo in the sidebar. */
   name: string;
   logo: string;
-  /** true = this site's own database; false = read-only remote export. */
+  /** true = this site's own database; false = another institution's. */
   local: boolean;
 }
 

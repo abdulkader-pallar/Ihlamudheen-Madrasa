@@ -1,7 +1,8 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { createRemoteClient } from "@/lib/remote-db";
 import { DEFAULT_SITE, getSite, type Site, type SiteId } from "@/lib/sites";
 import { isEditor, type Attendance, type Category, type Fund, type Profile, type Staff, type Transaction } from "@/lib/types";
 
@@ -12,7 +13,6 @@ type DataCtx = {
   /** The institution whose books are on screen (see lib/sites.ts). */
   site: Site;
   setSite: (id: SiteId) => void;
-  /** false for the read-only remote institutions, whatever the user's role. */
   canEdit: boolean;
   categories: Category[];
   funds: Fund[];
@@ -26,6 +26,8 @@ type DataCtx = {
   reload: () => Promise<void>;
   reloadStaff: () => Promise<void>;
   loadAttendance: (date: string) => Promise<Attendance[]>;
+  /** The database of the selected institution. For Grace Valley / PMSA this is
+   *  lib/remote-db.ts, which supports the same query calls the pages make. */
   supabase: SupabaseClient;
 };
 
@@ -39,15 +41,8 @@ export function useData() {
 
 const SITE_KEY = "accounts-site";
 
-async function fetchRemote(site: SiteId, params: Record<string, string>) {
-  const res = await fetch(`/api/admin/sites/${site}?${new URLSearchParams(params)}`, { cache: "no-store" });
-  const body = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(body.error || `Could not load ${site}`);
-  return body.data as Record<string, unknown[]>;
-}
-
 export function DataProvider({ profile, children }: { profile: Profile; children: React.ReactNode }) {
-  const [supabase] = useState(() => createClient());
+  const [local] = useState(() => createClient());
   const [siteId, setSiteId] = useState<SiteId>(DEFAULT_SITE);
   const [categories, setCategories] = useState<Category[]>([]);
   const [funds, setFunds] = useState<Fund[]>([]);
@@ -59,6 +54,11 @@ export function DataProvider({ profile, children }: { profile: Profile; children
   const site = getSite(siteId);
   // Bumped on every reload so a slow response for a previous site is dropped.
   const gen = useRef(0);
+
+  const supabase = useMemo(
+    () => (site.local ? local : (createRemoteClient(site.id) as unknown as SupabaseClient)),
+    [site, local]
+  );
 
   // Remember the chosen institution per browser.
   useEffect(() => {
@@ -74,38 +74,14 @@ export function DataProvider({ profile, children }: { profile: Profile; children
   }, []);
 
   const reloadStaff = useCallback(async () => {
-    if (!site.local) {
-      const d = await fetchRemote(site.id, { tables: "staff" });
-      setStaff(((d.staff as Staff[]) || []).sort((a, b) => a.name.localeCompare(b.name)));
-      return;
-    }
     const { data } = await supabase.from("staff").select("*").order("name");
     setStaff((data as Staff[]) || []);
-  }, [supabase, site]);
+  }, [supabase]);
 
   const reload = useCallback(async () => {
     const my = ++gen.current;
     setError(null);
-    if (!site.local) {
-      try {
-        const d = await fetchRemote(site.id, { tables: "profiles,categories,funds,transactions,staff" });
-        if (my !== gen.current) return;
-        const byKindName = (a: Category, b: Category) => a.kind.localeCompare(b.kind) || a.name.localeCompare(b.name);
-        setCategories(((d.categories as Category[]) || []).sort(byKindName));
-        setFunds(((d.funds as Fund[]) || []).sort((a, b) => a.name.localeCompare(b.name)));
-        setTransactions(((d.transactions as Transaction[]) || []).sort(
-          (a, b) => b.occurred_on.localeCompare(a.occurred_on) || b.created_at.localeCompare(a.created_at)
-        ));
-        setStaff(((d.staff as Staff[]) || []).sort((a, b) => a.name.localeCompare(b.name)));
-        setUsers(((d.profiles as Profile[]) || []).sort((a, b) => (a.full_name || "").localeCompare(b.full_name || "")));
-      } catch (e) {
-        if (my !== gen.current) return;
-        setError((e as Error).message);
-      }
-      setLoading(false);
-      return;
-    }
-    const [c, f, t] = await Promise.all([
+    const [c, f, t, s, u] = await Promise.all([
       supabase.from("categories").select("*").order("kind").order("name"),
       supabase.from("funds").select("*").order("name"),
       supabase
@@ -113,27 +89,30 @@ export function DataProvider({ profile, children }: { profile: Profile; children
         .select("*")
         .order("occurred_on", { ascending: false })
         .order("created_at", { ascending: false }),
-      reloadStaff(),
+      supabase.from("staff").select("*").order("name"),
+      site.local
+        ? Promise.resolve({ data: [], error: null })
+        : supabase.from("profiles").select("id, full_name, role").order("full_name"),
     ]);
     if (my !== gen.current) return;
+    const failed = [c, f, t, s, u].find((r) => r.error)?.error;
+    if (failed) setError(failed.message);
     setCategories((c.data as Category[]) || []);
     setFunds((f.data as Fund[]) || []);
     setTransactions((t.data as Transaction[]) || []);
+    setStaff((s.data as Staff[]) || []);
+    setUsers((u.data as Profile[]) || []);
     setLoading(false);
-  }, [supabase, site, reloadStaff]);
+  }, [supabase, site]);
 
   const loadAttendance = useCallback(async (date: string): Promise<Attendance[]> => {
-    if (!site.local) {
-      const d = await fetchRemote(site.id, { tables: "attendance", date });
-      return (d.attendance as Attendance[]) || [];
-    }
     const { data, error } = await supabase
       .from("attendance")
       .select("id, staff_id, work_date, check_in, check_out, source, remarks")
       .eq("work_date", date);
     if (error) throw new Error(error.message);
     return (data as Attendance[]) || [];
-  }, [supabase, site]);
+  }, [supabase]);
 
   // On first load and whenever the institution changes, clear the previous
   // site's figures so they never show under the new site's name.
@@ -147,7 +126,7 @@ export function DataProvider({ profile, children }: { profile: Profile; children
     reload();
   }, [reload]);
 
-  const canEdit = site.local && isEditor(profile.role);
+  const canEdit = isEditor(profile.role);
 
   return (
     <Ctx.Provider

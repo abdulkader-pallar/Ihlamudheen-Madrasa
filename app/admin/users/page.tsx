@@ -7,8 +7,8 @@ import { EmptyState, Panel, Spinner } from "@/components/admin/ui";
 // The Accounts portal uses the same platform user management as the school
 // ERP (/dashboard/user-mgmt), so there is one consistent tool for adding,
 // editing and removing users, changing roles and resetting passwords.
-// For the remote institutions (Grace Valley, PMSA) it is a read-only list of
-// their login accounts, taken from their export.
+// For the other institutions (Grace Valley, PMSA) it lists their login
+// accounts; those are managed on each institution's own site.
 export default function UsersPage() {
   const { site, users, loading } = useData();
   if (site.local) return <UserManagement />;
