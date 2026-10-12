@@ -18,7 +18,7 @@ const REMOTES: Record<string, { url?: string; key?: string }> = {
   },
 };
 
-const TABLES = new Set(["categories", "funds", "transactions", "staff", "attendance"]);
+const TABLES = new Set(["profiles", "categories", "funds", "transactions", "staff", "attendance"]);
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 // GET /api/admin/sites/<site>?tables=categories,funds,...&date=YYYY-MM-DD

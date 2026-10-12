@@ -23,7 +23,7 @@ const NAV: { href: string; label: string; icon: LucideIcon; exact?: boolean; edi
   { href: "/admin/reports", label: "Reports", icon: BarChart3 },
   { href: "/admin/attendance", label: "Staff Attendance", icon: Fingerprint },
   { href: "/admin/manage", label: "Categories & Funds", icon: SlidersHorizontal },
-  { href: "/admin/users", label: "Users & Roles", icon: Users, superadmin: true, local: true },
+  { href: "/admin/users", label: "Users & Roles", icon: Users, superadmin: true },
   { href: "/admin/meelad", label: "Meelad Accounts", icon: Wallet, superadmin: true, local: true },
 ];
 

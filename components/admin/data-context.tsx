@@ -18,6 +18,9 @@ type DataCtx = {
   funds: Fund[];
   transactions: Transaction[];
   staff: Staff[];
+  /** Login accounts of a remote institution (empty for Ihlamudheen, which
+   *  uses the full user-management tool instead). */
+  users: Profile[];
   loading: boolean;
   error: string | null;
   reload: () => Promise<void>;
@@ -50,6 +53,7 @@ export function DataProvider({ profile, children }: { profile: Profile; children
   const [funds, setFunds] = useState<Fund[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [staff, setStaff] = useState<Staff[]>([]);
+  const [users, setUsers] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const site = getSite(siteId);
@@ -84,7 +88,7 @@ export function DataProvider({ profile, children }: { profile: Profile; children
     setError(null);
     if (!site.local) {
       try {
-        const d = await fetchRemote(site.id, { tables: "categories,funds,transactions,staff" });
+        const d = await fetchRemote(site.id, { tables: "profiles,categories,funds,transactions,staff" });
         if (my !== gen.current) return;
         const byKindName = (a: Category, b: Category) => a.kind.localeCompare(b.kind) || a.name.localeCompare(b.name);
         setCategories(((d.categories as Category[]) || []).sort(byKindName));
@@ -93,6 +97,7 @@ export function DataProvider({ profile, children }: { profile: Profile; children
           (a, b) => b.occurred_on.localeCompare(a.occurred_on) || b.created_at.localeCompare(a.created_at)
         ));
         setStaff(((d.staff as Staff[]) || []).sort((a, b) => a.name.localeCompare(b.name)));
+        setUsers(((d.profiles as Profile[]) || []).sort((a, b) => (a.full_name || "").localeCompare(b.full_name || "")));
       } catch (e) {
         if (my !== gen.current) return;
         setError((e as Error).message);
@@ -138,6 +143,7 @@ export function DataProvider({ profile, children }: { profile: Profile; children
     setFunds([]);
     setTransactions([]);
     setStaff([]);
+    setUsers([]);
     reload();
   }, [reload]);
 
@@ -145,7 +151,7 @@ export function DataProvider({ profile, children }: { profile: Profile; children
 
   return (
     <Ctx.Provider
-      value={{ profile, site, setSite, canEdit, categories, funds, transactions, staff, loading, error, reload, reloadStaff, loadAttendance, supabase }}
+      value={{ profile, site, setSite, canEdit, categories, funds, transactions, staff, users, loading, error, reload, reloadStaff, loadAttendance, supabase }}
     >
       {children}
     </Ctx.Provider>
