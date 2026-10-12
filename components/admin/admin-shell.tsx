@@ -94,7 +94,9 @@ function Shell({ profile, children }: { profile: Profile; children: React.ReactN
 
           {/* Institution switcher — super-admins see every institution's books. */}
           {superadmin && (
-            <div className="mb-4 grid grid-cols-3 gap-1 rounded-xl bg-black/25 p-1" role="tablist" aria-label="Institution">
+            // Tabs size to their names (not equal thirds) so the full names fit
+            // in capitals; "GRACE VALLEY" breaks onto two lines.
+            <div className="mb-4 flex gap-1 rounded-xl bg-black/25 p-1" role="tablist" aria-label="Institution">
               {SITES.map((s) => (
                 <button
                   key={s.id}
@@ -102,7 +104,7 @@ function Shell({ profile, children }: { profile: Profile; children: React.ReactN
                   aria-selected={s.id === site.id}
                   onClick={() => { setSite(s.id); setOpen(false); }}
                   className={cx(
-                    "truncate rounded-lg px-1.5 py-2 text-[12.5px] font-bold transition",
+                    "grid min-h-[40px] flex-auto place-items-center rounded-lg px-2 py-1.5 text-center text-[10.5px] font-extrabold uppercase leading-[1.15] tracking-[0.06em] transition",
                     s.id === site.id ? "bg-white text-navy shadow-sm" : "text-[#cfe0f2] hover:bg-white/10"
                   )}
                 >
