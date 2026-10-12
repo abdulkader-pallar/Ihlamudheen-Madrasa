@@ -9,7 +9,7 @@ import type { Attendance } from "@/lib/types";
 import { CategoryDonut, MonthlyChart } from "@/components/admin/charts";
 import { TxDialog } from "@/components/admin/tx-dialog";
 import { fmt, fmtDate, monthKey, monthLabel, round2 } from "@/lib/format";
-import { btn } from "@/lib/ui";
+import { btn, cx } from "@/lib/ui";
 
 export default function DashboardPage() {
   const { transactions, categories, loading, profile, canEdit } = useData();
@@ -81,7 +81,7 @@ export default function DashboardPage() {
           </div>
         </div>
         {canEdit && (
-          <button onClick={() => setAdding(true)} className={btn({ variant: "primary" })}>
+          <button onClick={() => setAdding(true)} className={cx(btn({ variant: "primary" }), "btn-grad")}>
             <Plus size={16} /> New entry
           </button>
         )}

@@ -20,6 +20,8 @@
   --accent: var(--gold);
   /* Dashboard welcome heading (Accounts portal) — per institution below. */
   --grad-welcome: linear-gradient(110deg, #16807f 0%, #1a9694 45%, #d18f1c 100%);
+  /* Accounts "New entry" button — per institution below. */
+  --grad-button: linear-gradient(120deg, #11696a 0%, #16807f 50%, #1f9a8a 100%);
 
   --good: #12805c;
   --bad: #c0392b;
@@ -800,6 +802,7 @@ body {
 
 /* PMSA — matches pmsa-kattilangadi: orange → rose → fuchsia on deep plum. */
 :root[data-site="pmsa"] {
+  --grad-button: linear-gradient(120deg, #ff8a3d 0%, #f43f7e 52%, #c026d3 100%);
   --grad-welcome: linear-gradient(120deg, #ff8a3d 0%, #f43f7e 52%, #c026d3 100%);
   --navy: #2a1150;
   --brand: #f97316;
@@ -830,6 +833,7 @@ body {
 
 /* Grace Valley — from its crest: forest green with the gold of the pen nib. */
 :root[data-site="gracevalley"] {
+  --grad-button: linear-gradient(120deg, #13612d 0%, #1b7f3b 50%, #2f9e55 100%);
   --grad-welcome: linear-gradient(110deg, #1b7f3b 0%, #2f9e55 50%, #c9962a 100%);
   --navy: #0f3d24;
   --brand: #1b7f3b;
@@ -867,4 +871,17 @@ body {
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
+}
+
+/* Gradient primary button (Accounts "New entry"), as on the PMSA site. */
+.btn-grad {
+  background-image: var(--grad-button);
+  background-size: 140% 140%;
+  color: #fff;
+  box-shadow: 0 8px 20px -10px color-mix(in srgb, var(--brand) 70%, transparent);
+  transition: background-position 0.4s ease, transform 0.2s ease, filter 0.2s ease;
+}
+.btn-grad:hover {
+  background-position: 100% 0;
+  filter: saturate(1.08);
 }
