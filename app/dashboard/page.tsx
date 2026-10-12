@@ -63,7 +63,7 @@ import {
 } from "@/components/ui/card"
 import { DashboardSkeleton } from "@/components/loading-skeleton"
 import { useAuth } from "@/hooks/use-auth"
-import { getUserRole, ROLE_LABELS, ROLE_BADGE_COLORS } from "@/lib/roles"
+import { getUserRole, roleTag } from "@/lib/roles"
 import {
   initialCourses,
   initialTeachers,
@@ -1045,8 +1045,8 @@ export default function DashboardPage() {
           </motion.div>
           <h1 className="text-2xl font-bold text-navy-900 dark:text-white sm:text-3xl">
             Welcome back, {userName}!{" "}
-            <span className={cn("inline-flex align-middle text-xs rounded-full px-2.5 py-0.5 font-semibold uppercase tracking-wider ml-2", ROLE_BADGE_COLORS[userRole])} style={{ color: "#000000" }}>
-              {ROLE_LABELS[userRole]}
+            <span className={cn("inline-flex align-middle text-xs rounded-full px-2.5 py-0.5 font-semibold uppercase tracking-wider ml-2", roleTag(userRole, user?.email).className)} style={{ color: "#000000" }}>
+              {roleTag(userRole, user?.email).label}
             </span>
           </h1>
         </div>

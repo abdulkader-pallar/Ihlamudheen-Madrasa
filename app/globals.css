@@ -873,7 +873,12 @@ body {
   color: transparent;
 }
 
-/* Gradient primary button (Accounts "New entry"), as on the PMSA site. */
+/* Filled buttons in the Accounts portal take the institution's gradient, as on
+   the PMSA site. Scoped to [data-site] (set only by the admin shell) so the
+   public site and login keep their own buttons. .btn-grad applies it to other
+   highlighted controls there (active sidebar link, selected filter). */
+:root[data-site] .btn-primary,
+:root[data-site] .btn-gold,
 .btn-grad {
   background-image: var(--grad-button);
   background-size: 140% 140%;
@@ -881,6 +886,8 @@ body {
   box-shadow: 0 8px 20px -10px color-mix(in srgb, var(--brand) 70%, transparent);
   transition: background-position 0.4s ease, transform 0.2s ease, filter 0.2s ease;
 }
+:root[data-site] .btn-primary:hover,
+:root[data-site] .btn-gold:hover,
 .btn-grad:hover {
   background-position: 100% 0;
   filter: saturate(1.08);

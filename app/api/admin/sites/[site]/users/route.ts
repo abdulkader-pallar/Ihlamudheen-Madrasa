@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { authorizeRemote } from "@/lib/remote-sites";
-import type { Role } from "@/lib/types";
+import { isSuperadmin, type Role } from "@/lib/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -14,6 +14,13 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 type Ctx = { params: Promise<{ site: string }> };
 const fail = (error: string, status = 400) => NextResponse.json({ error }, { status });
+
+// The institute super-admins keep their access everywhere: their role can't be
+// changed and their account can't be deleted from here.
+async function isProtected(db: NonNullable<Awaited<ReturnType<typeof authorizeRemote>>["db"]>, id: string) {
+  const { data } = await db.auth.admin.getUserById(id);
+  return isSuperadmin(data?.user?.email);
+}
 
 async function authorize(ctx: Ctx) {
   const { site } = await ctx.params;
@@ -100,6 +107,7 @@ export async function PATCH(req: Request, ctx: Ctx) {
 
   const patch: { role?: Role; full_name?: string } = {};
   if (body.role !== undefined) {
+    if (await isProtected(auth.db, body.id)) return fail("Super Admin accounts can't have their role changed.", 403);
     if (!ROLES.includes(body.role)) return fail("Unknown role.");
     patch.role = body.role;
   }
@@ -121,6 +129,7 @@ export async function DELETE(req: Request, ctx: Ctx) {
 
   const body = (await req.json().catch(() => ({}))) as { id?: string };
   if (!body.id) return fail("Missing user id.");
+  if (await isProtected(auth.db, body.id)) return fail("Super Admin accounts can't be deleted.", 403);
   const { error } = await auth.db.auth.admin.deleteUser(body.id);
   if (error) {
     // Entries they made still point at them, so the database refuses.

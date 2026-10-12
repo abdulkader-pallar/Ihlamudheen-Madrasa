@@ -9,7 +9,7 @@ import { CommandSearch } from "@/components/command-search"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { useAuth } from "@/hooks/use-auth"
 import { DashboardSkeleton } from "@/components/loading-skeleton"
-import { getUserRole, ROLE_LABELS, ROLE_BADGE_COLORS } from "@/lib/roles"
+import { getUserRole, roleTag } from "@/lib/roles"
 import { cn, toTitleCase } from "@/lib/utils"
 import { isSuperadmin } from "@/lib/types"
 import { initialTeachers } from "@/data/courses"
@@ -82,8 +82,8 @@ export default function DashboardLayout({
               )}
               <div className="flex flex-col items-end">
                 <span className="text-sm font-medium text-white drop-shadow max-w-[120px] truncate">{userName}</span>
-                <span className={cn("text-[9px] font-semibold uppercase tracking-wider rounded-full px-1.5", ROLE_BADGE_COLORS[userRole])} style={{ color: "#000000" }}>
-                  {ROLE_LABELS[userRole]}
+                <span className={cn("text-[9px] font-semibold uppercase tracking-wider rounded-full px-1.5", roleTag(userRole, user.email).className)} style={{ color: "#000000" }}>
+                  {roleTag(userRole, user.email).label}
                 </span>
               </div>
             </div>

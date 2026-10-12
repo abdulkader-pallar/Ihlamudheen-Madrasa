@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 import { authFetch } from "@/lib/api-client"
 import { useAuth } from "@/hooks/use-auth"
-import { getUserRole, ROLE_BADGE_COLORS, ROLE_LABELS } from "@/lib/roles"
+import { getUserRole, roleTag } from "@/lib/roles"
 import type { UserRole } from "@/lib/roles"
 
 interface ManagedUser {
@@ -167,8 +167,8 @@ export default function PasswordsPage() {
                       <p className="font-medium text-navy-900 dark:text-white truncate">{u.name}</p>
                       <p className="text-xs text-navy-400 truncate">{u.email}</p>
                     </div>
-                    <span className={cn("rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase", ROLE_BADGE_COLORS[u.role])}>
-                      {ROLE_LABELS[u.role]}
+                    <span className={cn("rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase", roleTag(u.role, u.email).className)}>
+                      {roleTag(u.role, u.email).label}
                     </span>
                     <Button
                       variant="outline"

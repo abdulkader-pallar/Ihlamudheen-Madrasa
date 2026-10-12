@@ -1,5 +1,7 @@
 // ── Role Definitions ──────────────────────────────────────
 // Unioned set: teacher/student roles + accounting viewer/pending roles.
+import { isSuperadmin } from "@/lib/types"
+
 export type UserRole = "admin" | "accountant" | "teacher" | "student" | "viewer" | "pending"
 
 export const ROLE_LABELS: Record<UserRole, string> = {
@@ -27,6 +29,19 @@ export const ROLE_BADGE_COLORS: Record<UserRole, string> = {
   student: "bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400",
   viewer: "bg-slate-100 text-slate-700 dark:bg-slate-500/20 dark:text-slate-400",
   pending: "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400",
+}
+
+// The two institute super-admins (SUPERADMIN_EMAILS in lib/types.ts) carry a
+// "Super Admin" tag wherever a role is shown, instead of their plain role.
+export const SUPERADMIN_LABEL = "Super Admin"
+export const SUPERADMIN_BADGE =
+  "bg-gradient-to-r from-gold-300 to-gold-500 text-[#3a2a05] ring-1 ring-gold-500/50 dark:from-gold-400 dark:to-gold-600"
+
+/** Label + badge classes for a user's role tag. */
+export function roleTag(role: UserRole, email?: string | null): { label: string; className: string } {
+  return isSuperadmin(email)
+    ? { label: SUPERADMIN_LABEL, className: SUPERADMIN_BADGE }
+    : { label: ROLE_LABELS[role], className: ROLE_BADGE_COLORS[role] }
 }
 
 interface UserLike {

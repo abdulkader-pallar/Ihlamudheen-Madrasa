@@ -15,9 +15,11 @@ export function btn({ variant = "primary", size = "md" }: BtnOpts = {}) {
   const base =
     "inline-flex items-center justify-center font-bold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent whitespace-nowrap disabled:opacity-50 disabled:pointer-events-none";
   const variants = {
-    primary: "bg-brand text-white hover:bg-brand-600 hover:-translate-y-0.5",
+    // btn-primary / btn-gold are markers: inside the Accounts portal they take
+    // the institution's gradient (app/globals.css, [data-site]).
+    primary: "btn-primary bg-brand text-white hover:bg-brand-600 hover:-translate-y-0.5",
     ghost: "border-[1.5px] border-line text-ink hover:border-brand hover:text-brand hover:-translate-y-0.5",
-    gold: "bg-accent text-[#3a2a05] hover:brightness-105 hover:-translate-y-0.5",
+    gold: "btn-gold bg-accent text-[#3a2a05] hover:brightness-105 hover:-translate-y-0.5",
     danger: "border-[1.5px] border-bad text-bad hover:bg-bad-bg",
   }[variant];
   const sizes = {

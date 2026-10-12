@@ -90,7 +90,7 @@ export default function StaffPage() {
           <div className="flex gap-1 rounded-xl border border-line bg-surface-2 p-1" role="tablist" aria-label="Show">
             {(["active", "inactive", "all"] as Show[]).map((v) => (
               <button key={v} role="tab" aria-selected={show === v} onClick={() => setShow(v)}
-                className={cx("rounded-lg px-3 py-1.5 text-[13px] font-bold capitalize transition", show === v ? "bg-brand text-white" : "text-muted hover:text-ink")}>
+                className={cx("rounded-lg px-3 py-1.5 text-[13px] font-bold capitalize transition", show === v ? "btn-grad text-white" : "text-muted hover:text-ink")}>
                 {v}
               </button>
             ))}

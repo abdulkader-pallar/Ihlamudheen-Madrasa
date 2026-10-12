@@ -6,7 +6,7 @@ import { AppLauncher } from "@/components/app-launcher"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { useAuth } from "@/hooks/use-auth"
 import { DashboardSkeleton } from "@/components/loading-skeleton"
-import { getUserRole, ROLE_LABELS, ROLE_BADGE_COLORS } from "@/lib/roles"
+import { getUserRole, roleTag } from "@/lib/roles"
 import { isSuperadmin } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
@@ -38,8 +38,8 @@ export default function FestLayout({ children }: { children: React.ReactNode }) 
           </Link>
 
           <div className="flex items-center gap-2">
-            <span className={cn("hidden sm:inline-block text-[9px] font-semibold uppercase tracking-wider rounded-full px-1.5 py-0.5", ROLE_BADGE_COLORS[userRole])}>
-              {ROLE_LABELS[userRole]}
+            <span className={cn("hidden sm:inline-block text-[9px] font-semibold uppercase tracking-wider rounded-full px-1.5 py-0.5", roleTag(userRole, user.email).className)}>
+              {roleTag(userRole, user.email).label}
             </span>
             <span className="hidden sm:block text-sm font-medium text-navy-700 dark:text-navy-200 max-w-[140px] truncate">{userName}</span>
             <ThemeToggle />

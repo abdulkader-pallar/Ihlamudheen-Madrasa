@@ -11,7 +11,7 @@ import { Toaster } from "@/components/ui/toast";
 import { DataProvider, useData } from "./data-context";
 import { SITES } from "@/lib/sites";
 import { getMenuForRole, NavMenuBody } from "@/components/app-launcher";
-import type { UserRole } from "@/lib/roles";
+import { SUPERADMIN_LABEL, type UserRole } from "@/lib/roles";
 import { isSuperadmin, type Profile, type Role } from "@/lib/types";
 import { cx } from "@/lib/ui";
 
@@ -138,7 +138,7 @@ function Shell({ profile, children }: { profile: Profile; children: React.ReactN
                 onClick={() => setOpen(false)}
                 className={cx(
                   "flex items-center gap-3 rounded-[10px] px-3 py-2.5 text-[14.5px] font-semibold transition",
-                  active ? "bg-brand text-white" : "text-[var(--sidebar-link,#cfe0f2)] hover:bg-white/10"
+                  active ? "btn-grad text-white" : "text-[var(--sidebar-link,#cfe0f2)] hover:bg-white/10"
                 )}
               >
                 <Icon size={19} className="opacity-90" />
@@ -154,7 +154,7 @@ function Shell({ profile, children }: { profile: Profile; children: React.ReactN
               </div>
               <div className="min-w-0">
                 <div className="truncate text-[13.5px] font-bold text-white">{name}</div>
-                <div className="text-[11.5px] capitalize text-[var(--sidebar-muted,#8fa6bf)]">{profile.role}</div>
+                <div className="text-[11.5px] capitalize text-[var(--sidebar-muted,#8fa6bf)]">{superadmin ? SUPERADMIN_LABEL : profile.role}</div>
               </div>
             </div>
             <button

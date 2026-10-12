@@ -5,7 +5,8 @@ import { KeyRound, Plus, Trash2 } from "lucide-react";
 import { useData } from "@/components/admin/data-context";
 import { EmptyState, Modal, Panel, Spinner } from "@/components/admin/ui";
 import { toast } from "@/components/ui/toast";
-import type { Role } from "@/lib/types";
+import { isSuperadmin, type Role } from "@/lib/types";
+import { SUPERADMIN_BADGE, SUPERADMIN_LABEL } from "@/lib/roles";
 import { btn, cx, inputClass, labelClass } from "@/lib/ui";
 
 // User management for another institution (Grace Valley, PMSA): add login
@@ -94,6 +95,13 @@ export function RemoteUsers() {
                     {u.last_sign_in_at ? ` · last sign-in ${new Date(u.last_sign_in_at).toLocaleDateString("en-IN")}` : " · never signed in"}
                   </div>
                 </div>
+                {isSuperadmin(u.email) ? (
+                  // The institute super-admins can't be demoted, locked out or
+                  // removed from here — same rule as Ihlamudheen's user list.
+                  <span className={cx("rounded-full px-3 py-1 text-[11.5px] font-bold uppercase tracking-wide", SUPERADMIN_BADGE)}>
+                    {SUPERADMIN_LABEL}
+                  </span>
+                ) : (
                 <select
                   value={u.role}
                   onChange={(e) => changeRole(u, e.target.value as Role)}
@@ -102,12 +110,15 @@ export function RemoteUsers() {
                 >
                   {ROLE_OPTIONS.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
                 </select>
+                )}
                 <button onClick={() => setResetFor(u)} className={btn({ variant: "ghost", size: "sm" })} aria-label={`Reset password for ${u.email}`}>
                   <KeyRound size={14} /> Password
                 </button>
-                <button onClick={() => setRemoving(u)} className="text-bad hover:opacity-70" aria-label={`Remove ${u.email}`}>
-                  <Trash2 size={16} />
-                </button>
+                {!isSuperadmin(u.email) && (
+                  <button onClick={() => setRemoving(u)} className="text-bad hover:opacity-70" aria-label={`Remove ${u.email}`}>
+                    <Trash2 size={16} />
+                  </button>
+                )}
               </div>
             ))}
           </div>

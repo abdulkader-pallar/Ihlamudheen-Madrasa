@@ -5,11 +5,12 @@ import Link from "next/link";
 import { CalendarDays, Fingerprint, GraduationCap, Plus, TrendingDown, TrendingUp, Wallet } from "lucide-react";
 import { useData } from "@/components/admin/data-context";
 import { EmptyState, Panel, Pill, Spinner, StatCard } from "@/components/admin/ui";
-import type { Attendance } from "@/lib/types";
+import { isSuperadmin, type Attendance } from "@/lib/types";
 import { CategoryDonut, MonthlyChart } from "@/components/admin/charts";
 import { TxDialog } from "@/components/admin/tx-dialog";
 import { fmt, fmtDate, monthKey, monthLabel, round2 } from "@/lib/format";
-import { btn, cx } from "@/lib/ui";
+import { btn } from "@/lib/ui";
+import { SUPERADMIN_LABEL } from "@/lib/roles";
 
 export default function DashboardPage() {
   const { transactions, categories, loading, profile, canEdit } = useData();
@@ -69,7 +70,7 @@ export default function DashboardPage() {
             <div className="flex flex-wrap items-center gap-2.5">
               <h2 className="text-grad-welcome font-display text-2xl font-semibold capitalize">Welcome back, {firstName}!</h2>
               <span className="rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide" style={{ background: "color-mix(in srgb, var(--accent) 20%, transparent)", color: "var(--accent)" }}>
-                {profile.role}
+                {isSuperadmin(profile.email) ? SUPERADMIN_LABEL : profile.role}
               </span>
             </div>
             <div className="mt-0.5 flex items-center gap-2 text-[13px] text-muted">
@@ -81,7 +82,7 @@ export default function DashboardPage() {
           </div>
         </div>
         {canEdit && (
-          <button onClick={() => setAdding(true)} className={cx(btn({ variant: "primary" }), "btn-grad")}>
+          <button onClick={() => setAdding(true)} className={btn({ variant: "primary" })}>
             <Plus size={16} /> New entry
           </button>
         )}

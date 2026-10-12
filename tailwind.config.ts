@@ -4,7 +4,7 @@ const config: Config = {
   // Migrated components use Tailwind `dark:` variants (class-based). This app
   // themes via a `data-theme` attribute, so fire `dark:` on `[data-theme="dark"]`.
   darkMode: ["selector", '[data-theme="dark"]'],
-  content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}"],
+  content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./lib/**/*.{ts,tsx}"],
   theme: {
     extend: {
       colors: {
