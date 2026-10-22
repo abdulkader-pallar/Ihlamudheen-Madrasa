@@ -101,17 +101,26 @@ export default function PayrollPage() {
     await refresh();
   };
 
+  // The new lines go in before the old ones come out, so if either step fails
+  // the draft still has its lines (at worst both sets, never none).
   const regenerate = async () => {
     if (!run) return;
     const drafts = buildLines();
     setBusy(true);
-    const { error } = await supabase.from("payroll_lines").delete().eq("run_id", run.id);
-    if (!error && drafts.length) await supabase.from("payroll_lines").insert(drafts.map((d) => ({ ...d, run_id: run.id })));
+    const { data: old, error: readErr } = await supabase.from("payroll_lines").select("id").eq("run_id", run.id);
+    let error = readErr;
+    if (!error && drafts.length) {
+      ({ error } = await supabase.from("payroll_lines").insert(drafts.map((d) => ({ ...d, run_id: run.id }))));
+    }
+    const oldIds = ((old as { id: string }[]) || []).map((l) => l.id);
+    if (!error && oldIds.length) {
+      ({ error } = await supabase.from("payroll_lines").delete().in("id", oldIds));
+    }
     setBusy(false);
     setConfirm(null);
-    if (error) return toast(error.message, true);
-    toast("Rebuilt from current salaries.");
     await refresh();
+    if (error) return toast(`Rebuild didn't finish: ${error.message}`, true);
+    toast("Rebuilt from current salaries.");
   };
 
   const saveLine = async (l: PayrollLine, patch: Partial<LineEdit>) => {

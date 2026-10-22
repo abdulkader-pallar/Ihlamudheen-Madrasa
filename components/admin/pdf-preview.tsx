@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Download, Printer, X } from "lucide-react";
 import { btn } from "@/lib/ui";
 
@@ -8,21 +8,30 @@ import { btn } from "@/lib/ui";
 // so it can be read before it is saved. From here it is either downloaded or
 // sent to the printer; nothing reaches Downloads until Download is clicked.
 export function PdfPreview({ blob, filename, onClose }: { blob: Blob; filename: string; onClose: () => void }) {
-  const url = useMemo(() => URL.createObjectURL(blob), [blob]);
+  // The object URL is made and released by the same effect, so React's
+  // development double-run (mount, clean up, mount) can't release the one the
+  // page is still showing.
+  const [url, setUrl] = useState<string | null>(null);
+  useEffect(() => {
+    const u = URL.createObjectURL(blob);
+    setUrl(u);
+    return () => URL.revokeObjectURL(u);
+  }, [blob]);
   const frame = useRef<HTMLIFrameElement>(null);
   // Phone browsers don't render a PDF in an iframe; they offer to save it
   // instead, so there the preview is replaced by a plain "open it" card.
-  const [embeds, setEmbeds] = useState(true);
+  // Decided before the first paint: an iframe shown even for a moment can
+  // start that download. (This dialog only ever renders in the browser.)
+  const [embeds] = useState(() => typeof navigator === "undefined" || !/Android|iPhone|iPad|iPod/i.test(navigator.userAgent));
 
   useEffect(() => {
-    setEmbeds(!/Android|iPhone|iPad|iPod/i.test(navigator.userAgent));
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
-  useEffect(() => () => URL.revokeObjectURL(url), [url]);
 
   const download = () => {
+    if (!url) return;
     const a = document.createElement("a");
     a.href = url;
     a.download = filename;
@@ -32,6 +41,7 @@ export function PdfPreview({ blob, filename, onClose }: { blob: Blob; filename: 
   // Print the PDF where the viewer allows it; otherwise open it in a tab,
   // which has a print button of its own.
   const print = () => {
+    if (!url) return;
     const w = frame.current?.contentWindow;
     try {
       if (!w) throw new Error("no frame");
@@ -61,7 +71,9 @@ export function PdfPreview({ blob, filename, onClose }: { blob: Blob; filename: 
             <X size={17} />
           </button>
         </div>
-        {embeds ? (
+        {!url ? (
+          <div className="flex-1 bg-surface-2" />
+        ) : embeds ? (
           <iframe ref={frame} src={url} title="PDF preview" className="h-full w-full flex-1 bg-surface-2" />
         ) : (
           <div className="grid flex-1 place-items-center p-6 text-center">

@@ -108,10 +108,15 @@ export async function downloadAccountsPdf({ root, site, title, scope, preview }:
   const color = hexRgb(site.pdfColor);
   const generated = new Date().toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
   // A PMSA institution (KYHSS Athavanad, Yatheem Khana, …) is the name in the
-  // middle of the letterhead, with the trust's own short name under the logo,
-  // so neither the heading nor the centre repeats the other.
+  // middle of the letterhead, with the trust's own short name under the logo;
+  // otherwise the middle names the trust itself. Either way the letterhead
+  // already says whose books these are, so the heading is just the page.
   const sub = scope !== site.name ? clean(scope) : null;
-  const heading = sub ? clean(title) : clean(`${title} - ${scope}`);
+  const heading = clean(title);
+  // Pages 2+ carry one line naming all three: "PMSA - KYHSS Athavanad - Staff".
+  // ("PMSA - Common" already starts with the trust's name, so it isn't added twice.)
+  const trust = sub && !sub.startsWith(clean(site.name)) ? clean(site.name) : null;
+  const running = [trust, sub ?? clean(site.fullName), heading].filter(Boolean).join(" - ");
 
   // Letterhead
   const ruleY = drawLetterhead(doc, {
@@ -207,7 +212,7 @@ export async function downloadAccountsPdf({ root, site, title, scope, preview }:
     doc.setFontSize(8);
     doc.setTextColor(120);
     if (i > 1) {
-      doc.text([clean(site.fullName), sub, heading].filter(Boolean).join(" - "), W / 2, 12, { align: "center" });
+      doc.text(running, W / 2, 12, { align: "center" });
       doc.setDrawColor(...color);
       doc.setLineWidth(0.4);
       doc.line(M, 14.5, W - M, 14.5);

@@ -53,8 +53,16 @@ export function SalaryDialog({ staff, onClose }: { staff: Staff; onClose: () => 
   // Ending an item keeps it on past payrolls; deleting removes it everywhere
   // it hasn't already been copied into a run.
   const end = async (c: SalaryComponent) => {
-    const lastMonthEnd = new Date(new Date(month + "-01T00:00:00").getTime() - 86400000).toLocaleDateString("en-CA");
-    const effective_to = lastMonthEnd < c.effective_from ? c.effective_from : lastMonthEnd;
+    // An item that only starts this month (or later) was never paid in an
+    // earlier month, so there is nothing to keep: stopping it from this month
+    // means it goes. Its end date can't fall before its start date anyway.
+    if (c.effective_from >= month + "-01") {
+      const { error } = await supabase.from("salary_components").delete().eq("id", c.id);
+      if (error) return toast(error.message, true);
+      toast(`${c.name} removed - it hadn't been paid in any earlier month.`);
+      return reloadSalary();
+    }
+    const effective_to = new Date(new Date(month + "-01T00:00:00").getTime() - 86400000).toLocaleDateString("en-CA");
     const { error } = await supabase.from("salary_components").update({ effective_to }).eq("id", c.id);
     if (error) return toast(error.message, true);
     toast(`${c.name} stops from ${fmtDate(month + "-01")}.`);
