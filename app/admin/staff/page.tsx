@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Banknote, Download, Fingerprint, IndianRupee, Pencil, Plus, Search, Trash2, UserCheck, UserRound, UserX } from "lucide-react";
+import { Banknote, Download, IndianRupee, Pencil, Plus, Search, Trash2, UserCheck, UserRound, UserX } from "lucide-react";
 import { useData } from "@/components/admin/data-context";
 import { PdfButton } from "@/components/admin/pdf-button";
 import { EmptyState, Modal, Panel, Spinner, StatCard } from "@/components/admin/ui";
@@ -15,8 +15,8 @@ import type { Staff } from "@/lib/types";
 import { btn, cx, inputClass } from "@/lib/ui";
 
 // Staff register for the selected institution (Ihlamudheen, Grace Valley or
-// PMSA — see components/admin/data-context.tsx). These are the people tracked
-// by the ZKTeco attendance device, not portal login accounts.
+// PMSA — see components/admin/data-context.tsx). These are employees, not
+// portal login accounts.
 
 type Show = "all" | "active" | "inactive";
 
@@ -48,7 +48,7 @@ export default function StaffPage() {
 
   const counts = useMemo(() => {
     const active = staff.filter((s) => s.active).length;
-    return { total: staff.length, active, inactive: staff.length - active, noDevice: staff.filter((s) => s.active && s.device_user_id == null).length };
+    return { total: staff.length, active, inactive: staff.length - active };
   }, [staff]);
 
   const list = useMemo(() => {
@@ -57,7 +57,7 @@ export default function StaffPage() {
       if (show === "active" && !s.active) return false;
       if (show === "inactive" && s.active) return false;
       if (!term) return true;
-      return [s.name, s.designation, s.phone, s.device_user_id?.toString(), hasUnits ? unitName(s.unit_id) : null].some((v) => v?.toLowerCase().includes(term));
+      return [s.name, s.designation, s.phone, hasUnits ? unitName(s.unit_id) : null].some((v) => v?.toLowerCase().includes(term));
     });
   }, [staff, q, show, hasUnits, unitName]);
 
@@ -78,11 +78,11 @@ export default function StaffPage() {
   };
 
   const exportCSV = () => {
-    const rows: (string | number)[][] = [["Name", "Designation", ...(hasUnits ? ["Institution", "Basic", "Monthly cost"] : []), "Device user id", "Phone", "Status"]];
+    const rows: (string | number)[][] = [["Name", "Designation", ...(hasUnits ? ["Institution", "Basic", "Monthly cost"] : []), "Phone", "Status"]];
     list.forEach((s) => rows.push([
       s.name, s.designation || "",
       ...(hasUnits ? [unitName(s.unit_id), Number(s.basic_salary ?? 0), fromPaise(costOf[s.id] || 0)] : []),
-      s.device_user_id ?? "", s.phone || "", s.active ? "Active" : "Inactive",
+      s.phone || "", s.active ? "Active" : "Inactive",
     ]));
     downloadCSV(`${site.id}-staff`, rows);
     toast("CSV downloaded");
@@ -92,13 +92,11 @@ export default function StaffPage() {
 
   return (
     <div className="animate-fade grid gap-5">
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className={cx("grid gap-4 sm:grid-cols-2", hasUnits ? "xl:grid-cols-4" : "xl:grid-cols-3")}>
         <StatCard icon={UserRound} accent="teal" label="Total staff" value={String(counts.total)} sub={site.name} />
-        <StatCard icon={UserCheck} accent="green" label="Active" value={String(counts.active)} sub="Tracked in attendance" />
+        <StatCard icon={UserCheck} accent="green" label="Active" value={String(counts.active)} sub="Currently employed" />
         <StatCard icon={UserX} accent="red" label="Inactive" value={String(counts.inactive)} sub="Kept for history" />
-        {hasUnits
-          ? <StatCard icon={IndianRupee} accent="gold" label="Monthly salary bill" value={fmt(fromPaise(bill))} sub="Gross + employer cost, current pay" />
-          : <StatCard icon={Fingerprint} accent="gold" label="No device id" value={String(counts.noDevice)} sub="Active, can't punch in" />}
+        {hasUnits && <StatCard icon={IndianRupee} accent="gold" label="Monthly salary bill" value={fmt(fromPaise(bill))} sub="Gross + employer cost, current pay" />}
       </div>
 
       {hasUnits && unit === "all" && (
@@ -146,7 +144,7 @@ export default function StaffPage() {
         <div className="mb-4 flex flex-wrap items-center gap-2.5">
           <label className="relative min-w-[200px] flex-1">
             <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name, designation, phone, device id"
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name, designation, phone"
               className={cx(inputClass, "py-2 pl-9")} aria-label="Search staff" />
           </label>
           <div className="flex gap-1 rounded-xl border border-line bg-surface-2 p-1" role="tablist" aria-label="Show">
@@ -160,7 +158,7 @@ export default function StaffPage() {
         </div>
 
         {staff.length === 0 ? (
-          <EmptyState>No staff on {site.name} yet.{canEdit && " Add your teachers & employees, then set each one's device user id."}</EmptyState>
+          <EmptyState>No staff on {site.name} yet.{canEdit && " Add your teachers & employees."}</EmptyState>
         ) : list.length === 0 ? (
           <EmptyState>No staff match.</EmptyState>
         ) : (
@@ -172,7 +170,6 @@ export default function StaffPage() {
                   <th className="py-2 font-bold">Designation</th>
                   {hasUnits && <th className="py-2 font-bold">Institution</th>}
                   {hasUnits && <th className="py-2 text-right font-bold">Monthly cost</th>}
-                  <th className="py-2 font-bold">Device id</th>
                   <th className="py-2 font-bold">Phone</th>
                   <th className="py-2 font-bold">Status</th>
                   {canEdit && <th className="no-print py-2 text-right font-bold">Actions</th>}
@@ -189,7 +186,6 @@ export default function StaffPage() {
                         {costOf[s.id] ? fmt(fromPaise(costOf[s.id])) : <span className="text-muted">No salary</span>}
                       </td>
                     )}
-                    <td className="tnum py-2.5">{s.device_user_id ?? <span className="text-muted">—</span>}</td>
                     <td className="tnum py-2.5 text-muted">{s.phone || "—"}</td>
                     <td className="py-2.5">
                       {s.active
@@ -237,8 +233,8 @@ export default function StaffPage() {
       {del && (
         <Modal title="Delete staff member?" onClose={() => setDel(null)}>
           <p className="mb-5 text-[14px] text-muted">
-            <b className="text-ink">{del.name}</b> and <b className="text-ink">all of their attendance history</b> will be permanently deleted.
-            To stop tracking them but keep their history, use <b className="text-ink">Deactivate</b> instead.
+            <b className="text-ink">{del.name}</b> and their salary details will be permanently deleted.
+            To take them off payroll but keep their history, use <b className="text-ink">Deactivate</b> instead.
           </p>
           <div className="flex justify-end gap-2">
             <button onClick={() => setDel(null)} className={btn({ variant: "ghost" })}>Cancel</button>

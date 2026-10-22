@@ -48,7 +48,6 @@ import {
   SlidersHorizontal,
   ListOrdered,
   Trophy,
-  Fingerprint,
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
@@ -87,7 +86,6 @@ export function getMenuForRole(
           { href: "/admin/transactions", label: "Transactions", icon: ListOrdered, color: "bg-blue-500" },
           { href: "/admin/reports", label: "Reports", icon: FileBarChart, color: "bg-gold-500" },
           { href: "/admin/staff", label: "Staff", icon: UserCheck, color: "bg-teal-500" },
-          { href: "/admin/attendance", label: "Staff Attendance", icon: Fingerprint, color: "bg-sky-500" },
           { href: "/admin/manage", label: "Categories & Funds", icon: SlidersHorizontal, color: "bg-emerald-500" },
           { href: "/admin/users", label: "Users & Roles", icon: Users, color: "bg-violet-500" },
           // Standalone Meelad program book — separate table, separate totals.

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { BarChart3, Banknote, Building2, FileDown, Fingerprint, Globe, PieChart, LayoutDashboard, ListOrdered, LogOut, Menu, SlidersHorizontal, UserRound, Users, Wallet } from "lucide-react";
+import { BarChart3, Banknote, Building2, FileDown, Globe, PieChart, LayoutDashboard, ListOrdered, LogOut, Menu, SlidersHorizontal, UserRound, Users, Wallet } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -24,7 +24,6 @@ const NAV: { href: string; label: string; icon: LucideIcon; exact?: boolean; edi
   { href: "/admin/transactions", label: "Transactions", icon: ListOrdered },
   { href: "/admin/reports", label: "Reports", icon: BarChart3 },
   { href: "/admin/staff", label: "Staff", icon: UserRound },
-  { href: "/admin/attendance", label: "Staff Attendance", icon: Fingerprint },
   { href: "/admin/payroll", label: "Payroll", icon: Banknote, units: true },
   { href: "/admin/unit-costs", label: "Institution Costs", icon: PieChart, units: true },
   { href: "/admin/manage", label: "Categories & Funds", icon: SlidersHorizontal },
@@ -37,7 +36,6 @@ const TITLES: Record<string, string> = {
   "/admin/transactions": "Transactions",
   "/admin/reports": "Reports",
   "/admin/staff": "Staff",
-  "/admin/attendance": "Staff Attendance",
   "/admin/manage": "Categories & Funds",
   "/admin/payroll": "Payroll",
   "/admin/unit-costs": "Institution Costs",

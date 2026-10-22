@@ -4,7 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { createClient } from "@/lib/supabase/client";
 import { scopeToInstitution } from "@/lib/scoped-db";
 import { DEFAULT_SITE, getSite, type Site, type SiteId } from "@/lib/sites";
-import { isEditor, type Attendance, type Category, type Fund, type Profile, type SalaryComponent, type SalaryRevision, type Staff, type Transaction, type Unit } from "@/lib/types";
+import { isEditor, type Category, type Fund, type Profile, type SalaryComponent, type SalaryRevision, type Staff, type Transaction, type Unit } from "@/lib/types";
 
 type SupabaseClient = ReturnType<typeof createClient>;
 
@@ -38,7 +38,6 @@ type DataCtx = {
   error: string | null;
   reload: () => Promise<void>;
   reloadStaff: () => Promise<void>;
-  loadAttendance: (date: string) => Promise<Attendance[]>;
   /** The database, limited to the selected institution's rows on the
    *  accounting tables (lib/scoped-db.ts). */
   supabase: SupabaseClient;
@@ -144,15 +143,6 @@ export function DataProvider({ profile, children }: { profile: Profile; children
     setLoading(false);
   }, [supabase, reloadSalary]);
 
-  const loadAttendance = useCallback(async (date: string): Promise<Attendance[]> => {
-    const { data, error } = await supabase
-      .from("attendance")
-      .select("id, staff_id, work_date, check_in, check_out, source, remarks")
-      .eq("work_date", date);
-    if (error) throw new Error(error.message);
-    return (data as Attendance[]) || [];
-  }, [supabase]);
-
   // On first load and whenever the institution changes, clear the previous
   // site's figures so they never show under the new site's name.
   useEffect(() => {
@@ -180,7 +170,7 @@ export function DataProvider({ profile, children }: { profile: Profile; children
         profile, site, setSite, canEdit, categories, funds,
         transactions: filteredTx, staff: filteredStaff, allTransactions: transactions, allStaff: staff,
         units, unit, setUnit, unitName, salaryRevisions, salaryComponents, reloadSalary,
-        loading, error, reload, reloadStaff, loadAttendance, supabase,
+        loading, error, reload, reloadStaff, supabase,
       }}
     >
       {children}

@@ -23,6 +23,8 @@ const nextConfig = {
       // The Meelad accounts book moved into the Accounts shell so it keeps the
       // sidebar. Anyone holding the old link still lands in the right place.
       { source: "/fest/accounts", destination: "/admin/meelad", permanent: false },
+      // Staff attendance is no longer kept in the Accounts portal.
+      { source: "/admin/attendance", destination: "/admin/staff", permanent: false },
     ];
   },
   async headers() {
