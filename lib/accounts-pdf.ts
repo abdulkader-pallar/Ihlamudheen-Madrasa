@@ -107,7 +107,7 @@ export async function downloadAccountsPdf({ root, site, title, scope, preview }:
   const M = 14;
   const color = hexRgb(site.pdfColor);
   const generated = new Date().toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
-  // A PMSA institution (KYYHSS School, Yatheem Khana, …) is the name in the
+  // A PMSA institution (KYHSS Athavanad, Yatheem Khana, …) is the name in the
   // middle of the letterhead, with the trust's own short name under the logo,
   // so neither the heading nor the centre repeats the other.
   const sub = scope !== site.name ? clean(scope) : null;

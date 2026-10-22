@@ -1,9 +1,10 @@
 -- ============================================================================
---  KYYHSS School (PMSA) - staff register, staff IDs & basic pay
+--  KYHSS Athavanad (PMSA) - staff register, staff IDs & basic pay
 --
 --  Source: the school's own salary statement "SALARY STATEMENT 2025-26
 --  (SEPTEMBER -2026)" for KYHSS ATHAVANAD - 110 staff, basic pay total
---  Rs 13,70,790. Basic pay is loaded as each person's current basic, effective
+--  Rs 13,70,790. The unit, seeded as "KYYHSS School", is renamed to the name
+--  the school prints on that statement. Basic pay is loaded as each person's current basic, effective
 --  2026-09-01, so the salary history (salary_revisions) starts from that month
 --  and earlier months are untouched. The statement's fixed monthly allowance
 --  column is loaded as an "Allowance" salary component for the seven staff who
@@ -19,6 +20,11 @@
 --      node scripts/run-sql.mjs supabase/kyhss-staff-sept2026.sql
 -- ============================================================================
 
+-- The unit, under the name the school uses itself.
+update public.units set name = 'KYHSS Athavanad'
+ where institution = 'pmsa' and name = 'KYYHSS School'
+   and not exists (select 1 from public.units where institution = 'pmsa' and name = 'KYHSS Athavanad');
+
 DO $kyhss$
 DECLARE
   v_unit uuid;
@@ -27,9 +33,9 @@ DECLARE
   v_id   uuid;
   v_new  integer := 0;
 BEGIN
-  SELECT id INTO v_unit FROM public.units WHERE institution = 'pmsa' AND name = 'KYYHSS School';
+  SELECT id INTO v_unit FROM public.units WHERE institution = 'pmsa' AND name = 'KYHSS Athavanad';
   IF v_unit IS NULL THEN
-    RAISE EXCEPTION 'The KYYHSS School unit is missing - run supabase/pmsa-units-payroll.sql first';
+    RAISE EXCEPTION 'The KYHSS Athavanad unit is missing - run supabase/pmsa-units-payroll.sql first';
   END IF;
 
   FOR r IN
@@ -173,7 +179,7 @@ BEGIN
     END IF;
   END LOOP;
 
-  RAISE NOTICE 'KYYHSS School: % staff added', v_new;
+  RAISE NOTICE 'KYHSS Athavanad: % staff added', v_new;
 END
 $kyhss$;
 
@@ -186,5 +192,5 @@ select count(*)                            as staff,
            and c.staff_id in (select id from public.staff where unit_id = u.id)) as allowance_total
   from public.staff s
   join public.units u on u.id = s.unit_id
- where u.institution = 'pmsa' and u.name = 'KYYHSS School'
+ where u.institution = 'pmsa' and u.name = 'KYHSS Athavanad'
  group by u.id;

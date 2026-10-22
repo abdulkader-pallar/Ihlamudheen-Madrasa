@@ -28,11 +28,11 @@ create table if not exists public.units (
 );
 
 insert into public.units (institution, name, sort) values
-  ('pmsa', 'KYYHSS School',     1),
+  ('pmsa', 'KYHSS Athavanad',     1),
   ('pmsa', 'Yatheem Khana',     2),
   ('pmsa', 'PMSA Wafy College', 3),
   ('pmsa', 'Madrasa',           4),
-  ('pmsa', 'Vettichira School', 5),
+  ('pmsa', 'PTM HSS, Vettichira', 5),
   ('pmsa', 'Women''s College',  6)
 on conflict (institution, name) do nothing;
 

@@ -33,7 +33,7 @@ export interface LetterheadOptions {
   logoLabel?: string | null;
   /** The institution's full name, e.g. "PMSA Kattilangadi". */
   title: string;
-  /** The unit this page is about, e.g. "KYYHSS School" (null = the whole institution). */
+  /** The unit this page is about, e.g. "KYHSS Athavanad" (null = the whole institution). */
   sub: string | null;
   /** The small line under both, e.g. "Accounts  ·  Generated 22 Oct 2026, 16:40". */
   meta: string;
