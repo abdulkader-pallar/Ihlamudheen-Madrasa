@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { BarChart3, Banknote, Building2, FileDown, Globe, PieChart, LayoutDashboard, ListOrdered, LogOut, Menu, SlidersHorizontal, UserRound, Users, Wallet } from "lucide-react";
+import { BarChart3, Banknote, Building2, Globe, PieChart, LayoutDashboard, ListOrdered, LogOut, Menu, SlidersHorizontal, UserRound, Users, Wallet } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -236,15 +236,6 @@ function Shell({ profile, children }: { profile: Profile; children: React.ReactN
               </h1>
             </div>
             <div className="flex items-center gap-2.5">
-              <button
-                onClick={downloadPdf}
-                disabled={pdfBusy}
-                title="See this page as a PDF, then download or print it"
-                className="flex h-10 items-center gap-1.5 rounded-xl border border-line bg-surface px-3 text-[13.5px] font-bold text-ink transition hover:border-brand hover:text-brand disabled:opacity-60"
-              >
-                <FileDown size={17} />
-                <span className="hidden sm:inline">{pdfBusy ? "Making…" : "PDF"}</span>
-              </button>
               <div className="relative">
                 <button
                   onClick={() => setAppsOpen((v) => !v)}

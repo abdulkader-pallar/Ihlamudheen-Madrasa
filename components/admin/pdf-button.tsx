@@ -4,9 +4,10 @@ import { createContext, useContext } from "react";
 import { FileDown } from "lucide-react";
 import { btn } from "@/lib/ui";
 
-// The Accounts shell owns the "download this page as a PDF" action (it knows
-// the page title, institution and the <main> to read). Pages put a PdfButton
-// in their toolbars, next to CSV, to trigger the same download.
+// The Accounts shell owns the "this page as a PDF" action (it knows the page
+// title, institution and the <main> to read). There is no PDF button in the
+// shell's header: each page puts one PdfButton in its own toolbar, next to
+// CSV where it has one, so every page offers it exactly once.
 export const PdfContext = createContext<{ download: () => void; busy: boolean }>({ download: () => {}, busy: false });
 
 export function PdfButton() {

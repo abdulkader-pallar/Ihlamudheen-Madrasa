@@ -1,7 +1,7 @@
 // "Download PDF" for every Accounts page. Rather than each page describing its
 // own PDF, this reads what the page is showing: the summary cards (StatCard,
-// tagged data-pdf-stat) and every table, each under the title of the Panel
-// it sits in (data-pdf-title). Anything marked .no-print (toolbars, action
+// tagged data-pdf-stat) and every table - or list tagged data-pdf-list - each
+// under the title of the Panel it sits in (data-pdf-title). Anything marked .no-print (toolbars, action
 // buttons) is left out; inputs export their current value.
 //
 // Every PDF opens with the institution's letterhead: its logo, full name,
@@ -61,6 +61,20 @@ function readTable(t: HTMLTableElement): Section {
   return { title: panel ? clean(panel.getAttribute("data-pdf-title") || "") : null, head: rows("thead tr"), body: rows("tbody tr"), foot: rows("tfoot tr") };
 }
 
+/** A list laid out without a <table> (Categories & Funds): the container is
+ *  tagged data-pdf-list="<column heading>" and each row data-pdf-item, and it
+ *  comes out as a one-column table under its Panel's title. */
+function readList(el: HTMLElement): Section {
+  const panel = el.closest("[data-pdf-title]");
+  const body = Array.from(el.querySelectorAll("[data-pdf-item]")).map((i) => [{ content: cellText(i) }]).filter((r) => r[0].content);
+  return {
+    title: panel ? clean(panel.getAttribute("data-pdf-title") || "") : null,
+    head: body.length ? [[{ content: clean(el.dataset.pdfList || "Name") }]] : [],
+    body,
+    foot: [],
+  };
+}
+
 async function logoData(src: string): Promise<LetterheadLogo> {
   try {
     const img = new Image();
@@ -91,7 +105,11 @@ export async function downloadAccountsPdf({ root, site, title, scope, preview }:
   const stats = Array.from(root.querySelectorAll<HTMLElement>("[data-pdf-stat]")).filter(visible).map((el) => ({
     label: clean(el.dataset.label || ""), value: clean(el.dataset.value || ""), sub: clean(el.dataset.sub || ""),
   }));
-  const sections = Array.from(root.querySelectorAll("table")).filter(visible).map(readTable).filter((s) => s.head.length || s.body.length);
+  // Tables and tagged lists, in the order they sit on the page.
+  const sections = Array.from(root.querySelectorAll<HTMLElement>("table, [data-pdf-list]"))
+    .filter(visible)
+    .map((el) => (el instanceof HTMLTableElement ? readTable(el) : readList(el)))
+    .filter((s) => s.head.length || s.body.length);
   if (!stats.length && !sections.length) throw new Error("Nothing on this page to put in a PDF yet.");
 
   const [{ default: jsPDF }, { default: autoTable }, logo] = await Promise.all([

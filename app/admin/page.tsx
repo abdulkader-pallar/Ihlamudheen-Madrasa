@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { CalendarDays, GraduationCap, Plus, TrendingDown, TrendingUp, Wallet } from "lucide-react";
 import { useData } from "@/components/admin/data-context";
+import { PdfButton } from "@/components/admin/pdf-button";
 import { EmptyState, Panel, Pill, Spinner, StatCard } from "@/components/admin/ui";
 import { isSuperadmin } from "@/lib/types";
 import { CategoryDonut, MonthlyChart } from "@/components/admin/charts";
@@ -84,11 +85,14 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
-        {canEdit && (
-          <button onClick={() => setAdding(true)} className={btn({ variant: "primary" })}>
-            <Plus size={16} /> New entry
-          </button>
-        )}
+        <div className="no-print flex items-center gap-2">
+          <PdfButton />
+          {canEdit && (
+            <button onClick={() => setAdding(true)} className={btn({ variant: "primary" })}>
+              <Plus size={16} /> New entry
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="mb-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

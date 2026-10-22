@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Eye, EyeOff, Pencil, Plus, X } from "lucide-react";
 import { useData } from "@/components/admin/data-context";
+import { PdfButton } from "@/components/admin/pdf-button";
 import { EmptyState, Modal, Panel, Spinner } from "@/components/admin/ui";
 import { toast } from "@/components/ui/toast";
 import type { TxType, Unit } from "@/lib/types";
@@ -30,12 +31,16 @@ export default function ManagePage() {
 
   return (
     <div className="animate-fade grid gap-4 lg:grid-cols-2">
+      <div className="no-print flex justify-end lg:col-span-2">
+        <PdfButton />
+      </div>
+
       <Panel title="Income Categories" action={editor && <button onClick={() => setAddCat(true)} className={btn({ variant: "gold", size: "sm" })}><Plus size={14} /> Add</button>}>
-        <div className="grid max-h-[380px] gap-2 overflow-y-auto">
+        <div data-pdf-list="Income category" className="grid max-h-[380px] gap-2 overflow-y-auto">
           {categories.filter((c) => c.kind === "income").length === 0
             ? <EmptyState>No income categories.</EmptyState>
             : categories.filter((c) => c.kind === "income").map((c) => (
-              <div key={c.id} className="flex items-center justify-between gap-2.5 rounded-[10px] border border-line bg-surface-2 px-3 py-2.5 text-sm">
+              <div key={c.id} data-pdf-item className="flex items-center justify-between gap-2.5 rounded-[10px] border border-line bg-surface-2 px-3 py-2.5 text-sm">
                 <span>{c.name}</span>
                 {editor && <button onClick={() => setDel({ table: "categories", id: c.id, label: c.name })} className="text-bad hover:opacity-70" aria-label="Remove"><X size={16} /></button>}
               </div>
@@ -44,11 +49,11 @@ export default function ManagePage() {
       </Panel>
 
       <Panel title="Expense Categories" action={editor && <button onClick={() => setAddCat(true)} className={btn({ variant: "gold", size: "sm" })}><Plus size={14} /> Add</button>}>
-        <div className="grid max-h-[380px] gap-2 overflow-y-auto">
+        <div data-pdf-list="Expense category" className="grid max-h-[380px] gap-2 overflow-y-auto">
           {categories.filter((c) => c.kind === "expense").length === 0
             ? <EmptyState>No expense categories.</EmptyState>
             : categories.filter((c) => c.kind === "expense").map((c) => (
-              <div key={c.id} className="flex items-center justify-between gap-2.5 rounded-[10px] border border-line bg-surface-2 px-3 py-2.5 text-sm">
+              <div key={c.id} data-pdf-item className="flex items-center justify-between gap-2.5 rounded-[10px] border border-line bg-surface-2 px-3 py-2.5 text-sm">
                 <span>{c.name}</span>
                 {editor && <button onClick={() => setDel({ table: "categories", id: c.id, label: c.name })} className="text-bad hover:opacity-70" aria-label="Remove"><X size={16} /></button>}
               </div>
@@ -57,9 +62,9 @@ export default function ManagePage() {
       </Panel>
 
       <Panel title="Funds / Accounts" action={editor && <button onClick={() => setAddFund(true)} className={btn({ variant: "gold", size: "sm" })}><Plus size={14} /> Add</button>}>
-        <div className="grid max-h-[380px] gap-2 overflow-y-auto">
+        <div data-pdf-list="Fund / account" className="grid max-h-[380px] gap-2 overflow-y-auto">
           {funds.length === 0 ? <EmptyState>No funds.</EmptyState> : funds.map((fd) => (
-            <div key={fd.id} className="flex items-center justify-between gap-2.5 rounded-[10px] border border-line bg-surface-2 px-3 py-2.5 text-sm">
+            <div key={fd.id} data-pdf-item className="flex items-center justify-between gap-2.5 rounded-[10px] border border-line bg-surface-2 px-3 py-2.5 text-sm">
               <span>{fd.name}{fd.description && <span className="text-[12px] text-muted"> — {fd.description}</span>}</span>
               {editor && <button onClick={() => setDel({ table: "funds", id: fd.id, label: fd.name })} className="text-bad hover:opacity-70" aria-label="Remove"><X size={16} /></button>}
             </div>
@@ -162,9 +167,9 @@ function UnitsPanel() {
 
   return (
     <Panel title={`${site.name} Institutions`} action={canEdit && <button onClick={() => open("new")} className={btn({ variant: "gold", size: "sm" })}><Plus size={14} /> Add</button>}>
-      <div className="grid max-h-[380px] gap-2 overflow-y-auto">
+      <div data-pdf-list="Institution" className="grid max-h-[380px] gap-2 overflow-y-auto">
         {units.map((u) => (
-          <div key={u.id} className={cx("flex items-center justify-between gap-2.5 rounded-[10px] border border-line bg-surface-2 px-3 py-2.5 text-sm", !u.active && "opacity-55")}>
+          <div key={u.id} data-pdf-item className={cx("flex items-center justify-between gap-2.5 rounded-[10px] border border-line bg-surface-2 px-3 py-2.5 text-sm", !u.active && "opacity-55")}>
             <span>{u.name}{!u.active && <span className="text-[12px] text-muted"> — inactive</span>}</span>
             {canEdit && (
               <span className="flex gap-2.5">
