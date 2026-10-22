@@ -149,10 +149,10 @@ function UnitsPanel() {
     const { error } = edit === "new"
       ? await supabase.from("units").insert({ name: name.trim(), sort: units.length + 1 })
       : await supabase.from("units").update({ name: name.trim() }).eq("id", (edit as Unit).id);
-    if (error) return toast(/duplicate|unique/i.test(error.message) ? "A unit with that name already exists." : error.message, true);
+    if (error) return toast(/duplicate|unique/i.test(error.message) ? "An institution with that name already exists." : error.message, true);
     setEdit(null);
     await reload();
-    toast(edit === "new" ? "Unit added" : "Unit renamed");
+    toast(edit === "new" ? "Institution added" : "Institution renamed");
   };
   const toggle = async (u: Unit) => {
     const { error } = await supabase.from("units").update({ active: !u.active }).eq("id", u.id);
@@ -161,7 +161,7 @@ function UnitsPanel() {
   };
 
   return (
-    <Panel title={`${site.name} Units`} action={canEdit && <button onClick={() => open("new")} className={btn({ variant: "gold", size: "sm" })}><Plus size={14} /> Add</button>}>
+    <Panel title={`${site.name} Institutions`} action={canEdit && <button onClick={() => open("new")} className={btn({ variant: "gold", size: "sm" })}><Plus size={14} /> Add</button>}>
       <div className="grid max-h-[380px] gap-2 overflow-y-auto">
         {units.map((u) => (
           <div key={u.id} className={cx("flex items-center justify-between gap-2.5 rounded-[10px] border border-line bg-surface-2 px-3 py-2.5 text-sm", !u.active && "opacity-55")}>
@@ -178,7 +178,7 @@ function UnitsPanel() {
         ))}
       </div>
       {edit && (
-        <Modal title={edit === "new" ? "Add unit" : "Rename unit"} onClose={() => setEdit(null)}>
+        <Modal title={edit === "new" ? "Add institution" : "Rename institution"} onClose={() => setEdit(null)}>
           <div className="grid gap-4">
             <div><label className={labelClass}>Name</label><input value={name} onChange={(e) => setName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && save()} className={inputClass} placeholder="e.g. Hifz College" /></div>
             <div className="flex justify-end gap-2.5"><button onClick={() => setEdit(null)} className={btn({ variant: "ghost" })}>Cancel</button><button onClick={save} className={btn({ variant: "primary" })}>Save</button></div>

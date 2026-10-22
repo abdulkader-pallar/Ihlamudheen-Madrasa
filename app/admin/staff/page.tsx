@@ -77,7 +77,7 @@ export default function StaffPage() {
   };
 
   const exportCSV = () => {
-    const rows: (string | number)[][] = [["Name", "Designation", ...(hasUnits ? ["Unit", "Basic", "Monthly cost"] : []), "Device user id", "Phone", "Status"]];
+    const rows: (string | number)[][] = [["Name", "Designation", ...(hasUnits ? ["Institution", "Basic", "Monthly cost"] : []), "Device user id", "Phone", "Status"]];
     list.forEach((s) => rows.push([
       s.name, s.designation || "",
       ...(hasUnits ? [unitName(s.unit_id), Number(s.basic_salary ?? 0), fromPaise(costOf[s.id] || 0)] : []),
@@ -101,12 +101,12 @@ export default function StaffPage() {
       </div>
 
       {hasUnits && unit === "all" && (
-        <Panel title="Salary bill by unit">
+        <Panel title="Salary bill by institution">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[420px] text-sm">
               <thead>
                 <tr className="text-left text-[11.5px] uppercase tracking-wide text-muted">
-                  <th className="py-2 font-bold">Unit</th>
+                  <th className="py-2 font-bold">Institution</th>
                   <th className="py-2 text-right font-bold">Staff</th>
                   <th className="py-2 text-right font-bold">Monthly cost</th>
                 </tr>
@@ -168,7 +168,7 @@ export default function StaffPage() {
                 <tr className="text-left text-[11.5px] uppercase tracking-wide text-muted">
                   <th className="py-2 font-bold">Name</th>
                   <th className="py-2 font-bold">Designation</th>
-                  {hasUnits && <th className="py-2 font-bold">Unit</th>}
+                  {hasUnits && <th className="py-2 font-bold">Institution</th>}
                   {hasUnits && <th className="py-2 text-right font-bold">Monthly cost</th>}
                   <th className="py-2 font-bold">Device id</th>
                   <th className="py-2 font-bold">Phone</th>

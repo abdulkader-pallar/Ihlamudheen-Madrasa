@@ -170,7 +170,7 @@ export function DataProvider({ profile, children }: { profile: Profile; children
   const filteredTx = useMemo(() => transactions.filter((t) => inUnit(unit, t.unit_id)), [transactions, unit]);
   const filteredStaff = useMemo(() => staff.filter((s) => inUnit(unit, s.unit_id)), [staff, unit]);
   const unitName = useCallback(
-    (id: string | null | undefined) => (id ? units.find((x) => x.id === id)?.name ?? "Unknown unit" : `${site.name} – Common`),
+    (id: string | null | undefined) => (id ? units.find((x) => x.id === id)?.name ?? "Unknown institution" : `${site.name} – Common`),
     [units, site]
   );
 

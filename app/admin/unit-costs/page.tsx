@@ -97,8 +97,8 @@ export default function UnitCostsPage() {
   };
 
   const exportCSV = () => {
-    const out: (string | number)[][] = [[`${site.name} unit costs — ${monthName(month)}`]];
-    out.push(["Unit", "Staff", "Committed salary", "Salary paid", "Other expenses", "Total expense", "Cost per staff", "Monthly budget", "Budget − actual"]);
+    const out: (string | number)[][] = [[`${site.name} institution costs — ${monthName(month)}`]];
+    out.push(["Institution", "Staff", "Committed salary", "Salary paid", "Other expenses", "Total expense", "Cost per staff", "Monthly budget", "Budget − actual"]);
     summary.forEach((r) => out.push([
       r.name, r.staff, fromPaise(r.committed), fromPaise(r.salary), fromPaise(r.other), fromPaise(r.total),
       r.staff ? fromPaise(Math.round(r.total / r.staff)) : "", r.budget != null ? fromPaise(r.budget) : "", r.budget != null ? fromPaise(r.budget - r.total) : "",
@@ -108,12 +108,12 @@ export default function UnitCostsPage() {
     out.push(["Month", ...cols.map((c) => c.name), "Total"]);
     months.forEach((m) => out.push([monthLabel(m), ...cols.map((c) => fromPaise(cell(c.id, m).total)), fromPaise(monthTotal(m))]));
     out.push(["Total", ...cols.map((c) => fromPaise(fyTotal(c.id))), fromPaise(grand)]);
-    downloadCSV(`${site.id}-unit-costs-${month}`, out);
+    downloadCSV(`${site.id}-institution-costs-${month}`, out);
     toast("CSV downloaded");
   };
 
   if (loading || runs === null) return <Spinner />;
-  if (!units.length) return <EmptyState>This institution has no units.</EmptyState>;
+  if (!units.length) return <EmptyState>{site.name} has no institutions set up.</EmptyState>;
 
   return (
     <div className="animate-fade grid gap-5">
@@ -141,12 +141,12 @@ export default function UnitCostsPage() {
         <StatCard icon={Building2} accent="blue" label={`Expense — ${fyLabel(fy)}`} value={fmt(fromPaise(grand))} sub={`Avg ${fmt(fromPaise(Math.round(grand / monthsElapsed)))} / month`} />
       </div>
 
-      <Panel title={`Unit costs — ${monthName(month)}`}>
+      <Panel title={`Institution costs — ${monthName(month)}`}>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[980px] text-sm">
             <thead>
               <tr className="text-left text-[11.5px] uppercase tracking-wide text-muted">
-                <th className="py-2 font-bold">Unit</th>
+                <th className="py-2 font-bold">Institution</th>
                 <th className="py-2 text-right font-bold">Staff</th>
                 <th className="py-2 text-right font-bold">Committed salary</th>
                 <th className="py-2 text-right font-bold">Salary paid</th>
@@ -202,12 +202,12 @@ export default function UnitCostsPage() {
           </table>
         </div>
         <p className="mt-3 text-[12px] text-muted">
-          <b>Committed salary</b> is what the unit&apos;s staff cost for this month at their recorded pay (gross + employer contributions).
+          <b>Committed salary</b> is what the institution&apos;s staff cost for this month at their recorded pay (gross + employer contributions).
           <b> Salary paid</b> is what payroll actually posted for the month. A gap means a payroll that hasn&apos;t been paid, or bonuses, pro-rating or deductions.
         </p>
       </Panel>
 
-      <Panel title={`${fyLabel(fy)} — total expense by unit and month`}>
+      <Panel title={`${fyLabel(fy)} — total expense by institution and month`}>
         <div className="overflow-x-auto">
           <table className="w-full text-sm" style={{ minWidth: 180 + cols.length * 120 }}>
             <thead>

@@ -89,9 +89,9 @@ export function StaffDialog({ staff, onClose, onSaved }: { staff: Staff | null; 
         {hasUnits && (
           <>
             <div>
-              <label className={labelClass}>Unit</label>
+              <label className={labelClass}>Institution</label>
               <select value={unitId} onChange={(e) => setUnitId(e.target.value)} className={inputClass}>
-                <option value="">— Common (no unit) —</option>
+                <option value="">— Common (no institution) —</option>
                 {units.filter((u) => u.active || u.id === unitId).map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
               </select>
             </div>

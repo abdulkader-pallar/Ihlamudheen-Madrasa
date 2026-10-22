@@ -24,7 +24,7 @@ const NAV: { href: string; label: string; icon: LucideIcon; exact?: boolean; edi
   { href: "/admin/staff", label: "Staff", icon: UserRound },
   { href: "/admin/attendance", label: "Staff Attendance", icon: Fingerprint },
   { href: "/admin/payroll", label: "Payroll", icon: Banknote, units: true },
-  { href: "/admin/unit-costs", label: "Unit Costs", icon: PieChart, units: true },
+  { href: "/admin/unit-costs", label: "Institution Costs", icon: PieChart, units: true },
   { href: "/admin/manage", label: "Categories & Funds", icon: SlidersHorizontal },
   { href: "/admin/users", label: "Users & Roles", icon: Users, superadmin: true },
   { href: "/admin/meelad", label: "Meelad Accounts", icon: Wallet, superadmin: true, local: true },
@@ -38,7 +38,7 @@ const TITLES: Record<string, string> = {
   "/admin/attendance": "Staff Attendance",
   "/admin/manage": "Categories & Funds",
   "/admin/payroll": "Payroll",
-  "/admin/unit-costs": "Unit Costs",
+  "/admin/unit-costs": "Institution Costs",
   "/admin/users": "Users & Roles",
   "/admin/meelad": "Meelad Accounts",
 };
@@ -144,12 +144,12 @@ function Shell({ profile, children }: { profile: Profile; children: React.ReactN
           {hasUnits && (
             <label className="mb-4 block">
               <span className="mb-1 flex items-center gap-1.5 px-1 text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--sidebar-muted,#8fa6bf)]">
-                <Building2 size={13} /> Unit
+                <Building2 size={13} /> Institution
               </span>
               <select
                 value={unit}
                 onChange={(e) => { setUnit(e.target.value); setOpen(false); }}
-                className="w-full rounded-[10px] border border-white/15 bg-black/25 px-3 py-2 text-[13.5px] font-semibold text-white outline-none focus:border-white/40 [&>option]:text-ink"
+                className="w-full rounded-[10px] border border-white/15 bg-black/25 px-3 py-2 text-[13.5px] font-semibold text-white outline-none focus:border-white/40 [&>option]:bg-white [&>option]:font-semibold [&>option]:text-[#0E2E52]"
               >
                 <option value="all">All {site.name}</option>
                 {units.filter((u) => u.active || u.id === unit).map((u) => (
@@ -279,7 +279,7 @@ function AppsMenu({ role, email, local, units, onClose, onSignOut }: { role: Rol
             ...(units
               ? [
                   { href: "/admin/payroll", label: "Payroll", icon: Banknote, color: "bg-amber-500" },
-                  { href: "/admin/unit-costs", label: "Unit Costs", icon: PieChart, color: "bg-pink-500" },
+                  { href: "/admin/unit-costs", label: "Institution Costs", icon: PieChart, color: "bg-pink-500" },
                 ]
               : []),
           ],

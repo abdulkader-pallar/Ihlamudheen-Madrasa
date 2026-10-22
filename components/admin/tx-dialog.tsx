@@ -91,7 +91,7 @@ export function TxDialog({ tx, onClose }: { tx?: Transaction | null; onClose: ()
 
         {units.length > 0 && (
           <div>
-            <label className={labelClass}>Unit</label>
+            <label className={labelClass}>Institution</label>
             <select
               name="unit"
               defaultValue={tx ? tx.unit_id ?? "" : unit === "all" || unit === "common" ? "" : unit}

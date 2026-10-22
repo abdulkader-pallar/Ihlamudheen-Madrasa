@@ -215,7 +215,7 @@ export default function PayrollPage() {
   };
 
   if (loading) return <Spinner />;
-  if (!units.length) return <EmptyState>This institution has no units.</EmptyState>;
+  if (!units.length) return <EmptyState>{site.name} has no institutions set up.</EmptyState>;
 
   return (
     <div className="animate-fade grid gap-5">
@@ -225,7 +225,7 @@ export default function PayrollPage() {
           <input type="month" value={month} onChange={(e) => e.target.value && setMonth(e.target.value)} className={cx(inputClass, "py-2 text-[13.5px]")} />
         </div>
         <div>
-          <label className="mb-1 block text-[11px] font-bold text-muted">Unit</label>
+          <label className="mb-1 block text-[11px] font-bold text-muted">Institution</label>
           <select value={unitId} onChange={(e) => setUnitId(e.target.value)} className={cx(inputClass, "py-2 text-[13.5px]")}>
             {units.filter((u) => u.active || u.id === unitId).map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
           </select>
@@ -303,7 +303,7 @@ export default function PayrollPage() {
             }
           >
             {lines === null ? <Spinner /> : lines.length === 0 ? (
-              <EmptyState>No staff in this run.{editable && " Use Rebuild after adding staff to the unit."}</EmptyState>
+              <EmptyState>No staff in this run.{editable && " Use Rebuild after adding staff to the institution."}</EmptyState>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[980px] text-sm">
@@ -374,7 +374,7 @@ export default function PayrollPage() {
             )}
             <p className="mt-3 text-[12px] text-muted">
               Gross = (basic + allowances) × days worked ÷ days in month + bonus. Net pay = gross − recurring deductions (pro-rated) − other deduction.
-              Total cost = gross + employer contributions; this is what is posted as the unit&apos;s salary expense when the run is paid.
+              Total cost = gross + employer contributions; this is what is posted as the institution&apos;s salary expense when the run is paid.
             </p>
           </Panel>
         </>
