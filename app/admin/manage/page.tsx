@@ -1,17 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, X } from "lucide-react";
+import { Eye, EyeOff, Pencil, Plus, X } from "lucide-react";
 import { useData } from "@/components/admin/data-context";
 import { EmptyState, Modal, Panel, Spinner } from "@/components/admin/ui";
 import { toast } from "@/components/ui/toast";
-import type { TxType } from "@/lib/types";
+import type { TxType, Unit } from "@/lib/types";
 import { btn, cx, inputClass, labelClass } from "@/lib/ui";
 
 type DelTarget = { table: "categories" | "funds"; id: string; label: string } | null;
 
 export default function ManagePage() {
-  const { categories, funds, loading, canEdit, supabase, reload } = useData();
+  const { categories, funds, loading, canEdit, supabase, reload, units } = useData();
   const [addCat, setAddCat] = useState(false);
   const [addFund, setAddFund] = useState(false);
   const [del, setDel] = useState<DelTarget>(null);
@@ -66,6 +66,8 @@ export default function ManagePage() {
           ))}
         </div>
       </Panel>
+
+      {units.length > 0 && <UnitsPanel />}
 
       {addCat && <AddCategory onClose={() => setAddCat(false)} />}
       {addFund && <AddFund onClose={() => setAddFund(false)} />}
@@ -130,5 +132,59 @@ function AddFund({ onClose }: { onClose: () => void }) {
         <div className="flex justify-end gap-2.5"><button type="button" onClick={onClose} className={btn({ variant: "ghost" })}>Cancel</button><button className={btn({ variant: "primary" })}>Add</button></div>
       </form>
     </Modal>
+  );
+}
+
+// The institution's units (PMSA's schools and colleges). Units with payroll
+// history can't be deleted, so they're deactivated instead; inactive units
+// drop out of the pickers but keep their past figures.
+function UnitsPanel() {
+  const { units, supabase, reload, canEdit, site } = useData();
+  const [edit, setEdit] = useState<Unit | "new" | null>(null);
+  const [name, setName] = useState("");
+
+  const open = (u: Unit | "new") => { setEdit(u); setName(u === "new" ? "" : u.name); };
+  const save = async () => {
+    if (!name.trim()) return toast("Enter a name.", true);
+    const { error } = edit === "new"
+      ? await supabase.from("units").insert({ name: name.trim(), sort: units.length + 1 })
+      : await supabase.from("units").update({ name: name.trim() }).eq("id", (edit as Unit).id);
+    if (error) return toast(/duplicate|unique/i.test(error.message) ? "A unit with that name already exists." : error.message, true);
+    setEdit(null);
+    await reload();
+    toast(edit === "new" ? "Unit added" : "Unit renamed");
+  };
+  const toggle = async (u: Unit) => {
+    const { error } = await supabase.from("units").update({ active: !u.active }).eq("id", u.id);
+    if (error) return toast(error.message, true);
+    await reload();
+  };
+
+  return (
+    <Panel title={`${site.name} Units`} action={canEdit && <button onClick={() => open("new")} className={btn({ variant: "gold", size: "sm" })}><Plus size={14} /> Add</button>}>
+      <div className="grid max-h-[380px] gap-2 overflow-y-auto">
+        {units.map((u) => (
+          <div key={u.id} className={cx("flex items-center justify-between gap-2.5 rounded-[10px] border border-line bg-surface-2 px-3 py-2.5 text-sm", !u.active && "opacity-55")}>
+            <span>{u.name}{!u.active && <span className="text-[12px] text-muted"> — inactive</span>}</span>
+            {canEdit && (
+              <span className="flex gap-2.5">
+                <button onClick={() => open(u)} className="text-muted hover:text-ink" aria-label={`Rename ${u.name}`}><Pencil size={15} /></button>
+                <button onClick={() => toggle(u)} className="text-muted hover:text-ink" aria-label={u.active ? `Deactivate ${u.name}` : `Activate ${u.name}`}>
+                  {u.active ? <EyeOff size={15} /> : <Eye size={15} />}
+                </button>
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
+      {edit && (
+        <Modal title={edit === "new" ? "Add unit" : "Rename unit"} onClose={() => setEdit(null)}>
+          <div className="grid gap-4">
+            <div><label className={labelClass}>Name</label><input value={name} onChange={(e) => setName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && save()} className={inputClass} placeholder="e.g. Hifz College" /></div>
+            <div className="flex justify-end gap-2.5"><button onClick={() => setEdit(null)} className={btn({ variant: "ghost" })}>Cancel</button><button onClick={save} className={btn({ variant: "primary" })}>Save</button></div>
+          </div>
+        </Modal>
+      )}
+    </Panel>
   );
 }

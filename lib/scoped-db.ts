@@ -9,7 +9,10 @@ type SupabaseClient = ReturnType<typeof createClient>;
 // they get this wrapper: on the accounting tables it limits reads, updates and
 // deletes to the selected institution and stamps it on every new row. Other
 // tables (profiles, …) pass straight through.
-export const SCOPED_TABLES = new Set(["categories", "funds", "transactions", "staff", "attendance"]);
+export const SCOPED_TABLES = new Set([
+  "categories", "funds", "transactions", "staff", "attendance",
+  "units", "salary_revisions", "salary_components", "payroll_runs", "payroll_lines",
+]);
 
 type Row = Record<string, unknown>;
 const stamp = (payload: Row | Row[], institution: SiteId) =>

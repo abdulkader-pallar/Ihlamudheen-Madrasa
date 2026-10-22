@@ -14,7 +14,8 @@ import { btn, cx, inputClass } from "@/lib/ui";
 const empty = { search: "", type: "", category: "", fund: "", from: "", to: "" };
 
 export default function TransactionsPage() {
-  const { transactions, categories, funds, loading, canEdit, supabase, reload, site } = useData();
+  const { transactions, categories, funds, loading, canEdit, supabase, reload, site, units, unitName } = useData();
+  const hasUnits = units.length > 0;
   const [f, setF] = useState(empty);
   const [editing, setEditing] = useState<Transaction | null | undefined>(undefined);
   const [delTarget, setDelTarget] = useState<Transaction | null>(null);
@@ -54,8 +55,8 @@ export default function TransactionsPage() {
   };
 
   const exportCSV = () => {
-    const rows: (string | number)[][] = [["Date", "Type", "Category", "Fund", "Description", "Reference", "Amount"]];
-    list.forEach((t) => rows.push([t.occurred_on, t.type, catName[t.category_id ?? ""] || "", fundName[t.fund_id ?? ""] || "", t.description || "", t.reference || "", t.amount]));
+    const rows: (string | number)[][] = [["Date", "Type", ...(hasUnits ? ["Unit"] : []), "Category", "Fund", "Description", "Reference", "Amount"]];
+    list.forEach((t) => rows.push([t.occurred_on, t.type, ...(hasUnits ? [unitName(t.unit_id)] : []), catName[t.category_id ?? ""] || "", fundName[t.fund_id ?? ""] || "", t.description || "", t.reference || "", t.amount]));
     downloadCSV(`${site.id}-transactions`, rows);
     toast("CSV downloaded");
   };
@@ -98,6 +99,7 @@ export default function TransactionsPage() {
               <tr className="text-left text-[11.5px] uppercase tracking-wide text-muted">
                 <th className="px-4 py-3 font-bold">Date</th>
                 <th className="px-4 py-3 font-bold">Type</th>
+                {hasUnits && <th className="px-4 py-3 font-bold">Unit</th>}
                 <th className="px-4 py-3 font-bold">Category</th>
                 <th className="px-4 py-3 font-bold">Fund</th>
                 <th className="px-4 py-3 font-bold">Description</th>
@@ -107,12 +109,13 @@ export default function TransactionsPage() {
             </thead>
             <tbody>
               {list.length === 0 ? (
-                <tr><td colSpan={editor ? 7 : 6}><EmptyState>No transactions match.</EmptyState></td></tr>
+                <tr><td colSpan={(editor ? 7 : 6) + (hasUnits ? 1 : 0)}><EmptyState>No transactions match.</EmptyState></td></tr>
               ) : (
                 list.map((t) => (
                   <tr key={t.id} className="border-t border-line hover:bg-surface-2">
                     <td className="tnum px-4 py-3">{fmtDate(t.occurred_on)}</td>
                     <td className="px-4 py-3"><Pill type={t.type} /></td>
+                    {hasUnits && <td className="px-4 py-3 text-muted">{unitName(t.unit_id)}</td>}
                     <td className="px-4 py-3">{catName[t.category_id ?? ""] || "—"}</td>
                     <td className="px-4 py-3">{fundName[t.fund_id ?? ""] || "—"}</td>
                     <td className="px-4 py-3">

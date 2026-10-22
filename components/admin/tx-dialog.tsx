@@ -9,7 +9,7 @@ import { todayISO } from "@/lib/format";
 import type { Transaction, TxType } from "@/lib/types";
 
 export function TxDialog({ tx, onClose }: { tx?: Transaction | null; onClose: () => void }) {
-  const { categories, funds, supabase, reload } = useData();
+  const { categories, funds, supabase, reload, units, unit, site } = useData();
   const editing = !!tx;
   const [type, setType] = useState<TxType>(tx?.type ?? "income");
   const [error, setError] = useState("");
@@ -32,6 +32,7 @@ export function TxDialog({ tx, onClose }: { tx?: Transaction | null; onClose: ()
       fund_id: (f.get("fund") as string) || null,
       description: (String(f.get("description")).trim() || null) as string | null,
       reference: (String(f.get("reference")).trim() || null) as string | null,
+      ...(units.length ? { unit_id: (f.get("unit") as string) || null } : {}),
     };
     const res = editing
       ? await supabase.from("transactions").update(payload).eq("id", tx!.id)
@@ -87,6 +88,23 @@ export function TxDialog({ tx, onClose }: { tx?: Transaction | null; onClose: ()
             ))}
           </select>
         </div>
+
+        {units.length > 0 && (
+          <div>
+            <label className={labelClass}>Unit</label>
+            <select
+              name="unit"
+              defaultValue={tx ? tx.unit_id ?? "" : unit === "all" || unit === "common" ? "" : unit}
+              className={inputClass}
+            >
+              <option value="">{site.name} – Common</option>
+              {units.filter((u) => u.active || u.id === tx?.unit_id).map((u) => (
+                <option key={u.id} value={u.id}>{u.name}</option>
+              ))}
+            </select>
+            {tx?.payroll_run_id && <p className="mt-1 text-[12px] text-muted">Posted by payroll. Change it from the Payroll page instead.</p>}
+          </div>
+        )}
 
         <div>
           <label className={labelClass}>Fund / account</label>

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { BarChart3, Fingerprint, Globe, LayoutDashboard, ListOrdered, LogOut, Menu, SlidersHorizontal, UserRound, Users, Wallet } from "lucide-react";
+import { BarChart3, Banknote, Building2, Fingerprint, Globe, PieChart, LayoutDashboard, ListOrdered, LogOut, Menu, SlidersHorizontal, UserRound, Users, Wallet } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -16,13 +16,15 @@ import { isSuperadmin, type Profile, type Role } from "@/lib/types";
 import { cx } from "@/lib/ui";
 
 // `local` = Ihlamudheen-only pages (Meelad book), hidden on the other
-// institutions' tabs.
-const NAV: { href: string; label: string; icon: LucideIcon; exact?: boolean; editor?: boolean; admin?: boolean; superadmin?: boolean; local?: boolean }[] = [
+// institutions' tabs. `units` = only for institutions that have units (PMSA).
+const NAV: { href: string; label: string; icon: LucideIcon; exact?: boolean; editor?: boolean; admin?: boolean; superadmin?: boolean; local?: boolean; units?: boolean }[] = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { href: "/admin/transactions", label: "Transactions", icon: ListOrdered },
   { href: "/admin/reports", label: "Reports", icon: BarChart3 },
   { href: "/admin/staff", label: "Staff", icon: UserRound },
   { href: "/admin/attendance", label: "Staff Attendance", icon: Fingerprint },
+  { href: "/admin/payroll", label: "Payroll", icon: Banknote, units: true },
+  { href: "/admin/unit-costs", label: "Unit Costs", icon: PieChart, units: true },
   { href: "/admin/manage", label: "Categories & Funds", icon: SlidersHorizontal },
   { href: "/admin/users", label: "Users & Roles", icon: Users, superadmin: true },
   { href: "/admin/meelad", label: "Meelad Accounts", icon: Wallet, superadmin: true, local: true },
@@ -35,6 +37,8 @@ const TITLES: Record<string, string> = {
   "/admin/staff": "Staff",
   "/admin/attendance": "Staff Attendance",
   "/admin/manage": "Categories & Funds",
+  "/admin/payroll": "Payroll",
+  "/admin/unit-costs": "Unit Costs",
   "/admin/users": "Users & Roles",
   "/admin/meelad": "Meelad Accounts",
 };
@@ -51,7 +55,8 @@ export function AdminShell({ profile, children }: { profile: Profile; children: 
 function Shell({ profile, children }: { profile: Profile; children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { site, setSite, canEdit, error } = useData();
+  const { site, setSite, canEdit, error, units, unit, setUnit, loading } = useData();
+  const hasUnits = units.length > 0;
   const [open, setOpen] = useState(false);
   const [appsOpen, setAppsOpen] = useState(false);
   const admin = profile.role === "admin";
@@ -59,7 +64,7 @@ function Shell({ profile, children }: { profile: Profile; children: React.ReactN
   const name = profile.full_name || "Staff";
 
   const nav = NAV.filter((n) =>
-    (n.superadmin ? superadmin : n.admin ? admin : !n.editor || canEdit) && (!n.local || site.local)
+    (n.superadmin ? superadmin : n.admin ? admin : !n.editor || canEdit) && (!n.local || site.local) && (!n.units || hasUnits)
   );
 
   // Each institution has its own colour theme (app/globals.css, [data-site]).
@@ -74,6 +79,12 @@ function Shell({ profile, children }: { profile: Profile; children: React.ReactN
   useEffect(() => {
     if (!site.local && NAV.some((n) => n.local && pathname.startsWith(n.href))) router.replace("/admin");
   }, [site, pathname, router]);
+
+  // Same for the unit pages on an institution without units (checked once
+  // its units have loaded).
+  useEffect(() => {
+    if (!loading && !hasUnits && NAV.some((n) => n.units && pathname.startsWith(n.href))) router.replace("/admin");
+  }, [loading, hasUnits, pathname, router]);
 
   const signOut = async () => {
     await createClient().auth.signOut();
@@ -126,6 +137,27 @@ function Shell({ profile, children }: { profile: Profile; children: React.ReactN
                 </button>
               ))}
             </div>
+          )}
+
+          {/* Unit picker — PMSA's schools and colleges. Filters the dashboard,
+              transactions, reports and staff. */}
+          {hasUnits && (
+            <label className="mb-4 block">
+              <span className="mb-1 flex items-center gap-1.5 px-1 text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--sidebar-muted,#8fa6bf)]">
+                <Building2 size={13} /> Unit
+              </span>
+              <select
+                value={unit}
+                onChange={(e) => { setUnit(e.target.value); setOpen(false); }}
+                className="w-full rounded-[10px] border border-white/15 bg-black/25 px-3 py-2 text-[13.5px] font-semibold text-white outline-none focus:border-white/40 [&>option]:text-ink"
+              >
+                <option value="all">All {site.name}</option>
+                {units.filter((u) => u.active || u.id === unit).map((u) => (
+                  <option key={u.id} value={u.id}>{u.name}</option>
+                ))}
+                <option value="common">{site.name} – Common</option>
+              </select>
+            </label>
           )}
 
           {nav.map((n) => {
@@ -197,7 +229,7 @@ function Shell({ profile, children }: { profile: Profile; children: React.ReactN
                     ))}
                   </span>
                 </button>
-                {appsOpen && <AppsMenu role={profile.role} email={profile.email} local={site.local} onClose={() => setAppsOpen(false)} onSignOut={signOut} />}
+                {appsOpen && <AppsMenu role={profile.role} email={profile.email} local={site.local} units={hasUnits} onClose={() => setAppsOpen(false)} onSignOut={signOut} />}
               </div>
               <ThemeToggle />
             </div>
@@ -216,7 +248,7 @@ function Shell({ profile, children }: { profile: Profile; children: React.ReactN
   );
 }
 
-function AppsMenu({ role, email, local, onClose, onSignOut }: { role: Role; email?: string | null; local: boolean; onClose: () => void; onSignOut: () => void }) {
+function AppsMenu({ role, email, local, units, onClose, onSignOut }: { role: Role; email?: string | null; local: boolean; units: boolean; onClose: () => void; onSignOut: () => void }) {
   const superadmin = isSuperadmin(email);
 
   // Accounting roles viewer/pending fall back to the student menu. In practice
@@ -240,7 +272,18 @@ function AppsMenu({ role, email, local, onClose, onSignOut }: { role: Role; emai
     ? all
     : all
         .filter((c) => c.title === "Accounts")
-        .map((c) => ({ ...c, items: c.items.filter((i) => !localOnly.has(i.href)) }));
+        .map((c) => ({
+          ...c,
+          items: [
+            ...c.items.filter((i) => !localOnly.has(i.href)),
+            ...(units
+              ? [
+                  { href: "/admin/payroll", label: "Payroll", icon: Banknote, color: "bg-amber-500" },
+                  { href: "/admin/unit-costs", label: "Unit Costs", icon: PieChart, color: "bg-pink-500" },
+                ]
+              : []),
+          ],
+        }));
 
   return (
     <>

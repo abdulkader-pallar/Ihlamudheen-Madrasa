@@ -33,6 +33,10 @@ export interface Transaction {
   reference: string | null;
   created_by: string | null;
   created_at: string;
+  /** The unit this is charged to (null = the institution's common costs). */
+  unit_id?: string | null;
+  /** Set on the salary expense a payroll run posted. */
+  payroll_run_id?: string | null;
 }
 
 export interface Staff {
@@ -43,6 +47,71 @@ export interface Staff {
   phone: string | null;
   active: boolean;
   created_at: string;
+  unit_id?: string | null;
+  /** Current basic salary; past months use salary_revisions. */
+  basic_salary?: number | null;
+  joined_on?: string | null;
+  left_on?: string | null;
+}
+
+/** A unit inside an institution (PMSA's schools and colleges), see
+ *  supabase/pmsa-units-payroll.sql. */
+export interface Unit {
+  id: string;
+  name: string;
+  sort: number;
+  active: boolean;
+  monthly_budget: number | null;
+}
+
+export interface SalaryRevision {
+  id: string;
+  staff_id: string;
+  basic_salary: number;
+  effective_from: string;
+}
+
+export type ComponentKind = "allowance" | "deduction" | "employer";
+
+export interface SalaryComponent {
+  id: string;
+  staff_id: string;
+  kind: ComponentKind;
+  name: string;
+  amount: number;
+  effective_from: string;
+  effective_to: string | null;
+}
+
+export type RunStatus = "draft" | "approved" | "paid";
+
+export interface PayrollRun {
+  id: string;
+  unit_id: string;
+  /** First day of the month, YYYY-MM-01. */
+  month: string;
+  status: RunStatus;
+  paid_on: string | null;
+}
+
+export interface PayrollLine {
+  id: string;
+  run_id: string;
+  staff_id: string | null;
+  staff_name: string;
+  designation: string | null;
+  days_in_month: number;
+  days_worked: number;
+  basic: number;
+  allowances: number;
+  deductions: number;
+  employer: number;
+  bonus: number;
+  other_deduction: number;
+  gross: number;
+  net: number;
+  cost: number;
+  note: string | null;
 }
 
 export interface Attendance {

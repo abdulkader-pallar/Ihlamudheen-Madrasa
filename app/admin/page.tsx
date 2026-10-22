@@ -13,7 +13,7 @@ import { btn } from "@/lib/ui";
 import { SUPERADMIN_LABEL } from "@/lib/roles";
 
 export default function DashboardPage() {
-  const { transactions, categories, loading, profile, canEdit } = useData();
+  const { transactions, categories, loading, profile, canEdit, site, units, unit, unitName } = useData();
   const [adding, setAdding] = useState(false);
 
   const catName = useMemo(() => Object.fromEntries(categories.map((c) => [c.id, c.name])), [categories]);
@@ -73,7 +73,10 @@ export default function DashboardPage() {
                 {isSuperadmin(profile.email) ? SUPERADMIN_LABEL : profile.role}
               </span>
             </div>
-            <div className="mt-0.5 flex items-center gap-2 text-[13px] text-muted">
+            <div className="mt-0.5 flex flex-wrap items-center gap-2 text-[13px] text-muted">
+              {units.length > 0 && (
+                <span className="font-bold text-ink">{unit === "all" ? `All ${site.name}` : unitName(unit === "common" ? null : unit)} ·</span>
+              )}
               {today}
               <span className="inline-flex items-center gap-1">
                 <span className="h-1.5 w-1.5 rounded-full bg-good" /> Active

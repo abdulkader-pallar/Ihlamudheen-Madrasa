@@ -1,10 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Download, Fingerprint, Pencil, Plus, Search, Trash2, UserCheck, UserRound, UserX } from "lucide-react";
+import { Banknote, Download, Fingerprint, IndianRupee, Pencil, Plus, Search, Trash2, UserCheck, UserRound, UserX } from "lucide-react";
 import { useData } from "@/components/admin/data-context";
 import { EmptyState, Modal, Panel, Spinner, StatCard } from "@/components/admin/ui";
 import { StaffDialog } from "@/components/admin/staff-dialog";
+import { SalaryDialog } from "@/components/admin/salary-dialog";
+import { fmt, todayISO } from "@/lib/format";
+import { fromPaise, monthlyCost } from "@/lib/unit-payroll";
 import { toast } from "@/components/ui/toast";
 import { downloadCSV } from "@/lib/csv";
 import type { Staff } from "@/lib/types";
@@ -17,7 +20,26 @@ import { btn, cx, inputClass } from "@/lib/ui";
 type Show = "all" | "active" | "inactive";
 
 export default function StaffPage() {
-  const { staff, loading, canEdit, supabase, reloadStaff, site } = useData();
+  const { staff, allStaff, loading, canEdit, supabase, reloadStaff, site, units, unit, unitName, salaryRevisions, salaryComponents } = useData();
+  const hasUnits = units.length > 0;
+  const month = todayISO().slice(0, 7);
+  const [salaryOf, setSalaryOf] = useState<Staff | null>(null);
+  // Full-month cost to the institution at current pay, in paise.
+  const costOf = useMemo(() => {
+    const m: Record<string, number> = {};
+    allStaff.forEach((s) => { m[s.id] = monthlyCost(s, salaryRevisions, salaryComponents, month); });
+    return m;
+  }, [allStaff, salaryRevisions, salaryComponents, month]);
+  const onPayroll = (s: Staff) => s.active && (!s.left_on || s.left_on >= todayISO());
+  const bill = useMemo(() => staff.filter(onPayroll).reduce((a, s) => a + (costOf[s.id] || 0), 0), [staff, costOf]);
+  // Headcount and salary bill per unit (shown on "All").
+  const byUnit = useMemo(() => {
+    const rows = [...units.map((u) => ({ id: u.id as string | null, name: u.name })), { id: null, name: unitName(null) }].map((u) => {
+      const list = allStaff.filter((s) => onPayroll(s) && (s.unit_id ?? null) === u.id);
+      return { ...u, count: list.length, cost: list.reduce((a, s) => a + (costOf[s.id] || 0), 0) };
+    });
+    return rows.filter((r) => r.id !== null || r.count > 0);
+  }, [units, allStaff, costOf, unitName]);
   const [q, setQ] = useState("");
   const [show, setShow] = useState<Show>("active");
   const [edit, setEdit] = useState<Staff | "new" | null>(null);
@@ -34,9 +56,9 @@ export default function StaffPage() {
       if (show === "active" && !s.active) return false;
       if (show === "inactive" && s.active) return false;
       if (!term) return true;
-      return [s.name, s.designation, s.phone, s.device_user_id?.toString()].some((v) => v?.toLowerCase().includes(term));
+      return [s.name, s.designation, s.phone, s.device_user_id?.toString(), hasUnits ? unitName(s.unit_id) : null].some((v) => v?.toLowerCase().includes(term));
     });
-  }, [staff, q, show]);
+  }, [staff, q, show, hasUnits, unitName]);
 
   const setActive = async (s: Staff, active: boolean) => {
     const { error } = await supabase.from("staff").update({ active }).eq("id", s.id);
@@ -55,8 +77,12 @@ export default function StaffPage() {
   };
 
   const exportCSV = () => {
-    const rows: (string | number)[][] = [["Name", "Designation", "Device user id", "Phone", "Status"]];
-    list.forEach((s) => rows.push([s.name, s.designation || "", s.device_user_id ?? "", s.phone || "", s.active ? "Active" : "Inactive"]));
+    const rows: (string | number)[][] = [["Name", "Designation", ...(hasUnits ? ["Unit", "Basic", "Monthly cost"] : []), "Device user id", "Phone", "Status"]];
+    list.forEach((s) => rows.push([
+      s.name, s.designation || "",
+      ...(hasUnits ? [unitName(s.unit_id), Number(s.basic_salary ?? 0), fromPaise(costOf[s.id] || 0)] : []),
+      s.device_user_id ?? "", s.phone || "", s.active ? "Active" : "Inactive",
+    ]));
     downloadCSV(`${site.id}-staff`, rows);
     toast("CSV downloaded");
   };
@@ -69,8 +95,42 @@ export default function StaffPage() {
         <StatCard icon={UserRound} accent="teal" label="Total staff" value={String(counts.total)} sub={site.name} />
         <StatCard icon={UserCheck} accent="green" label="Active" value={String(counts.active)} sub="Tracked in attendance" />
         <StatCard icon={UserX} accent="red" label="Inactive" value={String(counts.inactive)} sub="Kept for history" />
-        <StatCard icon={Fingerprint} accent="gold" label="No device id" value={String(counts.noDevice)} sub="Active, can't punch in" />
+        {hasUnits
+          ? <StatCard icon={IndianRupee} accent="gold" label="Monthly salary bill" value={fmt(fromPaise(bill))} sub="Gross + employer cost, current pay" />
+          : <StatCard icon={Fingerprint} accent="gold" label="No device id" value={String(counts.noDevice)} sub="Active, can't punch in" />}
       </div>
+
+      {hasUnits && unit === "all" && (
+        <Panel title="Salary bill by unit">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[420px] text-sm">
+              <thead>
+                <tr className="text-left text-[11.5px] uppercase tracking-wide text-muted">
+                  <th className="py-2 font-bold">Unit</th>
+                  <th className="py-2 text-right font-bold">Staff</th>
+                  <th className="py-2 text-right font-bold">Monthly cost</th>
+                </tr>
+              </thead>
+              <tbody>
+                {byUnit.map((u) => (
+                  <tr key={u.id ?? "common"} className="border-t border-line">
+                    <td className="py-2.5 font-semibold">{u.name}</td>
+                    <td className="tnum py-2.5 text-right">{u.count}</td>
+                    <td className="tnum py-2.5 text-right font-bold">{fmt(fromPaise(u.cost))}</td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr className="border-t-2 border-line font-extrabold">
+                  <td className="py-2.5">Total</td>
+                  <td className="tnum py-2.5 text-right">{byUnit.reduce((a, u) => a + u.count, 0)}</td>
+                  <td className="tnum py-2.5 text-right">{fmt(fromPaise(byUnit.reduce((a, u) => a + u.cost, 0)))}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </Panel>
+      )}
 
       <Panel
         title={`Staff (${list.length})`}
@@ -103,11 +163,13 @@ export default function StaffPage() {
           <EmptyState>No staff match.</EmptyState>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[640px] text-sm">
+            <table className={cx("w-full text-sm", hasUnits ? "min-w-[900px]" : "min-w-[640px]")}>
               <thead>
                 <tr className="text-left text-[11.5px] uppercase tracking-wide text-muted">
                   <th className="py-2 font-bold">Name</th>
                   <th className="py-2 font-bold">Designation</th>
+                  {hasUnits && <th className="py-2 font-bold">Unit</th>}
+                  {hasUnits && <th className="py-2 text-right font-bold">Monthly cost</th>}
                   <th className="py-2 font-bold">Device id</th>
                   <th className="py-2 font-bold">Phone</th>
                   <th className="py-2 font-bold">Status</th>
@@ -119,6 +181,12 @@ export default function StaffPage() {
                   <tr key={s.id} className="border-t border-line align-middle">
                     <td className="py-2.5 font-bold">{s.name}</td>
                     <td className="py-2.5 text-muted">{s.designation || "—"}</td>
+                    {hasUnits && <td className="py-2.5 text-muted">{unitName(s.unit_id)}</td>}
+                    {hasUnits && (
+                      <td className="tnum py-2.5 text-right font-semibold">
+                        {costOf[s.id] ? fmt(fromPaise(costOf[s.id])) : <span className="text-muted">No salary</span>}
+                      </td>
+                    )}
                     <td className="tnum py-2.5">{s.device_user_id ?? <span className="text-muted">—</span>}</td>
                     <td className="tnum py-2.5 text-muted">{s.phone || "—"}</td>
                     <td className="py-2.5">
@@ -132,6 +200,11 @@ export default function StaffPage() {
                           <button onClick={() => setEdit(s)} className={btn({ variant: "ghost", size: "sm" })} aria-label={`Edit ${s.name}`}>
                             <Pencil size={14} /> Edit
                           </button>
+                          {hasUnits && (
+                            <button onClick={() => setSalaryOf(s)} className={btn({ variant: "ghost", size: "sm" })}>
+                              <Banknote size={14} /> Salary
+                            </button>
+                          )}
                           <button onClick={() => setActive(s, !s.active)} className={btn({ variant: "ghost", size: "sm" })}>
                             {s.active ? <><UserX size={14} /> Deactivate</> : <><UserCheck size={14} /> Activate</>}
                           </button>
@@ -156,6 +229,8 @@ export default function StaffPage() {
           onSaved={async () => { setEdit(null); await reloadStaff(); }}
         />
       )}
+
+      {salaryOf && <SalaryDialog staff={salaryOf} onClose={() => setSalaryOf(null)} />}
 
       {del && (
         <Modal title="Delete staff member?" onClose={() => setDel(null)}>
