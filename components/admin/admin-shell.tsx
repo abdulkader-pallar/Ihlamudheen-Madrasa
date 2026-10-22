@@ -10,6 +10,7 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { toast, Toaster } from "@/components/ui/toast";
 import { downloadAccountsPdf } from "@/lib/accounts-pdf";
 import { PdfContext } from "./pdf-button";
+import { PdfPreview } from "./pdf-preview";
 import { DataProvider, useData } from "./data-context";
 import { SITES } from "@/lib/sites";
 import { getMenuForRole, NavMenuBody } from "@/components/app-launcher";
@@ -60,11 +61,14 @@ function Shell({ profile, children }: { profile: Profile; children: React.ReactN
   const scope = hasUnits && unit !== "all" ? unitName(unit === "common" ? null : unit) : site.name;
   const mainRef = useRef<HTMLElement>(null);
   const [pdfBusy, setPdfBusy] = useState(false);
+  // The PDF is shown on screen first; Download and Print are in the preview.
+  const [pdf, setPdf] = useState<{ blob: Blob; filename: string } | null>(null);
   const downloadPdf = async () => {
     if (!mainRef.current) return;
     setPdfBusy(true);
     try {
-      await downloadAccountsPdf({ root: mainRef.current, site, title: TITLES[pathname] || "Accounts", scope });
+      const made = await downloadAccountsPdf({ root: mainRef.current, site, title: TITLES[pathname] || "Accounts", scope, preview: true });
+      if (made) setPdf(made);
     } catch (e) {
       toast(e instanceof Error ? e.message : "Could not make the PDF.", true);
     }
@@ -235,7 +239,7 @@ function Shell({ profile, children }: { profile: Profile; children: React.ReactN
               <button
                 onClick={downloadPdf}
                 disabled={pdfBusy}
-                title="Download this page as a PDF"
+                title="See this page as a PDF, then download or print it"
                 className="flex h-10 items-center gap-1.5 rounded-xl border border-line bg-surface px-3 text-[13.5px] font-bold text-ink transition hover:border-brand hover:text-brand disabled:opacity-60"
               >
                 <FileDown size={17} />
@@ -274,6 +278,7 @@ function Shell({ profile, children }: { profile: Profile; children: React.ReactN
           </main>
         </div>
       </div>
+      {pdf && <PdfPreview blob={pdf.blob} filename={pdf.filename} onClose={() => setPdf(null)} />}
     </>
   );
 }

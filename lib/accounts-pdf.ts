@@ -7,6 +7,7 @@
 // Every PDF opens with the institution's letterhead: its logo, full name,
 // the page and the selected institution (see lib/sites.ts).
 import type { Site } from "@/lib/sites";
+import { drawLetterhead, type LetterheadLogo } from "@/lib/pdf-letterhead";
 
 type Cell = { content: string; colSpan?: number; styles?: { halign?: "left" | "right" | "center" } };
 type Section = { title: string | null; head: Cell[][]; body: Cell[][]; foot: Cell[][] };
@@ -60,7 +61,7 @@ function readTable(t: HTMLTableElement): Section {
   return { title: panel ? clean(panel.getAttribute("data-pdf-title") || "") : null, head: rows("thead tr"), body: rows("tbody tr"), foot: rows("tfoot tr") };
 }
 
-async function logoData(src: string): Promise<{ data: string; w: number; h: number } | null> {
+async function logoData(src: string): Promise<LetterheadLogo> {
   try {
     const img = new Image();
     img.src = encodeURI(src);
@@ -74,7 +75,7 @@ async function logoData(src: string): Promise<{ data: string; w: number; h: numb
     g.fillStyle = "#fff";
     g.fillRect(0, 0, c.width, c.height);
     g.drawImage(img, 0, 0, c.width, c.height);
-    return { data: c.toDataURL("image/jpeg", 0.92), w: c.width, h: c.height };
+    return { data: c.toDataURL("image/jpeg", 0.92), format: "JPEG", w: c.width, h: c.height };
   } catch {
     return null; // a missing logo shouldn't stop the download
   }
@@ -106,40 +107,30 @@ export async function downloadAccountsPdf({ root, site, title, scope, preview }:
   const M = 14;
   const color = hexRgb(site.pdfColor);
   const generated = new Date().toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
-  // A PMSA institution (Yatheem Khana, …) is named under the letterhead, so
-  // the page heading doesn't repeat it.
+  // A PMSA institution (KYYHSS School, Yatheem Khana, …) is the name in the
+  // middle of the letterhead, with the trust's own short name under the logo,
+  // so neither the heading nor the centre repeats the other.
   const sub = scope !== site.name ? clean(scope) : null;
   const heading = sub ? clean(title) : clean(`${title} - ${scope}`);
 
   // Letterhead
-  let x = M;
-  const LOGO_H = 24;
-  if (logo) {
-    const w = (logo.w / logo.h) * LOGO_H;
-    doc.addImage(logo.data, "JPEG", M, 10, w, LOGO_H);
-    x = M + w + 5;
-  }
-  doc.setTextColor(...color);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(site.fullName.length > 40 ? 14 : 17);
-  doc.text(doc.splitTextToSize(clean(site.fullName), W - x - M), x, 17);
-  if (sub) {
-    doc.setFontSize(12.5);
-    doc.text(sub, x, 24.5);
-  }
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.setTextColor(90);
-  doc.text(`Accounts  |  Generated ${generated}`, x, sub ? 31 : 26);
-  doc.setDrawColor(...color);
-  doc.setLineWidth(0.8);
-  doc.line(M, 38, W - M, 38);
+  const ruleY = drawLetterhead(doc, {
+    // The trust's short name goes under the logo when the middle names one of
+    // its institutions; with the trust itself in the middle it would say the
+    // same thing twice.
+    logo, logoLabel: sub ? clean(site.name) : null,
+    // The institution this page is about takes the middle: the unit when one
+    // is selected, otherwise the trust itself.
+    title: sub ?? clean(site.fullName), sub: null,
+    meta: `Accounts  \xB7  Generated ${generated}`,
+    color, width: W, margin: M,
+  });
 
   doc.setTextColor(20);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(13);
-  doc.text(heading, M, 47);
-  let y = 53;
+  doc.text(heading, W / 2, ruleY + 9, { align: "center" });
+  let y = ruleY + 15;
 
   // Summary cards, four to a row
   if (stats.length) {
@@ -216,7 +207,7 @@ export async function downloadAccountsPdf({ root, site, title, scope, preview }:
     doc.setFontSize(8);
     doc.setTextColor(120);
     if (i > 1) {
-      doc.text([clean(site.fullName), sub, heading].filter(Boolean).join(" - "), M, 12);
+      doc.text([clean(site.fullName), sub, heading].filter(Boolean).join(" - "), W / 2, 12, { align: "center" });
       doc.setDrawColor(...color);
       doc.setLineWidth(0.4);
       doc.line(M, 14.5, W - M, 14.5);
@@ -226,7 +217,9 @@ export async function downloadAccountsPdf({ root, site, title, scope, preview }:
   }
 
   const slug = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-  // preview: return the PDF instead of downloading it (used to check the output).
-  if (preview) return doc.output("blob");
-  doc.save(`${slug(site.name)}-${slug(title)}${scope !== site.name ? "-" + slug(scope) : ""}-${new Date().toLocaleDateString("en-CA")}.pdf`);
+  const filename = `${slug(site.name)}-${slug(title)}${scope !== site.name ? "-" + slug(scope) : ""}-${new Date().toLocaleDateString("en-CA")}.pdf`;
+  // preview: hand the PDF back to be shown on screen (PdfPreview) instead of
+  // dropping it straight into Downloads.
+  if (preview) return { blob: doc.output("blob") as Blob, filename };
+  doc.save(filename);
 }
