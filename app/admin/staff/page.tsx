@@ -8,7 +8,7 @@ import { EmptyState, Modal, Panel, Spinner, StatCard } from "@/components/admin/
 import { StaffDialog } from "@/components/admin/staff-dialog";
 import { SalaryDialog } from "@/components/admin/salary-dialog";
 import { fmt, todayISO } from "@/lib/format";
-import { fromPaise, monthlyCost } from "@/lib/unit-payroll";
+import { basicFor, fromPaise, monthlyCost } from "@/lib/unit-payroll";
 import { toast } from "@/components/ui/toast";
 import { downloadCSV } from "@/lib/csv";
 import type { Staff } from "@/lib/types";
@@ -31,6 +31,13 @@ export default function StaffPage() {
     allStaff.forEach((s) => { m[s.id] = monthlyCost(s, salaryRevisions, salaryComponents, month); });
     return m;
   }, [allStaff, salaryRevisions, salaryComponents, month]);
+  // Basic in force this month, in paise; shown beside the cost, which adds
+  // allowances and employer contributions on top of it.
+  const basicOf = useMemo(() => {
+    const m: Record<string, number> = {};
+    allStaff.forEach((s) => { m[s.id] = basicFor(s, salaryRevisions, month); });
+    return m;
+  }, [allStaff, salaryRevisions, month]);
   const onPayroll = (s: Staff) => s.active && (!s.left_on || s.left_on >= todayISO());
   const bill = useMemo(() => staff.filter(onPayroll).reduce((a, s) => a + (costOf[s.id] || 0), 0), [staff, costOf]);
   // Headcount and salary bill per unit (shown on "All").
@@ -78,10 +85,10 @@ export default function StaffPage() {
   };
 
   const exportCSV = () => {
-    const rows: (string | number)[][] = [["Staff ID", "Name", "Designation", ...(hasUnits ? ["Institution", "Basic", "Monthly cost"] : []), "Phone", "Status"]];
+    const rows: (string | number)[][] = [["Staff ID", "Name", "Designation", ...(hasUnits ? ["Institution", "Basic salary", "Total salary"] : []), "Phone", "Status"]];
     list.forEach((s) => rows.push([
       s.code || "", s.name, s.designation || "",
-      ...(hasUnits ? [unitName(s.unit_id), Number(s.basic_salary ?? 0), fromPaise(costOf[s.id] || 0)] : []),
+      ...(hasUnits ? [unitName(s.unit_id), fromPaise(basicOf[s.id] || 0), fromPaise(costOf[s.id] || 0)] : []),
       s.phone || "", s.active ? "Active" : "Inactive",
     ]));
     downloadCSV(`${site.id}-staff`, rows);
@@ -107,7 +114,7 @@ export default function StaffPage() {
                 <tr className="text-left text-[11.5px] uppercase tracking-wide text-muted">
                   <th className="py-2 font-bold">Institution</th>
                   <th className="py-2 text-right font-bold">Staff</th>
-                  <th className="py-2 text-right font-bold">Monthly cost</th>
+                  <th className="py-2 text-right font-bold">Total salary</th>
                 </tr>
               </thead>
               <tbody>
@@ -163,15 +170,17 @@ export default function StaffPage() {
           <EmptyState>No staff match.</EmptyState>
         ) : (
           <div className="overflow-x-auto">
-            <table className={cx("w-full text-sm", hasUnits ? "min-w-[840px]" : "min-w-[620px]")}>
+            <table className={cx("w-full text-sm", hasUnits ? "min-w-[940px]" : "min-w-[620px]")}>
               <thead>
                 <tr className="text-left text-[11.5px] uppercase tracking-wide text-muted">
                   <th className="py-2 font-bold">ID</th>
                   <th className="py-2 font-bold">Name</th>
                   <th className="py-2 font-bold">Designation</th>
                   {hasUnits && <th className="py-2 font-bold">Institution</th>}
-                  {hasUnits && <th className="py-2 text-right font-bold">Monthly cost</th>}
-                  <th className="py-2 font-bold">Phone</th>
+                  {hasUnits && <th className="py-2 text-right font-bold">Basic salary</th>}
+                  {hasUnits && <th className="py-2 pl-6 text-right font-bold" title="Basic + allowances + employer PF/ESI, per month">Total salary</th>}
+                  {/* pl-6: keeps the phone clear of the right-aligned amount before it. */}
+                  <th className="py-2 pl-6 font-bold">Phone</th>
                   <th className="py-2 font-bold">Status</th>
                   {canEdit && <th className="no-print py-2 text-right font-bold">Actions</th>}
                 </tr>
@@ -184,11 +193,16 @@ export default function StaffPage() {
                     <td className="py-2.5 text-muted">{s.designation || "—"}</td>
                     {hasUnits && <td className="py-2.5 text-muted">{unitName(s.unit_id)}</td>}
                     {hasUnits && (
-                      <td className="tnum py-2.5 text-right font-semibold">
+                      <td className="tnum py-2.5 text-right">
+                        {basicOf[s.id] ? fmt(fromPaise(basicOf[s.id])) : <span className="text-muted">—</span>}
+                      </td>
+                    )}
+                    {hasUnits && (
+                      <td className="tnum py-2.5 pl-6 text-right font-semibold">
                         {costOf[s.id] ? fmt(fromPaise(costOf[s.id])) : <span className="text-muted">No salary</span>}
                       </td>
                     )}
-                    <td className="tnum py-2.5 text-muted">{s.phone || "—"}</td>
+                    <td className="tnum py-2.5 pl-6 text-muted">{s.phone || "—"}</td>
                     <td className="py-2.5">
                       {s.active
                         ? <span className="inline-flex rounded-full bg-good-bg px-2.5 py-0.5 text-[11.5px] font-bold text-good">Active</span>
