@@ -1,8 +1,6 @@
-// The institutions shown in the Accounts portal. Ihlamudheen is this site's own
-// Supabase database. The others are separate deployments of the same
-// accounting app with their own Supabase projects; they are read and edited
-// through app/api/admin/sites/[site]/route.ts (see lib/remote-db.ts), so their
-// secret keys never reach the browser. This file is safe to import client-side.
+// The institutions shown in the Accounts portal. All of their books are kept in
+// Ihlamudheen's own database, each row tagged with its institution id
+// (supabase/institutions.sql, lib/scoped-db.ts).
 export type SiteId = "ihlamudheen" | "gracevalley" | "pmsa";
 
 export interface Site {
@@ -14,7 +12,8 @@ export interface Site {
   logo: string;
   /** Enlarges the sidebar logo to offset empty space inside the image. */
   logoScale?: number;
-  /** true = this site's own database; false = another institution's. */
+  /** true = Ihlamudheen itself, which alone also has the school ERP, the
+   *  public website and the Meelad book. */
   local: boolean;
 }
 

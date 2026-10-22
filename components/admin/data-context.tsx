@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { createRemoteClient } from "@/lib/remote-db";
+import { scopeToInstitution } from "@/lib/scoped-db";
 import { DEFAULT_SITE, getSite, type Site, type SiteId } from "@/lib/sites";
 import { isEditor, type Attendance, type Category, type Fund, type Profile, type Staff, type Transaction } from "@/lib/types";
 
@@ -23,8 +23,8 @@ type DataCtx = {
   reload: () => Promise<void>;
   reloadStaff: () => Promise<void>;
   loadAttendance: (date: string) => Promise<Attendance[]>;
-  /** The database of the selected institution. For Grace Valley / PMSA this is
-   *  lib/remote-db.ts, which supports the same query calls the pages make. */
+  /** The database, limited to the selected institution's rows on the
+   *  accounting tables (lib/scoped-db.ts). */
   supabase: SupabaseClient;
 };
 
@@ -51,10 +51,7 @@ export function DataProvider({ profile, children }: { profile: Profile; children
   // Bumped on every reload so a slow response for a previous site is dropped.
   const gen = useRef(0);
 
-  const supabase = useMemo(
-    () => (site.local ? local : (createRemoteClient(site.id) as unknown as SupabaseClient)),
-    [site, local]
-  );
+  const supabase = useMemo(() => scopeToInstitution(local, site.id), [site, local]);
 
   // Remember the chosen institution per browser.
   useEffect(() => {

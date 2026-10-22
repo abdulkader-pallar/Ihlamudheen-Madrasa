@@ -197,7 +197,7 @@ function Shell({ profile, children }: { profile: Profile; children: React.ReactN
                     ))}
                   </span>
                 </button>
-                {appsOpen && <AppsMenu role={profile.role} email={profile.email} onClose={() => setAppsOpen(false)} onSignOut={signOut} />}
+                {appsOpen && <AppsMenu role={profile.role} email={profile.email} local={site.local} onClose={() => setAppsOpen(false)} onSignOut={signOut} />}
               </div>
               <ThemeToggle />
             </div>
@@ -216,7 +216,7 @@ function Shell({ profile, children }: { profile: Profile; children: React.ReactN
   );
 }
 
-function AppsMenu({ role, email, onClose, onSignOut }: { role: Role; email?: string | null; onClose: () => void; onSignOut: () => void }) {
+function AppsMenu({ role, email, local, onClose, onSignOut }: { role: Role; email?: string | null; local: boolean; onClose: () => void; onSignOut: () => void }) {
   const superadmin = isSuperadmin(email);
 
   // Accounting roles viewer/pending fall back to the student menu. In practice
@@ -228,10 +228,19 @@ function AppsMenu({ role, email, onClose, onSignOut }: { role: Role; email?: str
   // whole portal instead of two that drift apart. getMenuForRole already carries
   // the full Accounts section, so the only thing added by hand is the
   // public-site link the old bespoke menu kept in its footer.
-  const categories = [
+  const all = [
     ...getMenuForRole(erpRole, { isSuperadmin: superadmin }),
     { title: "Site", items: [{ href: "/", label: "Website", icon: Globe, color: "bg-violet-500" }] },
   ];
+  // Everything outside the Accounts section is Ihlamudheen's own school ERP and
+  // website, so Grace Valley and PMSA only get their Accounts pages — minus the
+  // ones they don't have (NAV entries marked local, e.g. Meelad).
+  const localOnly = new Set(NAV.filter((n) => n.local).map((n) => n.href));
+  const categories = local
+    ? all
+    : all
+        .filter((c) => c.title === "Accounts")
+        .map((c) => ({ ...c, items: c.items.filter((i) => !localOnly.has(i.href)) }));
 
   return (
     <>

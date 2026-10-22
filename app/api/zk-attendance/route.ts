@@ -42,10 +42,12 @@ export async function POST(request: Request) {
 
   const supabase = createAdminClient();
 
-  // Map the device enrolment number → staff member.
+  // Map the device enrolment number → staff member. The machine is at
+  // Ihlamudheen; the other institutions' staff are numbered separately.
   const { data: staff } = await supabase
     .from("staff")
     .select("id, active")
+    .eq("institution", "ihlamudheen")
     .eq("device_user_id", deviceUserId)
     .single();
   if (!staff) return NextResponse.json({ skipped: true, reason: `Device user ${deviceUserId} not mapped to any staff` });
