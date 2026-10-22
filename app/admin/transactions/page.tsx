@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Download, Plus } from "lucide-react";
 import { useData } from "@/components/admin/data-context";
 import { PdfButton } from "@/components/admin/pdf-button";
@@ -21,6 +21,11 @@ export default function TransactionsPage() {
   const [editing, setEditing] = useState<Transaction | null | undefined>(undefined);
   const [delTarget, setDelTarget] = useState<Transaction | null>(null);
   const editor = canEdit;
+  // Bulk move to a PMSA institution: tick entries (or filter, then tick all).
+  const canMove = editor && units.length > 0;
+  const [picked, setPicked] = useState<Set<string>>(new Set());
+  const [moveTo, setMoveTo] = useState("");
+  const [moving, setMoving] = useState(false);
 
   const catName = useMemo(() => Object.fromEntries(categories.map((c) => [c.id, c.name])), [categories]);
   const fundName = useMemo(() => Object.fromEntries(funds.map((x) => [x.id, x.name])), [funds]);
@@ -37,6 +42,33 @@ export default function TransactionsPage() {
       return true;
     });
   }, [transactions, f]);
+
+  // Drop ticks that are no longer on screen (filter or institution changed).
+  useEffect(() => {
+    setPicked((p) => {
+      const ids = new Set(list.map((t) => t.id));
+      const next = new Set([...p].filter((id) => ids.has(id)));
+      return next.size === p.size ? p : next;
+    });
+  }, [list]);
+
+  const allPicked = list.length > 0 && list.every((t) => picked.has(t.id));
+  const togglePick = (id: string) => setPicked((p) => { const n = new Set(p); if (n.has(id)) n.delete(id); else n.add(id); return n; });
+  const toggleAll = () => setPicked(allPicked ? new Set() : new Set(list.map((t) => t.id)));
+
+  const moveSelected = async () => {
+    // Salary entries belong to their payroll run; move those via Payroll.
+    const ids = list.filter((t) => picked.has(t.id) && !t.payroll_run_id).map((t) => t.id);
+    const skipped = picked.size - ids.length;
+    if (!ids.length) return toast("Payroll salary entries can't be moved here.", true);
+    setMoving(true);
+    const { error } = await supabase.from("transactions").update({ unit_id: moveTo || null }).in("id", ids);
+    setMoving(false);
+    if (error) return toast(error.message, true);
+    toast(`${ids.length} entr${ids.length === 1 ? "y" : "ies"} moved to ${unitName(moveTo || null)}.${skipped ? ` ${skipped} payroll entr${skipped === 1 ? "y" : "ies"} left as they are.` : ""}`);
+    setPicked(new Set());
+    await reload();
+  };
 
   const totals = useMemo(() => {
     let income = 0, expense = 0;
@@ -93,12 +125,32 @@ export default function TransactionsPage() {
         )}
       </div>
 
+      {canMove && picked.size > 0 && (
+        <div className="no-print mb-3 flex flex-wrap items-center gap-2.5 rounded-2xl border border-brand bg-surface px-4 py-3">
+          <b className="text-[14px]">{picked.size} selected</b>
+          <span className="text-[13px] text-muted">Move to</span>
+          <select value={moveTo} onChange={(e) => setMoveTo(e.target.value)} className={cx(inputClass, "w-auto py-1.5 text-[13.5px]")}>
+            <option value="">{site.name} – Common</option>
+            {units.filter((u) => u.active).map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
+          </select>
+          <button onClick={moveSelected} disabled={moving} className={btn({ variant: "primary", size: "sm" })}>
+            {moving ? "Moving…" : "Move"}
+          </button>
+          <button onClick={() => setPicked(new Set())} className={btn({ variant: "ghost", size: "sm" })}>Clear selection</button>
+        </div>
+      )}
+
       {/* Table */}
       <div className="overflow-hidden rounded-2xl border border-line bg-surface">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[680px] text-sm">
             <thead>
               <tr className="text-left text-[11.5px] uppercase tracking-wide text-muted">
+                {canMove && (
+                  <th className="no-print w-10 py-3 pl-4">
+                    <input type="checkbox" checked={allPicked} onChange={toggleAll} aria-label="Select all shown" className="h-4 w-4 accent-[var(--brand)]" />
+                  </th>
+                )}
                 <th className="px-4 py-3 font-bold">Date</th>
                 <th className="px-4 py-3 font-bold">Type</th>
                 {hasUnits && <th className="px-4 py-3 font-bold">Institution</th>}
@@ -111,10 +163,15 @@ export default function TransactionsPage() {
             </thead>
             <tbody>
               {list.length === 0 ? (
-                <tr><td colSpan={(editor ? 7 : 6) + (hasUnits ? 1 : 0)}><EmptyState>No transactions match.</EmptyState></td></tr>
+                <tr><td colSpan={(editor ? 7 : 6) + (hasUnits ? 1 : 0) + (canMove ? 1 : 0)}><EmptyState>No transactions match.</EmptyState></td></tr>
               ) : (
                 list.map((t) => (
-                  <tr key={t.id} className="border-t border-line hover:bg-surface-2">
+                  <tr key={t.id} className={cx("border-t border-line hover:bg-surface-2", picked.has(t.id) && "bg-surface-2")}>
+                    {canMove && (
+                      <td className="no-print py-3 pl-4">
+                        <input type="checkbox" checked={picked.has(t.id)} onChange={() => togglePick(t.id)} aria-label="Select entry" className="h-4 w-4 accent-[var(--brand)]" />
+                      </td>
+                    )}
                     <td className="tnum px-4 py-3">{fmtDate(t.occurred_on)}</td>
                     <td className="px-4 py-3"><Pill type={t.type} /></td>
                     {hasUnits && <td className="px-4 py-3 text-muted">{unitName(t.unit_id)}</td>}
