@@ -104,7 +104,7 @@ export default function TransactionsPage() {
                 <th className="px-4 py-3 font-bold">Fund</th>
                 <th className="px-4 py-3 font-bold">Description</th>
                 <th className="px-4 py-3 text-right font-bold">Amount</th>
-                {editor && <th className="px-4 py-3 text-right font-bold">Actions</th>}
+                {editor && <th className="no-print px-4 py-3 text-right font-bold">Actions</th>}
               </tr>
             </thead>
             <tbody>
@@ -126,7 +126,7 @@ export default function TransactionsPage() {
                       {t.type === "expense" ? "−" : "+"}{fmt(t.amount)}
                     </td>
                     {editor && (
-                      <td className="px-4 py-3">
+                      <td className="no-print px-4 py-3">
                         <div className="flex justify-end gap-1.5">
                           <button onClick={() => setEditing(t)} className={btn({ variant: "ghost", size: "sm" })}>Edit</button>
                           <button onClick={() => setDelTarget(t)} className={btn({ variant: "danger", size: "sm" })}>Delete</button>

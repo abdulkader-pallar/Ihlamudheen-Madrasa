@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { BarChart3, Banknote, Building2, Fingerprint, Globe, PieChart, LayoutDashboard, ListOrdered, LogOut, Menu, SlidersHorizontal, UserRound, Users, Wallet } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { BarChart3, Banknote, Building2, FileDown, Fingerprint, Globe, PieChart, LayoutDashboard, ListOrdered, LogOut, Menu, SlidersHorizontal, UserRound, Users, Wallet } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { Toaster } from "@/components/ui/toast";
+import { toast, Toaster } from "@/components/ui/toast";
+import { downloadAccountsPdf } from "@/lib/accounts-pdf";
 import { DataProvider, useData } from "./data-context";
 import { SITES } from "@/lib/sites";
 import { getMenuForRole, NavMenuBody } from "@/components/app-launcher";
@@ -57,6 +58,19 @@ function Shell({ profile, children }: { profile: Profile; children: React.ReactN
   const router = useRouter();
   const { site, setSite, canEdit, error, units, unit, setUnit, unitName, loading } = useData();
   const hasUnits = units.length > 0;
+  const scope = hasUnits && unit !== "all" ? unitName(unit === "common" ? null : unit) : site.name;
+  const mainRef = useRef<HTMLElement>(null);
+  const [pdfBusy, setPdfBusy] = useState(false);
+  const downloadPdf = async () => {
+    if (!mainRef.current) return;
+    setPdfBusy(true);
+    try {
+      await downloadAccountsPdf({ root: mainRef.current, site, title: TITLES[pathname] || "Accounts", scope });
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "Could not make the PDF.", true);
+    }
+    setPdfBusy(false);
+  };
   const [open, setOpen] = useState(false);
   const [appsOpen, setAppsOpen] = useState(false);
   const admin = profile.role === "admin";
@@ -215,10 +229,19 @@ function Shell({ profile, children }: { profile: Profile; children: React.ReactN
               <h1 className="font-display text-xl font-semibold sm:text-[22px]">
                 {TITLES[pathname] || "Accounts"}
                 <span className="font-normal text-muted"> — </span>
-                <span className="text-brand">{hasUnits && unit !== "all" ? unitName(unit === "common" ? null : unit) : site.name}</span>
+                <span className="text-brand">{scope}</span>
               </h1>
             </div>
             <div className="flex items-center gap-2.5">
+              <button
+                onClick={downloadPdf}
+                disabled={pdfBusy}
+                title="Download this page as a PDF"
+                className="flex h-10 items-center gap-1.5 rounded-xl border border-line bg-surface px-3 text-[13.5px] font-bold text-ink transition hover:border-brand hover:text-brand disabled:opacity-60"
+              >
+                <FileDown size={17} />
+                <span className="hidden sm:inline">{pdfBusy ? "Making…" : "PDF"}</span>
+              </button>
               <div className="relative">
                 <button
                   onClick={() => setAppsOpen((v) => !v)}
@@ -241,7 +264,7 @@ function Shell({ profile, children }: { profile: Profile; children: React.ReactN
             </div>
           </header>
 
-          <main className="p-4 sm:p-7">
+          <main ref={mainRef} className="p-4 sm:p-7">
             {error ? (
               <div className="rounded-xl border border-bad bg-bad-bg px-4 py-3 text-[14px] font-semibold text-bad">{error}</div>
             ) : (

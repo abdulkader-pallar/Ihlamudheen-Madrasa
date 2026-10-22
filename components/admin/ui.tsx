@@ -37,7 +37,7 @@ export function Modal({ title, onClose, children }: { title: string; onClose: ()
 
 export function Panel({ title, action, children, className }: { title?: string; action?: React.ReactNode; children: React.ReactNode; className?: string }) {
   return (
-    <div className={cx("rounded-2xl border border-line bg-surface p-5 shadow-soft", className)}>
+    <div data-pdf-title={title || undefined} className={cx("rounded-2xl border border-line bg-surface p-5 shadow-soft", className)}>
       {title && (
         <h3 className="mb-3.5 flex items-center justify-between gap-2 text-base font-bold">
           {title}
@@ -76,7 +76,13 @@ export function StatCard({
   const c = ACCENT_COLOR[accent];
   const valueColor = valueTone === "good" ? "var(--good)" : valueTone === "bad" ? "var(--bad)" : "var(--ink)";
   return (
-    <div className="flex items-center gap-4 rounded-2xl border border-line bg-surface p-5 shadow-soft transition hover:shadow-card">
+    <div
+      data-pdf-stat=""
+      data-label={label}
+      data-value={value}
+      data-sub={sub || undefined}
+      className="flex items-center gap-4 rounded-2xl border border-line bg-surface p-5 shadow-soft transition hover:shadow-card"
+    >
       <div
         className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl"
         style={{ background: `color-mix(in srgb, ${c} 15%, transparent)`, color: c }}

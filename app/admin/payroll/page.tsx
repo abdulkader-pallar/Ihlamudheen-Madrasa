@@ -319,7 +319,7 @@ export default function PayrollPage() {
                       <th className="py-2 text-right font-bold">Net pay</th>
                       <th className="py-2 text-right font-bold">Total cost</th>
                       <th className="py-2 font-bold">Note</th>
-                      {editable && <th className="py-2" />}
+                      {editable && <th className="no-print py-2" />}
                     </tr>
                   </thead>
                   <tbody>
@@ -351,7 +351,7 @@ export default function PayrollPage() {
                             : l.note || ""}
                         </td>
                         {editable && (
-                          <td className="py-2 text-right">
+                          <td className="no-print py-2 text-right">
                             <button onClick={() => removeLine(l)} className="grid h-8 w-8 place-items-center rounded-lg text-bad hover:bg-bad-bg" aria-label={`Remove ${l.staff_name}`}><Trash2 size={14} /></button>
                           </td>
                         )}
@@ -366,7 +366,8 @@ export default function PayrollPage() {
                       <td />
                       <td className="tnum py-2.5 text-right">{fmt(totals.net)}</td>
                       <td className="tnum py-2.5 text-right">{fmt(totals.cost)}</td>
-                      <td colSpan={editable ? 2 : 1} />
+                      <td />
+                      {editable && <td className="no-print" />}
                     </tr>
                   </tfoot>
                 </table>

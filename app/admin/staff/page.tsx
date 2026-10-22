@@ -173,7 +173,7 @@ export default function StaffPage() {
                   <th className="py-2 font-bold">Device id</th>
                   <th className="py-2 font-bold">Phone</th>
                   <th className="py-2 font-bold">Status</th>
-                  {canEdit && <th className="py-2 text-right font-bold">Actions</th>}
+                  {canEdit && <th className="no-print py-2 text-right font-bold">Actions</th>}
                 </tr>
               </thead>
               <tbody>
@@ -195,7 +195,7 @@ export default function StaffPage() {
                         : <span className="inline-flex rounded-full bg-muted/20 px-2.5 py-0.5 text-[11.5px] font-bold text-muted">Inactive</span>}
                     </td>
                     {canEdit && (
-                      <td className="py-2.5">
+                      <td className="no-print py-2.5">
                         <div className="flex justify-end gap-1.5">
                           <button onClick={() => setEdit(s)} className={btn({ variant: "ghost", size: "sm" })} aria-label={`Edit ${s.name}`}>
                             <Pencil size={14} /> Edit

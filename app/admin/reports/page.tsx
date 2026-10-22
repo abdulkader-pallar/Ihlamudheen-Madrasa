@@ -68,7 +68,7 @@ export default function ReportsPage() {
             <option value="fund">Fund</option>
           </select>
         </div>
-        <button onClick={() => window.print()} className={btn({ variant: "ghost", size: "sm" })}><Printer size={14} /> Print / PDF</button>
+        <button onClick={() => window.print()} className={btn({ variant: "ghost", size: "sm" })}><Printer size={14} /> Print</button>
         <button onClick={exportCSV} className={btn({ variant: "ghost", size: "sm" })}><Download size={14} /> CSV</button>
       </div>
 
