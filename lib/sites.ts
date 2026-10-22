@@ -29,7 +29,7 @@ export const SITES: Site[] = [
   { id: "gracevalley", tab: "Grace Valley", name: "Grace Valley", logo: "/sites/grace-valley.png", local: false,
     fullName: "Grace Valley Institutions", pdfLogo: "/sites/grace-valley.png", pdfColor: "#1B7F3B" },
   { id: "pmsa", tab: "PMSA", name: "PMSA", logo: "/sites/pmsa.png", local: false,
-    fullName: "PMSA Pookoya Thangal Memorial Orphanage, Kattilangadi", pdfLogo: "/sites/pmsa.png", pdfColor: "#0E3A63" },
+    fullName: "PMSA Kattilangadi", pdfLogo: "/sites/pmsa.png", pdfColor: "#0E3A63" },
 ];
 
 export const DEFAULT_SITE: SiteId = "ihlamudheen";

@@ -97,13 +97,19 @@ export async function downloadAccountsPdf({ root, site, title, scope, preview }:
     import("jspdf"), import("jspdf-autotable"), logoData(site.pdfLogo),
   ]);
   const widest = Math.max(0, ...sections.map((s) => Math.max(...[...s.head, ...s.body].map((r) => r.reduce((a, c) => a + (c.colSpan || 1), 0)))));
-  const doc = new jsPDF({ orientation: widest > 6 ? "landscape" : "portrait", unit: "mm", format: "a4" });
+  // Always portrait; wide tables (payroll, the financial-year grid) get a
+  // smaller font so they still fit across the page.
+  const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+  const fontSize = widest > 9 ? 6.5 : widest > 7 ? 7.2 : widest > 5 ? 8 : 8.5;
   const W = doc.internal.pageSize.getWidth();
   const H = doc.internal.pageSize.getHeight();
   const M = 14;
   const color = hexRgb(site.pdfColor);
   const generated = new Date().toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
-  const heading = clean(`${title} - ${scope}`);
+  // A PMSA institution (Yatheem Khana, …) is named under the letterhead, so
+  // the page heading doesn't repeat it.
+  const sub = scope !== site.name ? clean(scope) : null;
+  const heading = sub ? clean(title) : clean(`${title} - ${scope}`);
 
   // Letterhead
   let x = M;
@@ -117,12 +123,14 @@ export async function downloadAccountsPdf({ root, site, title, scope, preview }:
   doc.setFont("helvetica", "bold");
   doc.setFontSize(site.fullName.length > 40 ? 14 : 17);
   doc.text(doc.splitTextToSize(clean(site.fullName), W - x - M), x, 17);
+  if (sub) {
+    doc.setFontSize(12.5);
+    doc.text(sub, x, 24.5);
+  }
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
+  doc.setFontSize(9);
   doc.setTextColor(90);
-  doc.text("Accounts", x, 25);
-  doc.setFontSize(8.5);
-  doc.text(`Generated ${generated}`, x, 31);
+  doc.text(`Accounts  |  Generated ${generated}`, x, sub ? 31 : 26);
   doc.setDrawColor(...color);
   doc.setLineWidth(0.8);
   doc.line(M, 38, W - M, 38);
@@ -165,21 +173,33 @@ export async function downloadAccountsPdf({ root, site, title, scope, preview }:
   // Tables
   for (const s of sections) {
     if (y > H - 40) { doc.addPage(); y = 22; }
-    if (s.title) {
+    // Wide tables in portrait: drop "Rs." from every amount so figures stay on
+    // one line, and say once that amounts are in rupees.
+    const cols = Math.max(...[...s.head, ...s.body].map((r) => r.reduce((a, c) => a + (c.colSpan || 1), 0)));
+    const bare = cols > 6;
+    const strip = (rows: Cell[][]) => (bare ? rows.map((r) => r.map((c) => ({ ...c, content: c.content.replace(/Rs\. /g, "") }))) : rows);
+    const titleText = s.title || bare;
+    if (titleText) {
       doc.setFont("helvetica", "bold");
       doc.setFontSize(11);
       doc.setTextColor(...color);
-      doc.text(s.title, M, y + 4);
+      if (s.title) doc.text(s.title, M, y + 4);
+      if (bare) {
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(8.5);
+        doc.setTextColor(110);
+        doc.text("Amounts in Rs.", W - M, y + 4, { align: "right" });
+      }
       y += 7;
     }
     autoTable(doc, {
       startY: y,
       head: s.head,
-      body: s.body,
-      foot: s.foot,
+      body: strip(s.body),
+      foot: strip(s.foot),
       showFoot: "lastPage",
       margin: { left: M, right: M, top: 22, bottom: 16 },
-      styles: { fontSize: 8.5, cellPadding: 1.8, textColor: 30, lineColor: 225, lineWidth: 0.1 },
+      styles: { fontSize, cellPadding: fontSize < 8 ? 1.3 : 1.8, textColor: 30, lineColor: 225, lineWidth: 0.1 },
       headStyles: { fillColor: color, textColor: 255, fontStyle: "bold" },
       footStyles: { fillColor: [238, 241, 245], textColor: 20, fontStyle: "bold" },
       alternateRowStyles: { fillColor: [248, 249, 251] },
@@ -196,7 +216,7 @@ export async function downloadAccountsPdf({ root, site, title, scope, preview }:
     doc.setFontSize(8);
     doc.setTextColor(120);
     if (i > 1) {
-      doc.text(`${clean(site.fullName)} - ${heading}`, M, 12);
+      doc.text([clean(site.fullName), sub, heading].filter(Boolean).join(" - "), M, 12);
       doc.setDrawColor(...color);
       doc.setLineWidth(0.4);
       doc.line(M, 14.5, W - M, 14.5);
