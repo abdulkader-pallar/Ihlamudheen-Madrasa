@@ -1,17 +1,30 @@
 "use client";
 
 import { useState } from "react";
+import { Banknote, Trash2, UserCheck, UserX } from "lucide-react";
 import { useData } from "@/components/admin/data-context";
 import { Modal } from "@/components/admin/ui";
 import { toast } from "@/components/ui/toast";
 import { todayISO } from "@/lib/format";
 import type { Staff } from "@/lib/types";
-import { btn, inputClass, labelClass } from "@/lib/ui";
+import { btn, cx, inputClass, labelClass } from "@/lib/ui";
 
 // Add / edit one staff member on the selected institution. Used by the Staff
 // page. Institutions with units (PMSA) also set
 // the unit and salary here; allowances and deductions live in SalaryDialog.
-export function StaffDialog({ staff, onClose, onSaved }: { staff: Staff | null; onClose: () => void; onSaved: () => void }) {
+//
+// This is the only place a staff member is acted on: the Staff page's rows
+// carry nothing but Edit, so an existing member's Salary, Deactivate and
+// Delete are the buttons below (each is handed in by the page, which owns the
+// salary and delete dialogs).
+export function StaffDialog({ staff, onClose, onSaved, onSalary, onToggleActive, onDelete }: {
+  staff: Staff | null;
+  onClose: () => void;
+  onSaved: () => void;
+  onSalary?: () => void;
+  onToggleActive?: () => void;
+  onDelete?: () => void;
+}) {
   const { supabase, units, unit, reloadSalary } = useData();
   const hasUnits = units.length > 0;
   const [unitId, setUnitId] = useState(staff ? staff.unit_id ?? "" : unit === "all" || unit === "common" ? "" : unit);
@@ -113,13 +126,39 @@ export function StaffDialog({ staff, onClose, onSaved }: { staff: Staff | null; 
                 <input type="date" value={leftOn} onChange={(e) => setLeftOn(e.target.value)} className={inputClass} />
               </div>
             </div>
-            <p className="-mt-1 text-[12px] text-muted">Allowances, deductions and PF/ESI are added with the <b>Salary</b> button on the Staff page.</p>
+            <p className="-mt-1 text-[12px] text-muted">Allowances, deductions and PF/ESI are added with the <b>Salary</b> button {staff ? "below" : "here once this is saved"}.</p>
           </>
         )}
-        <label className="flex items-center gap-2.5 text-[14px] font-semibold">
-          <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} className="h-4 w-4 accent-[var(--brand)]" />
-          Active (on the staff list and payroll)
-        </label>
+        {!staff && (
+          <label className="flex items-center gap-2.5 text-[14px] font-semibold">
+            <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} className="h-4 w-4 accent-[var(--brand)]" />
+            Active (on the staff list and payroll)
+          </label>
+        )}
+
+        {staff && (onSalary || onToggleActive || onDelete) && (
+          <div className="border-t border-line pt-3.5">
+            <p className="mb-2 text-[12px] text-muted">These act on {staff.name} straight away; anything typed above is not saved.</p>
+            <div className="flex flex-wrap gap-2">
+              {onSalary && (
+                <button onClick={onSalary} className={btn({ variant: "ghost", size: "sm" })}>
+                  <Banknote size={14} /> Salary
+                </button>
+              )}
+              {onToggleActive && (
+                <button onClick={onToggleActive} className={btn({ variant: "ghost", size: "sm" })}>
+                  {staff.active ? <><UserX size={14} /> Deactivate</> : <><UserCheck size={14} /> Activate</>}
+                </button>
+              )}
+              {onDelete && (
+                <button onClick={onDelete} className={cx(btn({ variant: "ghost", size: "sm" }), "text-bad hover:bg-bad-bg")}>
+                  <Trash2 size={14} /> Delete
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
         <div className="mt-1 flex justify-end gap-2.5">
           <button onClick={onClose} className={btn({ variant: "ghost" })}>Cancel</button>
           <button onClick={save} disabled={busy} className={btn({ variant: "primary" })}>{busy ? "Saving…" : "Save"}</button>

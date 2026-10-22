@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Banknote, Download, IndianRupee, Pencil, Plus, Search, Trash2, UserCheck, UserRound, UserX } from "lucide-react";
+import { Download, IndianRupee, Pencil, Plus, Search, Trash2, UserCheck, UserRound, UserX } from "lucide-react";
 import { useData } from "@/components/admin/data-context";
 import { PdfButton } from "@/components/admin/pdf-button";
 import { EmptyState, Modal, Panel, Spinner, StatCard } from "@/components/admin/ui";
@@ -163,7 +163,7 @@ export default function StaffPage() {
           <EmptyState>No staff match.</EmptyState>
         ) : (
           <div className="overflow-x-auto">
-            <table className={cx("w-full text-sm", hasUnits ? "min-w-[960px]" : "min-w-[700px]")}>
+            <table className={cx("w-full text-sm", hasUnits ? "min-w-[840px]" : "min-w-[620px]")}>
               <thead>
                 <tr className="text-left text-[11.5px] uppercase tracking-wide text-muted">
                   <th className="py-2 font-bold">ID</th>
@@ -196,20 +196,10 @@ export default function StaffPage() {
                     </td>
                     {canEdit && (
                       <td className="no-print py-2.5">
-                        <div className="flex justify-end gap-1.5">
+                        {/* Salary, Deactivate and Delete live inside this dialog. */}
+                        <div className="flex justify-end">
                           <button onClick={() => setEdit(s)} className={btn({ variant: "ghost", size: "sm" })} aria-label={`Edit ${s.name}`}>
                             <Pencil size={14} /> Edit
-                          </button>
-                          {hasUnits && (
-                            <button onClick={() => setSalaryOf(s)} className={btn({ variant: "ghost", size: "sm" })}>
-                              <Banknote size={14} /> Salary
-                            </button>
-                          )}
-                          <button onClick={() => setActive(s, !s.active)} className={btn({ variant: "ghost", size: "sm" })}>
-                            {s.active ? <><UserX size={14} /> Deactivate</> : <><UserCheck size={14} /> Activate</>}
-                          </button>
-                          <button onClick={() => setDel(s)} className="grid h-8 w-8 place-items-center rounded-lg text-bad hover:bg-bad-bg" aria-label={`Delete ${s.name}`}>
-                            <Trash2 size={15} />
                           </button>
                         </div>
                       </td>
@@ -227,6 +217,9 @@ export default function StaffPage() {
           staff={edit === "new" ? null : edit}
           onClose={() => setEdit(null)}
           onSaved={async () => { setEdit(null); await reloadStaff(); }}
+          onSalary={hasUnits && edit !== "new" ? () => { setSalaryOf(edit); setEdit(null); } : undefined}
+          onToggleActive={edit !== "new" ? async () => { setEdit(null); await setActive(edit, !edit.active); } : undefined}
+          onDelete={edit !== "new" ? () => { setDel(edit); setEdit(null); } : undefined}
         />
       )}
 
