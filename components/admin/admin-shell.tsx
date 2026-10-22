@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/client";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { toast, Toaster } from "@/components/ui/toast";
 import { downloadAccountsPdf } from "@/lib/accounts-pdf";
+import { PdfContext } from "./pdf-button";
 import { DataProvider, useData } from "./data-context";
 import { SITES } from "@/lib/sites";
 import { getMenuForRole, NavMenuBody } from "@/components/app-launcher";
@@ -265,11 +266,13 @@ function Shell({ profile, children }: { profile: Profile; children: React.ReactN
           </header>
 
           <main ref={mainRef} className="p-4 sm:p-7">
+            <PdfContext.Provider value={{ download: downloadPdf, busy: pdfBusy }}>
             {error ? (
               <div className="rounded-xl border border-bad bg-bad-bg px-4 py-3 text-[14px] font-semibold text-bad">{error}</div>
             ) : (
               children
             )}
+            </PdfContext.Provider>
           </main>
         </div>
       </div>

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { BadgeCheck, Banknote, Download, Printer, RefreshCw, RotateCcw, Trash2, Undo2, Users, Wallet } from "lucide-react";
 import { useData } from "@/components/admin/data-context";
+import { PdfButton } from "@/components/admin/pdf-button";
 import { EmptyState, Modal, Panel, Spinner, StatCard } from "@/components/admin/ui";
 import { toast } from "@/components/ui/toast";
 import { downloadCSV } from "@/lib/csv";
@@ -281,6 +282,7 @@ export default function PayrollPage() {
                 </span>
                 <button onClick={() => window.print()} className={btn({ variant: "ghost", size: "sm" })}><Printer size={14} /> Print</button>
                 <button onClick={exportCSV} disabled={!lines?.length} className={btn({ variant: "ghost", size: "sm" })}><Download size={14} /> CSV</button>
+        <PdfButton />
                 {canEdit && run.status === "draft" && (
                   <>
                     <button onClick={() => setConfirm("regenerate")} className={btn({ variant: "ghost", size: "sm" })}><RefreshCw size={14} /> Rebuild</button>

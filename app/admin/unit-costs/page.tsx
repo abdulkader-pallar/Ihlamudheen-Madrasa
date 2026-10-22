@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Building2, Download, IndianRupee, Printer, TrendingDown, Users } from "lucide-react";
 import { useData } from "@/components/admin/data-context";
+import { PdfButton } from "@/components/admin/pdf-button";
 import { EmptyState, Panel, Spinner, StatCard } from "@/components/admin/ui";
 import { toast } from "@/components/ui/toast";
 import { downloadCSV } from "@/lib/csv";
@@ -132,6 +133,7 @@ export default function UnitCostsPage() {
         </div>
         <button onClick={() => window.print()} className={btn({ variant: "ghost", size: "sm" })}><Printer size={14} /> Print</button>
         <button onClick={exportCSV} className={btn({ variant: "ghost", size: "sm" })}><Download size={14} /> CSV</button>
+        <PdfButton />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Download, Plus } from "lucide-react";
 import { useData } from "@/components/admin/data-context";
+import { PdfButton } from "@/components/admin/pdf-button";
 import { EmptyState, Modal, Pill, Spinner } from "@/components/admin/ui";
 import { TxDialog } from "@/components/admin/tx-dialog";
 import { toast } from "@/components/ui/toast";
@@ -84,6 +85,7 @@ export default function TransactionsPage() {
         </div>
         <button onClick={() => setF(empty)} className={btn({ variant: "ghost", size: "sm" })}>Clear</button>
         <button onClick={exportCSV} className={btn({ variant: "ghost", size: "sm" })}><Download size={14} /> CSV</button>
+        <PdfButton />
         {editor && (
           <button onClick={() => setEditing(null)} className={cx(btn({ variant: "primary", size: "sm" }), "ml-auto")}>
             <Plus size={14} /> New entry

@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Banknote, Download, Fingerprint, IndianRupee, Pencil, Plus, Search, Trash2, UserCheck, UserRound, UserX } from "lucide-react";
 import { useData } from "@/components/admin/data-context";
+import { PdfButton } from "@/components/admin/pdf-button";
 import { EmptyState, Modal, Panel, Spinner, StatCard } from "@/components/admin/ui";
 import { StaffDialog } from "@/components/admin/staff-dialog";
 import { SalaryDialog } from "@/components/admin/salary-dialog";
@@ -137,6 +138,7 @@ export default function StaffPage() {
         action={
           <div className="flex gap-2">
             <button onClick={exportCSV} disabled={!list.length} className={btn({ variant: "ghost", size: "sm" })}><Download size={14} /> CSV</button>
+        <PdfButton />
             {canEdit && <button onClick={() => setEdit("new")} className={btn({ variant: "primary", size: "sm" })}><Plus size={15} /> Add staff</button>}
           </div>
         }

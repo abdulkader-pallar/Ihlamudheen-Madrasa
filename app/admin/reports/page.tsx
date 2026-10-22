@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Download, Printer, TrendingDown, TrendingUp, Wallet } from "lucide-react";
 import { useData } from "@/components/admin/data-context";
+import { PdfButton } from "@/components/admin/pdf-button";
 import { EmptyState, Spinner, StatCard } from "@/components/admin/ui";
 import { toast } from "@/components/ui/toast";
 import { fmt, fmtDate, monthKey, monthLabel, round2 } from "@/lib/format";
@@ -70,6 +71,7 @@ export default function ReportsPage() {
         </div>
         <button onClick={() => window.print()} className={btn({ variant: "ghost", size: "sm" })}><Printer size={14} /> Print</button>
         <button onClick={exportCSV} className={btn({ variant: "ghost", size: "sm" })}><Download size={14} /> CSV</button>
+        <PdfButton />
       </div>
 
       <div className="mb-4 rounded-2xl border border-line bg-surface p-5 shadow-soft">
