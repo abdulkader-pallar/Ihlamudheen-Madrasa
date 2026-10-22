@@ -55,7 +55,7 @@ export function AdminShell({ profile, children }: { profile: Profile; children: 
 function Shell({ profile, children }: { profile: Profile; children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { site, setSite, canEdit, error, units, unit, setUnit, loading } = useData();
+  const { site, setSite, canEdit, error, units, unit, setUnit, unitName, loading } = useData();
   const hasUnits = units.length > 0;
   const [open, setOpen] = useState(false);
   const [appsOpen, setAppsOpen] = useState(false);
@@ -210,7 +210,13 @@ function Shell({ profile, children }: { profile: Profile; children: React.ReactN
               <button className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-surface text-ink md:hidden" aria-label="Menu" onClick={() => setOpen(true)}>
                 <Menu size={20} />
               </button>
-              <h1 className="font-display text-xl font-semibold sm:text-[22px]">{TITLES[pathname] || "Accounts"}</h1>
+              {/* Page name, then whose books they are: the selected PMSA
+                  institution when one is picked, else the whole institution. */}
+              <h1 className="font-display text-xl font-semibold sm:text-[22px]">
+                {TITLES[pathname] || "Accounts"}
+                <span className="font-normal text-muted"> — </span>
+                <span className="text-brand">{hasUnits && unit !== "all" ? unitName(unit === "common" ? null : unit) : site.name}</span>
+              </h1>
             </div>
             <div className="flex items-center gap-2.5">
               <div className="relative">
