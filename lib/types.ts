@@ -42,6 +42,9 @@ export interface Transaction {
 export interface Staff {
   id: string;
   name: string;
+  /** The institution's own staff ID number, as printed on its salary
+   *  statements. Unique within the unit; see supabase/staff-code.sql. */
+  code?: string | null;
   designation: string | null;
   device_user_id: number | null;
   phone: string | null;

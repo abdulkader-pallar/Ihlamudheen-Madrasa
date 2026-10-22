@@ -22,6 +22,7 @@ export function StaffDialog({ staff, onClose, onSaved }: { staff: Staff | null; 
   const [leftOn, setLeftOn] = useState(staff?.left_on || "");
   const basicChanged = (basic.trim() === "" ? null : Number(basic)) !== (staff?.basic_salary != null ? Number(staff.basic_salary) : null);
   const [name, setName] = useState(staff?.name || "");
+  const [code, setCode] = useState(staff?.code || "");
   const [designation, setDesignation] = useState(staff?.designation || "");
   const [phone, setPhone] = useState(staff?.phone || "");
   const [active, setActive] = useState(staff?.active ?? true);
@@ -36,7 +37,7 @@ export function StaffDialog({ staff, onClose, onSaved }: { staff: Staff | null; 
     }
     setBusy(true);
     const payload = {
-      name: name.trim(), designation: designation.trim() || null, phone: phone.trim() || null, active,
+      name: name.trim(), code: code.trim() || null, designation: designation.trim() || null, phone: phone.trim() || null, active,
       ...(hasUnits ? { unit_id: unitId || null, basic_salary, joined_on: joinedOn || null, left_on: leftOn || null } : {}),
     };
     const res = staff
@@ -53,7 +54,9 @@ export function StaffDialog({ staff, onClose, onSaved }: { staff: Staff | null; 
     }
     setBusy(false);
     if (error) {
-      toast(error.message, true);
+      toast(error.message.includes("uq_staff_code")
+        ? `Staff ID ${code.trim()} is already used by someone on this institution.`
+        : error.message, true);
       return;
     }
     toast(staff ? "Staff updated." : "Staff added.");
@@ -63,9 +66,15 @@ export function StaffDialog({ staff, onClose, onSaved }: { staff: Staff | null; 
   return (
     <Modal title={staff ? "Edit staff" : "Add staff"} onClose={onClose}>
       <div className="grid gap-3.5">
-        <div>
-          <label className={labelClass}>Full name</label>
-          <input value={name} onChange={(e) => setName(e.target.value)} className={inputClass} placeholder="e.g. Abdul Rahim" />
+        <div className="grid gap-3.5 sm:grid-cols-[1fr_7rem]">
+          <div>
+            <label className={labelClass}>Full name</label>
+            <input value={name} onChange={(e) => setName(e.target.value)} className={inputClass} placeholder="e.g. Abdul Rahim" />
+          </div>
+          <div>
+            <label className={labelClass}>Staff ID</label>
+            <input value={code} onChange={(e) => setCode(e.target.value)} className={inputClass} placeholder="e.g. 212" />
+          </div>
         </div>
         <div>
           <label className={labelClass}>Designation</label>

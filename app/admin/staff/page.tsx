@@ -57,7 +57,7 @@ export default function StaffPage() {
       if (show === "active" && !s.active) return false;
       if (show === "inactive" && s.active) return false;
       if (!term) return true;
-      return [s.name, s.designation, s.phone, hasUnits ? unitName(s.unit_id) : null].some((v) => v?.toLowerCase().includes(term));
+      return [s.name, s.code, s.designation, s.phone, hasUnits ? unitName(s.unit_id) : null].some((v) => v?.toLowerCase().includes(term));
     });
   }, [staff, q, show, hasUnits, unitName]);
 
@@ -78,9 +78,9 @@ export default function StaffPage() {
   };
 
   const exportCSV = () => {
-    const rows: (string | number)[][] = [["Name", "Designation", ...(hasUnits ? ["Institution", "Basic", "Monthly cost"] : []), "Phone", "Status"]];
+    const rows: (string | number)[][] = [["Staff ID", "Name", "Designation", ...(hasUnits ? ["Institution", "Basic", "Monthly cost"] : []), "Phone", "Status"]];
     list.forEach((s) => rows.push([
-      s.name, s.designation || "",
+      s.code || "", s.name, s.designation || "",
       ...(hasUnits ? [unitName(s.unit_id), Number(s.basic_salary ?? 0), fromPaise(costOf[s.id] || 0)] : []),
       s.phone || "", s.active ? "Active" : "Inactive",
     ]));
@@ -144,7 +144,7 @@ export default function StaffPage() {
         <div className="mb-4 flex flex-wrap items-center gap-2.5">
           <label className="relative min-w-[200px] flex-1">
             <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name, designation, phone"
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search staff ID, name, designation, phone"
               className={cx(inputClass, "py-2 pl-9")} aria-label="Search staff" />
           </label>
           <div className="flex gap-1 rounded-xl border border-line bg-surface-2 p-1" role="tablist" aria-label="Show">
@@ -163,9 +163,10 @@ export default function StaffPage() {
           <EmptyState>No staff match.</EmptyState>
         ) : (
           <div className="overflow-x-auto">
-            <table className={cx("w-full text-sm", hasUnits ? "min-w-[900px]" : "min-w-[640px]")}>
+            <table className={cx("w-full text-sm", hasUnits ? "min-w-[960px]" : "min-w-[700px]")}>
               <thead>
                 <tr className="text-left text-[11.5px] uppercase tracking-wide text-muted">
+                  <th className="py-2 font-bold">ID</th>
                   <th className="py-2 font-bold">Name</th>
                   <th className="py-2 font-bold">Designation</th>
                   {hasUnits && <th className="py-2 font-bold">Institution</th>}
@@ -178,6 +179,7 @@ export default function StaffPage() {
               <tbody>
                 {list.map((s) => (
                   <tr key={s.id} className="border-t border-line align-middle">
+                    <td className="tnum py-2.5 text-muted">{s.code || "—"}</td>
                     <td className="py-2.5 font-bold">{s.name}</td>
                     <td className="py-2.5 text-muted">{s.designation || "—"}</td>
                     {hasUnits && <td className="py-2.5 text-muted">{unitName(s.unit_id)}</td>}
