@@ -1,10 +1,14 @@
 // Content-Security-Policy. 'unsafe-inline' is needed for Next's inline runtime,
 // the theme script, and Tailwind's injected styles; scripts/styles are otherwise
 // self-only. connect-src allows the Supabase REST + realtime endpoints.
+// frame-src allows blob: for the Accounts PDF preview, which shows the PDF it
+// has just made in the browser (components/admin/pdf-preview.tsx) - a blob:
+// URL from this page itself, never another site.
 const csp = [
   "default-src 'self'",
   "base-uri 'self'",
   "object-src 'none'",
+  "frame-src 'self' blob:",
   "frame-ancestors 'none'",
   "img-src 'self' data: blob:",
   "font-src 'self'",
