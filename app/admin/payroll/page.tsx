@@ -317,9 +317,10 @@ export default function PayrollPage() {
               <EmptyState>No staff in this run.{editable && " Use Rebuild after adding staff to the institution."}</EmptyState>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[980px] text-sm">
+                <table className="w-full min-w-[1040px] text-sm">
                   <thead>
                     <tr className="text-left text-[11.5px] uppercase tracking-wide text-muted">
+                      <th className="py-2 pr-4 font-bold">Sl. No.</th>
                       <th className="py-2 font-bold">Staff</th>
                       <th className="py-2 text-right font-bold">Days</th>
                       <th className="py-2 text-right font-bold">Basic</th>
@@ -334,8 +335,9 @@ export default function PayrollPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {lines.map((l) => (
+                    {lines.map((l, i) => (
                       <tr key={l.id} className="border-t border-line align-middle">
+                        <td className="tnum py-2 pr-4 text-muted">{i + 1}</td>
                         <td className="py-2">
                           <div className="font-bold">{l.staff_name}</div>
                           <div className="text-[11.5px] text-muted">{l.designation || "Staff"}</div>
@@ -371,7 +373,7 @@ export default function PayrollPage() {
                   </tbody>
                   <tfoot>
                     <tr className="border-t-2 border-line font-extrabold">
-                      <td className="py-2.5">Total</td>
+                      <td colSpan={2} className="py-2.5">Total</td>
                       <td colSpan={4} />
                       <td className="tnum py-2.5 text-right">{fmt(totals.gross)}</td>
                       <td />

@@ -143,7 +143,7 @@ export default function TransactionsPage() {
       {/* Table */}
       <div className="overflow-hidden rounded-2xl border border-line bg-surface">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[680px] text-sm">
+          <table className="w-full min-w-[740px] text-sm">
             <thead>
               <tr className="text-left text-[11.5px] uppercase tracking-wide text-muted">
                 {canMove && (
@@ -151,6 +151,7 @@ export default function TransactionsPage() {
                     <input type="checkbox" checked={allPicked} onChange={toggleAll} aria-label="Select all shown" className="h-4 w-4 accent-[var(--brand)]" />
                   </th>
                 )}
+                <th className="px-4 py-3 font-bold">Sl. No.</th>
                 <th className="px-4 py-3 font-bold">Date</th>
                 <th className="px-4 py-3 font-bold">Type</th>
                 {hasUnits && <th className="px-4 py-3 font-bold">Institution</th>}
@@ -163,15 +164,16 @@ export default function TransactionsPage() {
             </thead>
             <tbody>
               {list.length === 0 ? (
-                <tr><td colSpan={(editor ? 7 : 6) + (hasUnits ? 1 : 0) + (canMove ? 1 : 0)}><EmptyState>No transactions match.</EmptyState></td></tr>
+                <tr><td colSpan={(editor ? 8 : 7) + (hasUnits ? 1 : 0) + (canMove ? 1 : 0)}><EmptyState>No transactions match.</EmptyState></td></tr>
               ) : (
-                list.map((t) => (
+                list.map((t, i) => (
                   <tr key={t.id} className={cx("border-t border-line hover:bg-surface-2", picked.has(t.id) && "bg-surface-2")}>
                     {canMove && (
                       <td className="no-print py-3 pl-4">
                         <input type="checkbox" checked={picked.has(t.id)} onChange={() => togglePick(t.id)} aria-label="Select entry" className="h-4 w-4 accent-[var(--brand)]" />
                       </td>
                     )}
+                    <td className="tnum px-4 py-3 text-muted">{i + 1}</td>
                     <td className="tnum px-4 py-3">{fmtDate(t.occurred_on)}</td>
                     <td className="px-4 py-3"><Pill type={t.type} /></td>
                     {hasUnits && <td className="px-4 py-3 text-muted">{unitName(t.unit_id)}</td>}

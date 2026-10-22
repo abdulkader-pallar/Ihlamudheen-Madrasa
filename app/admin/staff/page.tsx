@@ -170,9 +170,10 @@ export default function StaffPage() {
           <EmptyState>No staff match.</EmptyState>
         ) : (
           <div className="overflow-x-auto">
-            <table className={cx("w-full text-sm", hasUnits ? "min-w-[940px]" : "min-w-[620px]")}>
+            <table className={cx("w-full text-sm", hasUnits ? "min-w-[1000px]" : "min-w-[680px]")}>
               <thead>
                 <tr className="text-left text-[11.5px] uppercase tracking-wide text-muted">
+                  <th className="py-2 pr-4 font-bold">Sl. No.</th>
                   <th className="py-2 font-bold">ID</th>
                   <th className="py-2 font-bold">Name</th>
                   <th className="py-2 font-bold">Designation</th>
@@ -186,8 +187,9 @@ export default function StaffPage() {
                 </tr>
               </thead>
               <tbody>
-                {list.map((s) => (
+                {list.map((s, i) => (
                   <tr key={s.id} className="border-t border-line align-middle">
+                    <td className="tnum py-2.5 pr-4 text-muted">{i + 1}</td>
                     <td className="tnum py-2.5 text-muted">{s.code || "—"}</td>
                     <td className="py-2.5 font-bold">{s.name}</td>
                     <td className="py-2.5 text-muted">{s.designation || "—"}</td>
