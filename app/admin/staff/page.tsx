@@ -20,6 +20,12 @@ import { btn, cx, inputClass } from "@/lib/ui";
 
 type Show = "all" | "active" | "inactive";
 
+// The head of an institution and their second, picked out of a register that
+// runs to a hundred names. Matched on the designation, not on the institution,
+// so it holds for every register the page shows - and for "V.P." as much as
+// "Vice Principal".
+const isHead = (designation: string | null) => /\b(principal|vp)\b/i.test((designation || "").replace(/\./g, ""));
+
 export default function StaffPage() {
   const { staff, allStaff, loading, canEdit, supabase, reloadStaff, site, units, unit, unitName, salaryRevisions, salaryComponents } = useData();
   const hasUnits = units.length > 0;
@@ -187,12 +193,23 @@ export default function StaffPage() {
                 </tr>
               </thead>
               <tbody>
-                {list.map((s, i) => (
-                  <tr key={s.id} className="border-t border-line align-middle">
+                {list.map((s, i) => {
+                  const head = isHead(s.designation);
+                  return (
+                  <tr key={s.id} className={cx("border-t border-line align-middle", head && "bg-[color-mix(in_srgb,var(--accent)_10%,transparent)]")}>
                     <td className="tnum py-2.5 pr-4 text-muted">{i + 1}</td>
                     <td className="tnum py-2.5 text-muted">{s.code || "—"}</td>
                     <td className="py-2.5 font-bold">{s.name}</td>
-                    <td className="py-2.5 text-muted">{s.designation || "—"}</td>
+                    <td className="py-2.5">
+                      {/* The title itself carries the highlight, so it reads in
+                          print and in greyscale as well as on screen. */}
+                      {head
+                        ? <span className="inline-flex rounded-full px-2.5 py-0.5 text-[11.5px] font-bold uppercase tracking-wide"
+                                style={{ background: "color-mix(in srgb, var(--accent) 20%, transparent)", color: "var(--accent)" }}>
+                            {s.designation}
+                          </span>
+                        : <span className="text-muted">{s.designation || "—"}</span>}
+                    </td>
                     {hasUnits && <td className="py-2.5 text-muted">{unitName(s.unit_id)}</td>}
                     {hasUnits && (
                       <td className="tnum py-2.5 text-right">
@@ -221,7 +238,8 @@ export default function StaffPage() {
                       </td>
                     )}
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
