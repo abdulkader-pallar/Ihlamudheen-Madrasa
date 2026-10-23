@@ -26,11 +26,16 @@
 --  period, so he is one person here on two rates, not two people. The sheet
 --  has no row 7 and no staff ID numbers, so `code` is left empty.
 --
+--  The SP. ALLOWANCE column is a standing monthly allowance - the Principal's
+--  Rs 5,054.08 and the Officer's Rs 3,938.25 are paid every month - so it is
+--  loaded as a "Special allowance" salary component from 2026-09-01, the way
+--  KYHSS's own allowance column is, and the Payroll page picks it up for every
+--  month from September on without being told again.
+--
 --  Everything else on the sheets belongs to a month's payroll run, not to the
 --  register - the CL and LLP days, the leave allowance paid for the 2 CL
---  alloted (2 x basic/30), the special allowance paid to the Principal and the
---  Officer, and each guest's period or day count for the month. Those are in
---  supabase/wafy-college-payroll-sept2026.sql.
+--  alloted (2 x basic/30), and each guest's period or day count for the month.
+--  Those are in supabase/wafy-college-payroll-sept2026.sql.
 --
 --  Run after supabase/pmsa-units-payroll.sql. Safe to re-run: a staff member
 --  already on this unit by name is matched, not duplicated.
@@ -98,6 +103,25 @@ BEGIN
     END IF;
   END LOOP;
 
+  -- The SP. ALLOWANCE column: paid every month, so it stands in the register.
+  FOR r IN
+    SELECT * FROM (VALUES
+  ('AHMED FAISY',   5054.08),
+  ('M SALEEM WAFY', 3938.25)
+    ) AS t(name, amount)
+  LOOP
+    SELECT id INTO v_id FROM public.staff
+     WHERE institution = 'pmsa' AND unit_id = v_unit AND upper(name) = upper(r.name)
+     LIMIT 1;
+    IF v_id IS NOT NULL AND NOT EXISTS (
+      SELECT 1 FROM public.salary_components
+       WHERE staff_id = v_id AND kind = 'allowance' AND name = 'Special allowance' AND effective_from = v_from)
+    THEN
+      INSERT INTO public.salary_components (institution, staff_id, kind, name, amount, effective_from)
+      VALUES ('pmsa', v_id, 'allowance', 'Special allowance', r.amount, v_from);
+    END IF;
+  END LOOP;
+
   RAISE NOTICE 'PMSA Wafy College: % staff added', v_new;
 END
 $wafy$;
@@ -108,7 +132,10 @@ $wafy$;
 select u.name                as unit,
        count(*)              as staff,
        count(s.basic_salary) as with_basic,
-       sum(s.basic_salary)   as basic_total
+       sum(s.basic_salary)   as basic_total,
+       (select coalesce(sum(amount), 0) from public.salary_components c
+         where c.kind = 'allowance'
+           and c.staff_id in (select id from public.staff where unit_id = u.id)) as allowance_total
   from public.staff s
   join public.units u on u.id = s.unit_id
  where u.institution = 'pmsa' and u.name = 'PMSA Wafy College'
