@@ -33,7 +33,7 @@ insert into public.units (institution, name, sort) values
   ('pmsa', 'PMSA Wafy College', 3),
   ('pmsa', 'Madrasa',           4),
   ('pmsa', 'PTM HSS, Vettichira', 5),
-  ('pmsa', 'Women''s College',  6)
+  ('pmsa', 'SMSTMWC',          6)
 on conflict (institution, name) do nothing;
 
 -- Staff salary ---------------------------------------------------------------
