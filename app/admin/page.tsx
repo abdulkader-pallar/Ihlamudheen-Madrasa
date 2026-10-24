@@ -76,7 +76,7 @@ export default function DashboardPage() {
             </div>
             <div className="mt-0.5 flex flex-wrap items-center gap-2 text-[13px] text-muted">
               {units.length > 0 && (
-                <span className="font-bold text-ink">{unit === "all" ? `All ${site.name}` : unitName(unit === "common" ? null : unit)} ·</span>
+                <span className="font-bold text-ink">{unit === "all" ? `All ${site.name} institutions` : unitName(unit)} ·</span>
               )}
               {today}
               <span className="inline-flex items-center gap-1">

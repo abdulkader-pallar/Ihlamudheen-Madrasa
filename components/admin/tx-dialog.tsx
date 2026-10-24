@@ -94,10 +94,10 @@ export function TxDialog({ tx, onClose }: { tx?: Transaction | null; onClose: ()
             <label className={labelClass}>Institution</label>
             <select
               name="unit"
-              defaultValue={tx ? tx.unit_id ?? "" : unit === "all" || unit === "common" ? "" : unit}
+              defaultValue={tx ? tx.unit_id ?? "" : unit === "all" ? "" : unit}
               className={inputClass}
             >
-              <option value="">{site.name} – Common</option>
+              <option value="">{site.name} (trust office)</option>
               {units.filter((u) => u.active || u.id === tx?.unit_id).map((u) => (
                 <option key={u.id} value={u.id}>{u.name}</option>
               ))}

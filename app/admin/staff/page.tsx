@@ -125,7 +125,7 @@ export default function StaffPage() {
               </thead>
               <tbody>
                 {byUnit.map((u) => (
-                  <tr key={u.id ?? "common"} className="border-t border-line">
+                  <tr key={u.id ?? "trust"} className="border-t border-line">
                     <td className="py-2.5 font-semibold">{u.name}</td>
                     <td className="tnum py-2.5 text-right">{u.count}</td>
                     <td className="tnum py-2.5 text-right font-bold">{fmt(fromPaise(u.cost))}</td>

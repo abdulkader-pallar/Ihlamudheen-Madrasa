@@ -14,7 +14,7 @@ import { btn, cx, inputClass } from "@/lib/ui";
 
 // What each unit costs: salaries (posted by payroll runs, counted in the month
 // the run is for) plus expenses charged to the unit (counted in the month they
-// happened). Expenses with no unit are the institution's common costs.
+// happened). Expenses with no unit are the trust's own costs.
 // Amounts are summed in paise.
 
 type Col = { id: string | null; name: string; budget: number | null };

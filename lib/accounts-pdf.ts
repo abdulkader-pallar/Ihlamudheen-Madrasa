@@ -132,7 +132,7 @@ export async function downloadAccountsPdf({ root, site, title, scope, preview }:
   const sub = scope !== site.name ? clean(scope) : null;
   const heading = clean(title);
   // Pages 2+ carry one line naming all three: "PMSA - KYHSS Athavanad - Staff".
-  // ("PMSA - Common" already starts with the trust's name, so it isn't added twice.)
+  // (A unit whose own name starts with the trust's is not prefixed twice.)
   const trust = sub && !sub.startsWith(clean(site.name)) ? clean(site.name) : null;
   const running = [trust, sub ?? clean(site.fullName), heading].filter(Boolean).join(" - ");
 

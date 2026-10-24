@@ -25,9 +25,9 @@ export function StaffDialog({ staff, onClose, onSaved, onSalary, onToggleActive,
   onToggleActive?: () => void;
   onDelete?: () => void;
 }) {
-  const { supabase, units, unit, reloadSalary } = useData();
+  const { supabase, units, unit, site, reloadSalary } = useData();
   const hasUnits = units.length > 0;
-  const [unitId, setUnitId] = useState(staff ? staff.unit_id ?? "" : unit === "all" || unit === "common" ? "" : unit);
+  const [unitId, setUnitId] = useState(staff ? staff.unit_id ?? "" : unit === "all" ? "" : unit);
   const [basic, setBasic] = useState(staff?.basic_salary != null ? String(staff.basic_salary) : "");
   // A new basic applies from the 1st of this month unless changed.
   const [basicFrom, setBasicFrom] = useState(todayISO().slice(0, 8) + "01");
@@ -102,7 +102,7 @@ export function StaffDialog({ staff, onClose, onSaved, onSalary, onToggleActive,
             <div>
               <label className={labelClass}>Institution</label>
               <select value={unitId} onChange={(e) => setUnitId(e.target.value)} className={inputClass}>
-                <option value="">— Common (no institution) —</option>
+                <option value="">{site.name} (trust office)</option>
                 {units.filter((u) => u.active || u.id === unitId).map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
               </select>
             </div>

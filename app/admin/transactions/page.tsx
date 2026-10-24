@@ -130,7 +130,7 @@ export default function TransactionsPage() {
           <b className="text-[14px]">{picked.size} selected</b>
           <span className="text-[13px] text-muted">Move to</span>
           <select value={moveTo} onChange={(e) => setMoveTo(e.target.value)} className={cx(inputClass, "w-auto py-1.5 text-[13.5px]")}>
-            <option value="">{site.name} – Common</option>
+            <option value="">{site.name} (trust office)</option>
             {units.filter((u) => u.active).map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
           </select>
           <button onClick={moveSelected} disabled={moving} className={btn({ variant: "primary", size: "sm" })}>

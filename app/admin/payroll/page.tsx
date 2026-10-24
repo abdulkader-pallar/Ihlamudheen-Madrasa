@@ -41,7 +41,7 @@ export default function PayrollPage() {
 
   // Follow the sidebar's unit when it names one; otherwise the first unit.
   useEffect(() => {
-    if (unit !== "all" && unit !== "common" && units.some((u) => u.id === unit)) setUnitId(unit);
+    if (unit !== "all" && units.some((u) => u.id === unit)) setUnitId(unit);
   }, [unit, units]);
   useEffect(() => {
     if (!unitId && activeUnits[0]) setUnitId(activeUnits[0].id);

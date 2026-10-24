@@ -14,7 +14,7 @@ type Group = "category" | "month" | "fund";
 
 export default function ReportsPage() {
   const { transactions, categories, funds, loading, site, units, unit, unitName } = useData();
-  const scope = !units.length || unit === "all" ? (site.local ? "Ihlamudheen Madrasa" : site.name) : unitName(unit === "common" ? null : unit);
+  const scope = !units.length || unit === "all" ? (site.local ? "Ihlamudheen Madrasa" : site.name) : unitName(unit);
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [group, setGroup] = useState<Group>("category");

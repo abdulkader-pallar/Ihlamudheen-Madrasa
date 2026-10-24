@@ -8,8 +8,8 @@ import { isEditor, type Category, type Fund, type Profile, type SalaryComponent,
 
 type SupabaseClient = ReturnType<typeof createClient>;
 
-/** Unit filter: every unit, the institution's common (unassigned) rows, or one unit. */
-export type UnitFilter = "all" | "common" | string;
+/** Unit filter: every institution at once, or one of them. */
+export type UnitFilter = "all" | string;
 
 type DataCtx = {
   profile: Profile;
@@ -19,8 +19,8 @@ type DataCtx = {
   canEdit: boolean;
   categories: Category[];
   funds: Fund[];
-  /** Transactions and staff of the selected unit (all of them when the
-   *  institution has no units or "all" is picked). */
+  /** Transactions and staff of the selected unit. With "all" picked these
+   *  are every unit's rows plus the trust's own (unit-less) ones. */
   transactions: Transaction[];
   staff: Staff[];
   /** Every transaction / staff member of the institution, whatever unit. */
@@ -54,8 +54,7 @@ export function useData() {
 const SITE_KEY = "accounts-site";
 const UNIT_KEY = "accounts-unit";
 
-const inUnit = (u: UnitFilter, unitId: string | null | undefined) =>
-  u === "all" || (u === "common" ? !unitId : unitId === u);
+const inUnit = (u: UnitFilter, unitId: string | null | undefined) => u === "all" || unitId === u;
 
 export function DataProvider({ profile, children }: { profile: Profile; children: React.ReactNode }) {
   const [local] = useState(() => createClient());
@@ -138,7 +137,7 @@ export function DataProvider({ profile, children }: { profile: Profile; children
     // Keep a remembered unit only if it still belongs to this institution.
     let saved: string | null = null;
     try { saved = localStorage.getItem(UNIT_KEY); } catch {}
-    setUnitState(saved && (saved === "all" || saved === "common" || us.some((x) => x.id === saved)) && us.length ? saved : "all");
+    setUnitState(saved && (saved === "all" || us.some((x) => x.id === saved)) && us.length ? saved : "all");
     if (us.length) await reloadSalary(); else { setSalaryRevisions([]); setSalaryComponents([]); }
     setLoading(false);
   }, [supabase, reloadSalary]);
@@ -160,7 +159,7 @@ export function DataProvider({ profile, children }: { profile: Profile; children
   const filteredTx = useMemo(() => transactions.filter((t) => inUnit(unit, t.unit_id)), [transactions, unit]);
   const filteredStaff = useMemo(() => staff.filter((s) => inUnit(unit, s.unit_id)), [staff, unit]);
   const unitName = useCallback(
-    (id: string | null | undefined) => (id ? units.find((x) => x.id === id)?.name ?? "Unknown institution" : `${site.name} – Common`),
+    (id: string | null | undefined) => (id ? units.find((x) => x.id === id)?.name ?? "Unknown institution" : site.name),
     [units, site]
   );
 

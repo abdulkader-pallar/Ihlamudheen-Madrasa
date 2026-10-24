@@ -58,7 +58,7 @@ function Shell({ profile, children }: { profile: Profile; children: React.ReactN
   const router = useRouter();
   const { site, setSite, canEdit, error, units, unit, setUnit, unitName, loading } = useData();
   const hasUnits = units.length > 0;
-  const scope = hasUnits && unit !== "all" ? unitName(unit === "common" ? null : unit) : site.name;
+  const scope = hasUnits && unit !== "all" ? unitName(unit) : site.name;
   const mainRef = useRef<HTMLElement>(null);
   const [pdfBusy, setPdfBusy] = useState(false);
   // The PDF is shown on screen first; Download and Print are in the preview.
@@ -168,11 +168,10 @@ function Shell({ profile, children }: { profile: Profile; children: React.ReactN
                 onChange={(e) => { setUnit(e.target.value); setOpen(false); }}
                 className="w-full rounded-[10px] border border-white/15 bg-black/25 px-3 py-2 text-[13.5px] font-semibold text-white outline-none focus:border-white/40 [&>option]:bg-white [&>option]:font-semibold [&>option]:text-[#0E2E52]"
               >
-                <option value="all">All {site.name}</option>
+                <option value="all">All {site.name} institutions</option>
                 {units.filter((u) => u.active || u.id === unit).map((u) => (
                   <option key={u.id} value={u.id}>{u.name}</option>
                 ))}
-                <option value="common">{site.name} – Common</option>
               </select>
             </label>
           )}
