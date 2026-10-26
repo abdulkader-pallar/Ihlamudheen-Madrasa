@@ -27,13 +27,18 @@ export default function ReportsPage() {
     const groups: Record<string, { income: number; expense: number }> = {};
     list.forEach((t) => {
       const key =
-        group === "month" ? monthLabel(monthKey(t.occurred_on)) : group === "fund" ? fundName[t.fund_id ?? ""] || "— No fund —" : catName[t.category_id ?? ""] || "— Uncategorised —";
+        group === "month" ? monthKey(t.occurred_on) : group === "fund" ? fundName[t.fund_id ?? ""] || "— No fund —" : catName[t.category_id ?? ""] || "— Uncategorised —";
       groups[key] = groups[key] || { income: 0, expense: 0 };
       groups[key][t.type] += +t.amount;
     });
     let income = 0, expense = 0;
     list.forEach((t) => (t.type === "income" ? (income += +t.amount) : (expense += +t.amount)));
-    const rows = Object.entries(groups).sort((a, b) => b[1].income + b[1].expense - (a[1].income + a[1].expense));
+    const rows =
+      group === "month"
+        ? Object.entries(groups)
+            .sort((a, b) => a[0].localeCompare(b[0]))
+            .map(([k, v]) => [monthLabel(k), v] as [string, { income: number; expense: number }])
+        : Object.entries(groups).sort((a, b) => b[1].income + b[1].expense - (a[1].income + a[1].expense));
     return { rows, totals: { income: round2(income), expense: round2(expense), balance: round2(income - expense) } };
   }, [transactions, from, to, group, catName, fundName]);
 
